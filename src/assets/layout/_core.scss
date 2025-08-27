@@ -1,0 +1,152 @@
+html {
+    height: 100%;
+    font-size: 14px;
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+    color: var(--text-color);
+    background-color: var(--surface-ground);
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.2;
+}
+
+a {
+    text-decoration: none;
+}
+
+.layout-wrapper {
+    min-height: 100vh;
+}
+
+.space{
+    margin-right: 8px !important;
+}
+
+.activity-section{
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    justify-content: center;
+
+    @media screen and (max-width: 1150px) {
+        flex-wrap: wrap;
+    }
+}
+
+.activity-section div:first-child {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+}
+
+.activity-section div:last-child {
+
+}
+
+.activity-section div:first-child div{
+    text-align: center !important;
+}
+
+.activity-section div:first-child video {
+    width: 100%;
+}
+
+.flex-basis-75{
+    flex-basis: 75%;
+}
+
+.flex-basis-25{
+    flex-basis: 25%;
+}
+
+.pdf-link{
+    color: rgb(168, 168, 4);
+}
+
+.pdf-link:hover{
+    text-decoration: underline;
+}
+
+.pdfs-list{
+    text-align: center;
+}
+
+.pdfs-list-students{
+    text-align: left;
+
+}
+
+.pdfs-list-students > li{
+    margin-bottom: 1.5em;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.pdfs-list > li{
+    margin-bottom: 7px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.pdf-link-icons{
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.pdf-actions{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+}
+
+
+
+
+.activity-section-student{
+    display: flex;
+    flex-direction: row;
+    gap: 4rem;
+    justify-content: center;
+    
+    @media screen and (max-width: 1150px) {
+        flex-wrap: wrap;
+    }
+}
+
+.activity-section-student div:first-child {
+
+}
+
+.activity-section-student div:last-child {
+
+}
+
+.activity-section-student div:first-child div{
+}
+
+.activity-section-student div:first-child video {
+    width: 100%;
+}
+
+.student-actions{
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+}
+
+.video-wrapper{
+    width: 75%;
+    @media screen and (max-width: 1150px) {
+        width: 100%;
+    }
+}
