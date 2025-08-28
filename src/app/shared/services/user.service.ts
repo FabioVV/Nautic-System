@@ -5,34 +5,34 @@ import { USER_DATA } from '../constants';
 import { environment } from '../../../environments/environment';
 
 export interface UserData {
-  fullName: string,
-  email: string
+    name: string,
+    email: string
 }
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class UserService {
-  constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient) { }
 
-  updateUser(formData: any) {
-    return this.http.patch(`${environment.apiBaseURL}/updateUser`, formData)
-  }
+    updateUser(formData: any) {
+        return this.http.patch(`${environment.apiBaseURL}/updateUser`, formData)
+    }
 
-  deleteUser(id: string) {
-    return this.http.delete(`${environment.apiBaseURL}/deleteUser/${id}`)
-  }
+    deleteUser(id: string) {
+        return this.http.delete(`${environment.apiBaseURL}/deleteUser/${id}`)
+    }
 
-  getUserData(): UserData {
-    return JSON.parse(localStorage.getItem(USER_DATA) as string) ?? false
-  }
+    getUserData(): UserData {
+        return JSON.parse(localStorage.getItem(USER_DATA) as string) ?? false
+    }
 
-  registerUser(formData: any){
-    return this.http.post(`${environment.apiBaseURL}/signup`, formData)
-  }
+    registerUser(formData: any) {
+        return this.http.post(`${environment.apiBaseURL}/signup`, formData)
+    }
 
-  getUsers(search: string){
-    return this.http.get(`${environment.apiBaseURL}/users?q=${search ?? ""}`)
-  }
+    getUsers(search: string) {
+        return this.http.get(`${environment.apiBaseURL}/users?q=${search ?? ""}`)
+    }
 }
 

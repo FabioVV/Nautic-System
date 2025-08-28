@@ -59,55 +59,53 @@ import { ToastModule } from 'primeng/toast';
 export class Login implements OnInit {
     constructor(public formBuilder: FormBuilder, private service: AuthService, private messageService: MessageService, private router: Router) { }
 
-    
-  ngOnInit(): void {
-    if (this.service.isLoggedIn()) {
-      this.router.navigateByUrl("/dashboard")
+
+    ngOnInit(): void {
+        if (this.service.isLoggedIn()) {
+            this.router.navigateByUrl("/dashboard")
+        }
     }
-  }
 
-  isSubmited: boolean = false
-  isLoading: boolean = false
+    isSubmited: boolean = false
+    isLoading: boolean = false
 
-  form = this.formBuilder.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required]],
-  })
+    form = this.formBuilder.group({
+        email: ['', [Validators.required, Validators.email]],
+        password: ['', [Validators.required]],
+    })
 
-  onSubmit() {
-    this.isSubmited = true
-    if (this.form.valid) {
-      this.isLoading = true
+    onSubmit() {
+        this.isSubmited = true
+        if (this.form.valid) {
+            this.isLoading = true
 
-      this.service.loginUser(this.form.value).subscribe({
-        next: (res: any) => {
-          if (res.token) {
-            this.isSubmited = false
-            this.service.saveUserData(res)
+            this.service.loginUser(this.form.value).subscribe({
+                next: (res: any) => {
+                    if (res.token) {
+                        this.isSubmited = false
+                        this.service.saveUserData(res)
 
-            this.router.navigateByUrl("/dashboard");
-          }
-          this.isLoading = false
+                        this.router.navigateByUrl("/dashboard");
+                    }
+                    this.isLoading = false
+                },
+                error: (err) => {
+                    if (err.status == 400) {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Email ou senha incorretos.' });
 
-        },
-        error: (err) => {
-          if (err.status == 400) {
-            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Email ou senha incorretos.' });
-
-          } else {
-            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
-          }
-          this.isLoading = false
-
-        },
-      })
+                    } else {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                    }
+                    this.isLoading = false
+                },
+            })
+        }
     }
-  }
 
-  hasBeenSubmited(controlName: string): boolean {
-    const control = this.form.get(controlName)
-    return Boolean(control?.invalid)
-      && (this.isSubmited || Boolean(control?.touched))
-    //|| Boolean(control?.dirty
-  }
+    hasBeenSubmited(controlName: string): boolean {
+        const control = this.form.get(controlName)
+        return Boolean(control?.invalid)
+            && (this.isSubmited || Boolean(control?.touched))
+        //|| Boolean(control?.dirty
+    }
 }

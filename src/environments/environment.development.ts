@@ -1,4 +1,4 @@
 export const environment = {
-  apiBaseURL: "https://gradehub.xyz/api"
-  };
-  
+    apiBaseURL: "http://127.0.0.1:8080/api/v1"
+};
+

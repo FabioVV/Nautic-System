@@ -1,36 +1,26 @@
 import { Component, OnInit } from '@angular/core';
 import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 import { UserData, UserService } from '../../shared/services/user.service';
 
-import { RecentStudentsUpdates } from './studentsupdates';
-import { Stats } from './appstats';
-import { MessageService } from 'primeng/api';
 
 @Component({
     selector: 'app-dashboard',
-    imports: [Stats, RecentStudentsUpdates, ToastModule, ],
-    providers:[MessageService],
+    imports: [ToastModule,],
+    providers: [MessageService],
 
     template: `
         <p-toast></p-toast>
-        <h1>Bem vindo(a)! Professor(a) {{ userName }}</h1>
+        <h1>Bem vindo(a)! {{ userName }}</h1>
 
-        <div class="grid grid-cols-12 gap-8">
-            <stats class="contents"/>
-
-            <div class="col-span-12 xl:col-span-12">
-                <recent-students-updates />
-            </div>
-
-        </div>
     `
 })
-export class Dashboard implements OnInit{
+export class Dashboard implements OnInit {
 
     userData: UserData = this.userService.getUserData()
-    userName: any = this.userData.fullName.split(` `)?.at(0) || this.userData.fullName || this.userData.email
-    
+    userName: any = this.userData.name.split(` `)?.at(0) || this.userData.name || this.userData.email
+
     constructor(
         private userService: UserService,
     ) {
@@ -38,7 +28,6 @@ export class Dashboard implements OnInit{
     }
 
     ngOnInit(): void {
-        
     }
-    
+
 }

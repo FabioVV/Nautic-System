@@ -4,8 +4,8 @@ import { Component } from '@angular/core';
     standalone: true,
     selector: 'app-footer',
     template: `<div class="layout-footer">
-        GradeHub project by
-        <a href="#" target="_blank" rel="noopener noreferrer" class="text-primary font-bold hover:underline">Fábio Varela</a>
+        Nautic project by
+        <a href="#" target="_blank" rel="noopener noreferrer" class="text-primary font-bold hover:underline">DataByte</a>
     </div>`
 })
-export class AppFooter {}
+export class AppFooter { }

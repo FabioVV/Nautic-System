@@ -33,7 +33,7 @@ import { ThemeService } from '../../shared/services/theme.service';
                 <i class="pi pi-bars"></i>
             </button>
             <a class="layout-topbar-logo" routerLink="/">
-                <span>GradeHub</span>
+                <span>Nautic</span>
             </a>
         </div>
 
@@ -80,10 +80,11 @@ import { ThemeService } from '../../shared/services/theme.service';
                 <form [formGroup]="form" (ngSubmit)="onSubmit()">
                     <div>
 
-                        <label for="fullName" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Nome</label>
-                        <input formControlName="fullName" pInputText id="fullName" type="text" placeholder="John Doe" class="w-full  mb-2" />
-                        <div class="error-feedback" *ngIf="hasBeenSubmited('fullName')">
-                            <p-message styleClass="mb-2" *ngIf="form.controls.fullName.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar seu nome</p-message>
+                        <label for="name" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Nome</label>
+                        <input formControlName="name" pInputText id="name" type="text" placeholder="John Doe" class="w-full  mb-2" />
+                        <div class="error-feedback" *ngIf="hasBeenSubmited('name')">
+
+                            <p-message styleClass="mb-2" *ngIf="form.controls.name.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar seu nome</p-message>
                         </div>
 
                         <label for="email" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
@@ -159,30 +160,30 @@ export class AppTopbar implements OnInit {
     passwordMatchValidator: ValidatorFn = (control: AbstractControl): null => {
         const password = control.get("newPassword")
         const confirmPassword = control.get("confirmPassword")
-    
+
         if (password && confirmPassword && password.value != confirmPassword.value) {
-          confirmPassword?.setErrors({ passwordMismatch: true })
+            confirmPassword?.setErrors({ passwordMismatch: true })
         } else {
-          confirmPassword?.setErrors(null)
+            confirmPassword?.setErrors(null)
         }
-    
+
         return null
     }
 
 
     form = this.formBuilder.group({
-        fullName: [this.userData.fullName, [Validators.required]],
+        name: [this.userData.name, [Validators.required]],
         email: [this.userData.email, [Validators.required, Validators.email]],
         oldPassword: ['', [Validators.pattern(this.passwordPattern)]],
         newPassword: ['', [Validators.pattern(this.passwordPattern)]],
         confirmPassword: ['', [Validators.pattern(this.passwordPattern)]],
 
-    }, {validators: [this.passwordMatchValidator]})
+    }, { validators: [this.passwordMatchValidator] })
 
     constructor(
         public layoutService: LayoutService,
         public formBuilder: FormBuilder,
-        private authService: AuthService, 
+        private authService: AuthService,
         private router: Router,
         private userService: UserService,
         private renderer: Renderer2,
@@ -197,14 +198,13 @@ export class AppTopbar implements OnInit {
         this.authService.userData$.subscribe(data => { // To update the navbar automagically
             this.userData = data
         })
-
     }
 
-    logout(){
+    logout() {
         this.authService.logoutUser()
     }
 
-    openEditAccountModal(){
+    openEditAccountModal() {
         this.editAccountVisible = true
         this.renderer.setStyle(this.shared.getSidebar()?.nativeElement, 'z-index', '1', RendererStyleFlags2.Important)
     }
@@ -216,46 +216,46 @@ export class AppTopbar implements OnInit {
 
     toggleDarkMode() {
         this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: !state.darkTheme }));
-        
+
         this.layoutService.configUpdate$.subscribe(data => {
             this.themeService.saveThemeMode(data)
         })
     }
 
-    onSubmit(){
+    onSubmit() {
         this.isSubmited = true
         if (this.form.valid) {
             this.isLoading = true
-        
-            this.userService.updateUser(this.form.value).subscribe({
-            next: (res: any) => {
-                if(res?.succeeded){
-                    this.isSubmited = false
-                    this.authService.updateUserData(res.data)
-                    this.messageService.add({ severity: 'success', summary: 'Conta atualizada', detail: 'Sua conta foi atualizada com sucesso.' });
-                }
-                this.isLoading = false
-            },
-            error: (err: any) => {
-                if (err.status == 400) {
-                    this.messageService.add({ severity: 'error', summary: "Erro", detail: err.error?.description ?? "Por favor, verifique suas informações" });
-        
-                } else {
-                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
-                }
 
-                this.isLoading = false
-            },
-          })
+            this.userService.updateUser(this.form.value).subscribe({
+                next: (res: any) => {
+                    if (res?.succeeded) {
+                        this.isSubmited = false
+                        this.authService.updateUserData(res.data)
+                        this.messageService.add({ severity: 'success', summary: 'Conta atualizada', detail: 'Sua conta foi atualizada com sucesso.' });
+                    }
+                    this.isLoading = false
+                },
+                error: (err: any) => {
+                    if (err.status == 400) {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: err.error?.description ?? "Por favor, verifique suas informações" });
+
+                    } else {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                    }
+
+                    this.isLoading = false
+                },
+            })
         }
 
     }
-    
+
 
     hasBeenSubmited(controlName: string): boolean {
         const control = this.form.get(controlName)
         return Boolean(control?.invalid)
-          && (this.isSubmited || Boolean(control?.touched))
+            && (this.isSubmited || Boolean(control?.touched))
         //|| Boolean(control?.dirty
     }
 }

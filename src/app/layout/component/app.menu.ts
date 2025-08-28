@@ -22,13 +22,13 @@ import { AuthService } from '../../shared/services/auth.service';
 
 export class AppMenu {
     model: MenuItem[] = [];
-    constructor(private authService: AuthService){
+    constructor(private authService: AuthService) {
 
     }
 
 
     ngOnInit() {
-    
+
         this.model = [
             // {
             //     label: 'Home',
@@ -38,9 +38,9 @@ export class AppMenu {
                 label: 'Home',
                 items: [
                     { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'], },
-                    { label: 'Turmas', icon: 'pi pi-fw pi-book', routerLink: ['/classes'] },
-                    { label: 'Atividades', icon: 'pi pi-fw pi-file', routerLink: ['/activities'] },
-                    { label: 'Atividades enviadas', icon: 'pi pi-fw pi-file-arrow-up', routerLink: ['/delivered-activities'] },
+                    // { label: 'Turmas', icon: 'pi pi-fw pi-book', routerLink: ['/classes'] },
+                    // { label: 'Atividades', icon: 'pi pi-fw pi-file', routerLink: ['/activities'] },
+                    // { label: 'Atividades enviadas', icon: 'pi pi-fw pi-file-arrow-up', routerLink: ['/delivered-activities'] },
                 ],
             }
             // {
@@ -61,8 +61,8 @@ export class AppMenu {
             label: 'Administrador',
             items: [
                 {
-                    label: 'Usuários', 
-                    icon: 'pi pi-fw pi-user-plus', 
+                    label: 'Usuários',
+                    icon: 'pi pi-fw pi-user-plus',
                     routerLink: ['/teachers']
                 },
             ]
@@ -71,6 +71,6 @@ export class AppMenu {
         if (this.authService.isLoggedIn() && this.authService.getUserClaim()?.role == 'admin') {
             this.model = [adminMenuItem, ...this.model];
         }
-        
+
     }
 }
