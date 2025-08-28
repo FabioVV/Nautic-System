@@ -26,8 +26,8 @@ import { ToastModule } from 'primeng/toast';
                     <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
                         <div class="text-center mb-8">
 
-                            <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Bem vindo ao GradeHub!</div>
-                            <span class="text-muted-color font-medium">Logue em sua conta para continuar</span>
+                            <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Bem Vindo ao Sistema Nautic</div>
+                            <span class="text-muted-color font-medium">Faça login em sua conta para continuar</span>
                         </div>
 
                         <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -35,14 +35,14 @@ import { ToastModule } from 'primeng/toast';
                                 <label for="email" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
                                 <input formControlName="email" pInputText id="email" type="text" placeholder="Email" class="w-full md:w-[30rem] mb-2" />
                                 <div class="error-feedback" *ngIf="hasBeenSubmited('email')">
-                                    <p-message styleClass="mb-2" *ngIf="form.controls.email.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar seu email de preferência</p-message>
+                                    <p-message styleClass="mb-2" *ngIf="form.controls.email.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar seu email da conta</p-message>
                                     <p-message styleClass="mb-2" *ngIf="form.controls.email.hasError('email')" severity="error" variant="simple" size="small">Por favor, digitar um email válido</p-message>
                                 </div>
 
                                 <label for="password" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Senha</label>
                                 <p-password formControlName="password" id="password"  placeholder="********" [toggleMask]="true" styleClass="mb-2" [fluid]="true" [feedback]="false"></p-password>
                                 <div class="error-feedback" *ngIf="hasBeenSubmited('password')">
-                                    <p-message styleClass="mb-2" *ngIf="form.controls.password.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar uma senha</p-message>
+                                    <p-message styleClass="mb-2" *ngIf="form.controls.password.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar sua senha</p-message>
                                 </div>
     
                                 <p-button [disabled]="isLoading" type="submit" label="Entrar" styleClass="w-full" ></p-button>
