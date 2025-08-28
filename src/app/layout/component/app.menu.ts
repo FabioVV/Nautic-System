@@ -42,7 +42,51 @@ export class AppMenu {
                     // { label: 'Atividades', icon: 'pi pi-fw pi-file', routerLink: ['/activities'] },
                     // { label: 'Atividades enviadas', icon: 'pi pi-fw pi-file-arrow-up', routerLink: ['/delivered-activities'] },
                 ],
-            }
+            },
+            {
+                label: 'Hierarchy',
+                items: [
+                    {
+                        label: 'Submenu 1',
+                        icon: 'pi pi-fw pi-bookmark',
+                        items: [
+                            {
+                                label: 'Submenu 1.1',
+                                icon: 'pi pi-fw pi-bookmark',
+                                items: [
+                                    { label: 'Submenu 1.1.1', icon: 'pi pi-fw pi-bookmark' },
+                                    { label: 'Submenu 1.1.2', icon: 'pi pi-fw pi-bookmark' },
+                                    { label: 'Submenu 1.1.3', icon: 'pi pi-fw pi-bookmark' }
+                                ]
+                            },
+                            {
+                                label: 'Submenu 1.2',
+                                icon: 'pi pi-fw pi-bookmark',
+                                items: [{ label: 'Submenu 1.2.1', icon: 'pi pi-fw pi-bookmark' }]
+                            }
+                        ]
+                    },
+                    {
+                        label: 'Submenu 2',
+                        icon: 'pi pi-fw pi-bookmark',
+                        items: [
+                            {
+                                label: 'Submenu 2.1',
+                                icon: 'pi pi-fw pi-bookmark',
+                                items: [
+                                    { label: 'Submenu 2.1.1', icon: 'pi pi-fw pi-bookmark' },
+                                    { label: 'Submenu 2.1.2', icon: 'pi pi-fw pi-bookmark' }
+                                ]
+                            },
+                            {
+                                label: 'Submenu 2.2',
+                                icon: 'pi pi-fw pi-bookmark',
+                                items: [{ label: 'Submenu 2.2.1', icon: 'pi pi-fw pi-bookmark' }]
+                            }
+                        ]
+                    }
+                ]
+            },
             // {
             //     label: 'Info',
             //     items: [
@@ -58,10 +102,20 @@ export class AppMenu {
 
 
         const adminMenuItem = {
-            label: 'Administrador',
+            label: 'Sistema',
             items: [
                 {
                     label: 'Usuários',
+                    icon: 'pi pi-fw pi-user-plus',
+                    routerLink: ['/']
+                },
+                {
+                    label: 'Cargos',
+                    icon: 'pi pi-fw pi-user-plus',
+                    routerLink: ['/']
+                },
+                {
+                    label: 'Permissões',
                     icon: 'pi pi-fw pi-user-plus',
                     routerLink: ['/teachers']
                 },

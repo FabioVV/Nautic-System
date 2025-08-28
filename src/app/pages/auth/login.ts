@@ -90,7 +90,7 @@ export class Login implements OnInit {
                     this.isLoading = false
                 },
                 error: (err) => {
-                    if (err.status == 400) {
+                    if (err.status == 401) {
                         this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Email ou senha incorretos.' });
 
                     } else {

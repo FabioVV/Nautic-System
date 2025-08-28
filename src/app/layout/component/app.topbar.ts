@@ -5,7 +5,7 @@ import { FormBuilder, ReactiveFormsModule, Validators, ValidatorFn, AbstractCont
 import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
 import { DialogModule } from 'primeng/dialog';
-
+import { TooltipModule } from 'primeng/tooltip';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
 import { AuthService } from '../../shared/services/auth.service';
@@ -17,17 +17,19 @@ import { PasswordModule } from 'primeng/password';
 import { SharedService } from '../../shared/services/shared.service';
 import { ToastModule } from 'primeng/toast';
 import { ThemeService } from '../../shared/services/theme.service';
-
-
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faHeadset } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, ReactiveFormsModule, StyleClassModule, DialogModule, MessageModule, PasswordModule, ButtonModule, InputTextModule, AppConfigurator, ToastModule],
+    imports: [TooltipModule, FontAwesomeModule, RouterModule, CommonModule, ReactiveFormsModule, StyleClassModule, DialogModule, MessageModule, PasswordModule, ButtonModule, InputTextModule, AppConfigurator, ToastModule],
     providers: [MessageService],
     template: ` 
     <p-toast></p-toast>
+
     <div class="layout-topbar">
+
         <div class="layout-topbar-logo-container">
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
                 <i class="pi pi-bars"></i>
@@ -68,6 +70,8 @@ import { ThemeService } from '../../shared/services/theme.service';
                     <i class="pi pi-user"></i>
                     <span>Seu perfil</span>
                 </button>
+
+
 
                 <button (click)="logout()" type="button" class="layout-topbar-action">
                     <i class="pi pi-sign-out"></i>
@@ -144,9 +148,14 @@ import { ThemeService } from '../../shared/services/theme.service';
             </p-dialog>
 
         </div>
-    </div>`
+
+    </div>
+
+    `
 })
 export class AppTopbar implements OnInit {
+    faHeadset = faHeadset
+
     items!: MenuItem[]
     userData: UserData = this.userService.getUserData()
 
