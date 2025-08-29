@@ -136,16 +136,21 @@ export class AppMenu {
 
         if (this.authService.isLoggedIn()) {
             const userjwt = this.authService.parseUserJwt()
+            const isAdmin = userjwt?.role.includes("admin")
 
             this.model = [relatSalesMenuItem, ...this.model]
             this.model = [afterSalesMenuItem, ...this.model]
             this.model = [salesMenuItem, ...this.model]
             this.model = [productsMenu, ...this.model]
 
-            if (userjwt?.role.includes("admin") || this.authService.checkUserPermissionsContains(adminMenuItem.items)) {
-                if (this.authService.parseUserJwt().permissions.length != 0) {
-                    adminMenuItem.items = adminMenuItem.items.filter((i) => userjwt?.permissions.includes(i.code))
+            if (isAdmin || this.authService.checkUserPermissionsContains(adminMenuItem.items)) {
+                if (isAdmin) {
                     this.model = [adminMenuItem, ...this.model]
+                } else {
+                    if (this.authService.parseUserJwt().permissions.length != 0) {
+                        adminMenuItem.items = adminMenuItem.items.filter((i) => userjwt?.permissions.includes(i.code))
+                        this.model = [adminMenuItem, ...this.model]
+                    }
                 }
             }
 

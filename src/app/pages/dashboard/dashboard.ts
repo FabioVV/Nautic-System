@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
-import { UserData, UserService } from '../../shared/services/user.service';
+import { User, UserService } from '../../shared/services/user.service';
 import { AuthService } from '../../shared/services/auth.service';
 
 @Component({
@@ -17,7 +17,7 @@ import { AuthService } from '../../shared/services/auth.service';
 })
 export class Dashboard implements OnInit {
 
-    userData: UserData = this.userService.getUserData()
+    userData: User = this.userService.getUserData()
     userName: any = this.userData.name.split(` `)?.at(0) || this.userData.name || this.userData.email
 
     constructor(

@@ -9,7 +9,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
 import { AuthService } from '../../shared/services/auth.service';
-import { UserData, UserService } from '../../shared/services/user.service';
+import { User, UserService } from '../../shared/services/user.service';
 import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -157,7 +157,7 @@ export class AppTopbar implements OnInit {
     faHeadset = faHeadset
 
     items!: MenuItem[]
-    userData: UserData = this.userService.getUserData()
+    userData: User = this.userService.getUserData()
 
     editAccountVisible!: boolean
 

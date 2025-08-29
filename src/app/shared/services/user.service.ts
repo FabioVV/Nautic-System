@@ -4,10 +4,14 @@ import { HttpClient } from '@angular/common/http';
 import { USER_DATA } from '../constants';
 import { environment } from '../../../environments/environment';
 
-export interface UserData {
+export interface User {
     name: string,
     email: string
+    roles: Array<string>,
+    permissions: Array<string>,
 }
+
+
 
 @Injectable({
     providedIn: 'root'
@@ -23,7 +27,7 @@ export class UserService {
         return this.http.delete(`${environment.apiBaseURL}/deleteUser/${id}`)
     }
 
-    getUserData(): UserData {
+    getUserData(): User {
         return JSON.parse(localStorage.getItem(USER_DATA) as string) ?? false
     }
 
