@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
 import { AuthService } from '../../shared/services/auth.service';
+import { updatePreset } from '@primeng/themes';
 
 @Component({
     selector: 'app-menu',
@@ -22,27 +23,10 @@ import { AuthService } from '../../shared/services/auth.service';
 
 export class AppMenu {
     model: MenuItem[] = [];
-    constructor(private authService: AuthService) {
-
-    }
-
+    constructor(private authService: AuthService) { }
 
     ngOnInit() {
-
         this.model = [
-            // {
-            //     label: 'Home',
-            //     items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/'] }]
-            // },
-            {
-                label: 'Home',
-                items: [
-                    { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'], },
-                    // { label: 'Turmas', icon: 'pi pi-fw pi-book', routerLink: ['/classes'] },
-                    // { label: 'Atividades', icon: 'pi pi-fw pi-file', routerLink: ['/activities'] },
-                    // { label: 'Atividades enviadas', icon: 'pi pi-fw pi-file-arrow-up', routerLink: ['/delivered-activities'] },
-                ],
-            },
             {
                 label: 'Hierarchy',
                 items: [
@@ -87,43 +71,85 @@ export class AppMenu {
                     }
                 ]
             },
-            // {
-            //     label: 'Info',
-            //     items: [
-            //         {
-            //             label: 'View Source',
-            //             icon: 'pi pi-fw pi-github',
-            //             url: '',
-            //             target: '_blank'
-            //         }
-            //     ]
-            // }
+
         ];
 
+        const dashMenu = {
+            label: 'Home',
+            items: [
+                { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'], },
+            ],
+        }
 
-        const adminMenuItem = {
+        let adminMenuItem = {
             label: 'Sistema',
             items: [
                 {
                     label: 'Usuários',
-                    icon: 'pi pi-fw pi-user-plus',
-                    routerLink: ['/']
+                    icon: 'pi pi-user',
+                    routerLink: ['/'],
+                    code: "users:view"
                 },
                 {
                     label: 'Cargos',
-                    icon: 'pi pi-fw pi-user-plus',
-                    routerLink: ['/']
+                    icon: 'pi pi-users',
+                    routerLink: ['/'],
+                    code: "roles:view"
                 },
                 {
                     label: 'Permissões',
-                    icon: 'pi pi-fw pi-user-plus',
-                    routerLink: ['/teachers']
+                    icon: 'pi pi-key',
+                    routerLink: ['/teachers'],
+                    code: "permissions:view"
                 },
             ]
         }
 
-        if (this.authService.isLoggedIn() && this.authService.getUserClaim()?.role == 'admin') {
-            this.model = [adminMenuItem, ...this.model];
+        const salesMenuItem = {
+            label: 'Vendas',
+            items: [
+
+            ]
+        }
+
+        const afterSalesMenuItem = {
+            label: 'Pós vendas',
+            items: [
+
+            ]
+        }
+
+        const relatSalesMenuItem = {
+            label: 'Relatórios',
+            items: [
+
+            ]
+        }
+
+        const productsMenu = {
+            label: 'Produtos',
+            items: [
+
+            ]
+        }
+
+
+        if (this.authService.isLoggedIn()) {
+            const userjwt = this.authService.parseUserJwt()
+
+            this.model = [relatSalesMenuItem, ...this.model]
+            this.model = [afterSalesMenuItem, ...this.model]
+            this.model = [salesMenuItem, ...this.model]
+            this.model = [productsMenu, ...this.model]
+
+            if (userjwt?.role.includes("admin") || this.authService.checkUserPermissionsContains(adminMenuItem.items)) {
+                if (this.authService.parseUserJwt().permissions.length != 0) {
+                    adminMenuItem.items = adminMenuItem.items.filter((i) => userjwt?.permissions.includes(i.code))
+                    this.model = [adminMenuItem, ...this.model]
+                }
+            }
+
+            this.model = [dashMenu, ...this.model]
         }
 
     }

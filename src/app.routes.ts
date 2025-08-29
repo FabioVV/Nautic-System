@@ -17,7 +17,7 @@ export const appRoutes: Routes = [
         path: '',
         component: AppLayout,
         children: [
-            { path: 'dashboard', component: Dashboard, canActivate: [authGuard] },
+            { path: 'dashboard', component: Dashboard, canActivate: [authGuard], },//data: { "claim": "test" }
             { path: '', loadChildren: () => import('./app/pages/pages.routes'), canActivate: [authGuard] }
         ]
     },

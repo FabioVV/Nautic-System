@@ -35,6 +35,10 @@ export class AuthService {
     }
 
     getUserToken() {
+        if (!localStorage.getItem(USER_DATA)) {
+            return
+        }
+
         return JSON.parse(localStorage.getItem(USER_DATA) as string).token
     }
 
@@ -42,7 +46,41 @@ export class AuthService {
         return JSON.parse(window.atob(this.getUserToken()!.split('.')[1]))
     }
 
-    isLoggedIn() { // Check if token has expired
+    checkUserPermissionsContains(permsToCheckFor: Array<any>): Boolean {
+        return permsToCheckFor.some(p => this.parseUserJwt().permissions.includes(p.code))
+    }
+
+    parseUserJwt() {
+        if (!localStorage.getItem(USER_DATA)) {
+            return
+        }
+
+        let token = this.getUserToken()
+        let base64Url = token.split('.')[1];
+        let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        let parsedUserJwt = JSON.parse(jsonPayload)
+
+        if ('permissions' in parsedUserJwt && parsedUserJwt['permissions'] == null) {
+            parsedUserJwt['permissions'] = []
+        }
+
+        return parsedUserJwt
+    }
+
+    isLoggedIn() {
+        if (!localStorage.getItem(USER_DATA)) {
+            return
+        }
+
+        const exp = new Date(this.parseUserJwt().exp * 1000)
+
+        if (new Date() >= exp) {
+            return false
+        }
+
         return localStorage.getItem(USER_DATA) ?? false
     }
 
