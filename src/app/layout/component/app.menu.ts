@@ -87,7 +87,7 @@ export class AppMenu {
                 {
                     label: 'Usuários',
                     icon: 'pi pi-user',
-                    routerLink: ['/'],
+                    routerLink: ['/system/users'],
                     code: "users:view"
                 },
                 {
@@ -136,7 +136,7 @@ export class AppMenu {
 
         if (this.authService.isLoggedIn()) {
             const userjwt = this.authService.parseUserJwt()
-            const isAdmin = userjwt?.role.includes("admin")
+            const isAdmin = userjwt?.roles.includes("admin")
 
             this.model = [relatSalesMenuItem, ...this.model]
             this.model = [afterSalesMenuItem, ...this.model]

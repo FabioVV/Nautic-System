@@ -19,6 +19,11 @@ export interface User {
 export class UserService {
     constructor(private http: HttpClient) { }
 
+    getUserData(): User {
+        return JSON.parse(localStorage.getItem(USER_DATA) as string) ?? false
+    }
+
+
     updateUser(formData: any) {
         return this.http.patch(`${environment.apiBaseURL}/updateUser`, formData)
     }
@@ -27,9 +32,6 @@ export class UserService {
         return this.http.delete(`${environment.apiBaseURL}/deleteUser/${id}`)
     }
 
-    getUserData(): User {
-        return JSON.parse(localStorage.getItem(USER_DATA) as string) ?? false
-    }
 
     registerUser(formData: any) {
         return this.http.post(`${environment.apiBaseURL}/signup`, formData)

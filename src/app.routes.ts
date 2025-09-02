@@ -5,8 +5,6 @@ import { Notfound } from './app/pages/notfound/notfound';
 import { authGuard } from './app/shared/guards/auth.guard';
 
 
-// import { Landing } from './app/pages/landing/landing';
-
 export const appRoutes: Routes = [
     { path: "", redirectTo: "/auth/login", pathMatch: "full" },
     { path: "auth", redirectTo: "/auth/login", pathMatch: "full" },
@@ -17,8 +15,17 @@ export const appRoutes: Routes = [
         path: '',
         component: AppLayout,
         children: [
-            { path: 'dashboard', component: Dashboard, canActivate: [authGuard], },//data: { "claim": "test" }
-            { path: '', loadChildren: () => import('./app/pages/pages.routes'), canActivate: [authGuard] }
+            { path: 'dashboard', component: Dashboard, canActivate: [authGuard], },
+        ]
+    },
+
+    {
+        path: "system",
+        component: AppLayout,
+        children: [
+            { path: '', loadChildren: () => import('./app/pages/users.routes') },
+            { path: '', loadChildren: () => import('./app/pages/permissions.routes') },
+            { path: '', loadChildren: () => import('./app/pages/roles.routes') },
         ]
     },
 

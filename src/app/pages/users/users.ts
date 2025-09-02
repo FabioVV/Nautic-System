@@ -21,8 +21,6 @@ import { ListUsersComponent } from '../../shared/components/users/list.users';
 import { User, UserService } from '../../shared/services/user.service';
 
 
-
-
 @Component({
     selector: 'app-users',
     standalone: true,
@@ -52,7 +50,8 @@ import { User, UserService } from '../../shared/services/user.service';
     <p-toast></p-toast>
     <p-toolbar styleClass="mb-6">
     <ng-template #start>
-    <p-button label="Nova turma" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+        <p-button label="Novo usuário" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+
     <!-- <p-button severity="secondary" label="Excluir professor" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" /> -->
     </ng-template>
 
@@ -60,7 +59,7 @@ import { User, UserService } from '../../shared/services/user.service';
     </ng-template>
     </p-toolbar>
 
-    <p-dialog [(visible)]="classDialog" [style]="{ width: '450px' }" header="Registrar turma" [modal]="true">
+    <p-dialog [(visible)]="userDialog" [style]="{ width: '450px' }" header="Registrar turma" [modal]="true">
     <ng-template #content>
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <button id="btn_submit" style='display:none;' type="submit"></button>
@@ -94,7 +93,6 @@ import { User, UserService } from '../../shared/services/user.service';
     </p-dialog>
 
     <list-users [users]="users" [totalRecords]="totalRecords" ></list-users>
-
     `
 })
 export class UsersPage implements OnInit {
