@@ -19,11 +19,12 @@ import { ToastModule } from 'primeng/toast';
 import { ThemeService } from '../../shared/services/theme.service';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faHeadset } from '@fortawesome/free-solid-svg-icons';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [TooltipModule, FontAwesomeModule, RouterModule, CommonModule, ReactiveFormsModule, StyleClassModule, DialogModule, MessageModule, PasswordModule, ButtonModule, InputTextModule, AppConfigurator, ToastModule],
+    imports: [TooltipModule, FontAwesomeModule, RouterModule, CommonModule, ReactiveFormsModule, StyleClassModule, DialogModule, MessageModule, PasswordModule, ButtonModule, InputTextModule, AppConfigurator, ToastModule, FormsModule],
     providers: [MessageService],
     template: ` 
     <p-toast></p-toast>
@@ -80,7 +81,7 @@ import { faHeadset } from '@fortawesome/free-solid-svg-icons';
             </div>
 
 
-            <p-dialog header="Editar conta" [modal]="true" (onHide)="closeEditAccountModal()" [(visible)]="editAccountVisible" [style]="{ width: '50rem', z_index: '100' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }">
+            <p-dialog header="Editar sua conta" [modal]="true" (onHide)="closeEditAccountModal()" [(visible)]="editAccountVisible" [style]="{ width: '50rem', z_index: '100' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }">
                 <form [formGroup]="form" (ngSubmit)="onSubmit()">
                     <div>
 
@@ -92,7 +93,7 @@ import { faHeadset } from '@fortawesome/free-solid-svg-icons';
                         </div>
 
                         <label for="email" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email</label>
-                        <input formControlName="email" pInputText id="email" type="text" placeholder="john@email.com" class="w-full  mb-2" />
+                        <input pInputText [disabled]="true" id="email" type="text" placeholder="john@email.com" class="w-full  mb-2" formControlName="email" />
                         <div class="error-feedback" *ngIf="hasBeenSubmited('email')">
                             <p-message styleClass="mb-2" *ngIf="form.controls.email.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar seu email de preferência</p-message>
                             <p-message styleClass="mb-2" *ngIf="form.controls.email.hasError('email')" severity="error" variant="simple" size="small">Por favor, digitar um email válido</p-message>
@@ -160,6 +161,7 @@ export class AppTopbar implements OnInit {
     userData: User = this.userService.getUserData()
 
     editAccountVisible!: boolean
+    email: string | undefined = "Disabled"
 
     isSubmited: boolean = false
     isLoading: boolean = false
@@ -182,7 +184,7 @@ export class AppTopbar implements OnInit {
 
     form = this.formBuilder.group({
         name: [this.userData.name, [Validators.required]],
-        email: [this.userData.email, [Validators.required, Validators.email]],
+        email: [{ value: this.userData.email, disabled: true }, [Validators.required, Validators.email]],
         oldPassword: ['', [Validators.pattern(this.passwordPattern)]],
         newPassword: ['', [Validators.pattern(this.passwordPattern)]],
         confirmPassword: ['', [Validators.pattern(this.passwordPattern)]],
@@ -233,6 +235,8 @@ export class AppTopbar implements OnInit {
 
     onSubmit() {
         this.isSubmited = true
+        delete this.form.value.email
+
         if (this.form.valid) {
             this.isLoading = true
 
