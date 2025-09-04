@@ -21,6 +21,11 @@ import { ListUsersComponent } from '../../shared/components/users/list.users';
 import { User, UserService } from '../../shared/services/user.service';
 
 
+export interface UserStatus {
+    name: string
+    code: string
+}
+
 @Component({
     selector: 'app-users',
     standalone: true,
@@ -92,7 +97,7 @@ import { User, UserService } from '../../shared/services/user.service';
     </ng-template>
     </p-dialog>
 
-    <list-users [users]="users" [totalRecords]="totalRecords" ></list-users>
+    <list-users [users]="users" [totalRecords]="totalRecords" [limitPerPage]="limitPerPage" ></list-users>
     `
 })
 export class UsersPage implements OnInit {
@@ -110,6 +115,7 @@ export class UsersPage implements OnInit {
     isLoading: boolean = false
     userDialog: boolean = false;
     totalRecords = 0;
+    limitPerPage = 20;
 
     users = signal<User[]>([]);
 
@@ -124,20 +130,18 @@ export class UsersPage implements OnInit {
     }
 
     loadUsers() {
-        // this.userService(1, "").subscribe({
-        //     next: (res: any) => {
-        //         if (res.succeeded) {
-        //             this.classes.set(res.data.$values ?? [])
-        //             this.totalRecords = res.totalRecords
-        //         }
-        //     },
-        //     error: (err) => {
-        //         if (err.status) {
-        //             this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar turmas. Contate o administrador' });
-        //         }
-        //         this.isLoading = false
-        //     },
-        // })
+        this.userService.getUsers(1, this.limitPerPage, "", "", "").subscribe({
+            next: (res: any) => {
+                this.users.set(res.data ?? [])
+                this.totalRecords = res.totalRecords
+            },
+            error: (err) => {
+                if (err.status) {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar usuários.' });
+                }
+                this.isLoading = false
+            },
+        })
     }
 
     hideDialog() {

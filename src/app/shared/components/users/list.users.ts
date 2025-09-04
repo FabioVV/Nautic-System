@@ -1,91 +1,121 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { PaginatorModule } from 'primeng/paginator';
-import { Tag } from 'primeng/tag';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { TableModule } from 'primeng/table';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputTextModule } from 'primeng/inputtext';
+import { Tag } from 'primeng/tag';
+import { SelectModule } from 'primeng/select';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { ToastModule } from 'primeng/toast';
 
-import { UserService } from '../../services/user.service'
+import { showLoading } from '../utils';
+import { UserStatus } from '../../../pages/users/users';
+import { UserService } from '../../services/user.service';
 
 @Component({
     selector: 'list-users',
-    imports: [DialogModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
+    providers: [ConfirmationService, MessageService],
     styleUrls: [],
     standalone: true,
 
     template: `
-    <p-dataview #dv
-    [value]="users()"
-    layout="grid"
+    <p-toast></p-toast>
+    <p-table [value]="users()" stripedRows selectionMode="multiple" [(selection)]="selectedUsers" dataKey="id" [tableStyle]="{ 'min-width': '50rem', 'margin-top':'10px' }"
+        #dt
+        [rows]="10"
+        [globalFilterFields]="['title']"
+        [rowHover]="true"
+        dataKey="id"
     >
-    <ng-template #header>
-    <div class="flex items-center justify-between">
-    <h5></h5>
-    <p-iconfield>
-    <p-inputicon styleClass="pi pi-search" />
-    <input pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Digite o nome..." />
-    </p-iconfield>
-    </div>
-    </ng-template>
-    <ng-template #grid let-items>
-    <div class="grid grid-cols-12 gap-4">
-    <div *ngFor="let user of items" class="col-span-12 sm:col-span-6 md:col-span-4 xl:col-span-4 p-2">
-    <div
-    class="p-6 border border-surface-200 dark:border-surface-700 bg-surface-0 dark:bg-surface-900 rounded flex flex-col"
-    >
-    <div class="bg-surface-50 flex justify-center rounded p-4">
-    <div class="relative mx-auto" style="width:100% !important;">
-    <img
-    class="rounded w-full"
-    src="assets/images/nowpro.png"
-    [alt]="user.name"
-    style="height: 200px; object-fit: cover;"
+        <ng-template #caption>
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-xl font-bold">Usuários</span>
+        </div>
+
+            <div class="flex flex-wrap items-center justify-end gap-2">
+                <p-iconfield>
+                    <p-inputicon styleClass="pi pi-search" />
+                    <input [(ngModel)]="emailSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Email do usuário..." />
+                </p-iconfield>
+
+                <p-iconfield>
+                    <p-inputicon styleClass="pi pi-search" />
+                    <input [(ngModel)]="nameSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Nome do usuário..." />
+                </p-iconfield>
+
+
+                <p-iconfield>
+                    <p-select [options]="userStates" [(ngModel)]="selectedUserState" optionLabel="name" (onChange)="onGlobalFilter($event)" class="w-full md:w-56" />
+                </p-iconfield>
+            </div>
+
+        </ng-template>
+
+        <ng-template #header>
+            <tr>
+                <th pSortableColumn="name">
+                    Nome
+                    <p-sortIcon field="name" />
+                </th>
+                <th>Email</th>
+                <th>Telefone</th>
+                <th pSortableColumn="active">
+                    Ativo
+                    <p-sortIcon field="active" />
+                </th>
+            </tr>
+        </ng-template>
+        <ng-template #body let-user>
+            <tr [pSelectableRow]="user">
+                <td>
+                    {{ user.name }}
+                </td>
+
+                <td>
+                    {{ user.email }}
+                </td>
+
+                <td>
+                    {{ user.phone != "" ? user.phone : "-" }}
+                </td>
+
+                <td>
+                    <p-tag
+                        [value]="getUserActiveState(user)"
+                        [severity]="getSeverity(user)"
+                        styleClass="dark:!bg-surface-900"
+                    />
+                </td>
+
+            </tr>
+        </ng-template>
+    </p-table>
+
+    <p-paginator (onPageChange)="onPageChange($event)"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Total: {totalRecords} | Mostrando {first} de {last}"
+    [rows]="limitPerPage"
+    [totalRecords]="totalRecords"
+     />
+
+    <p-confirmdialog
+    [rejectLabel]="rejectLabel"
+    [acceptLabel]="confirmLabel"
+    [acceptAriaLabel]="confirmLabel"
+    [rejectAriaLabel]="rejectLabel"
+    [style]="{ width: '450px' }"
     />
-    <p-tag
-    [value]="getUserActiveState(user)"
-    [severity]="getSeverity(user)"
-    class="absolute"
-    styleClass="dark:!bg-surface-900"
-    [style.left.px]="4"
-    [style.top.px]="4"
-    />
-    </div>
-    </div>
-    <div class="pt-6">
-    <div class="flex flex-row justify-between products-start gap-2">
-    <div>
-    <div class="text-lg font-medium mt-1">{{ user.name }}</div>
-    </div>
-
-    </div>
-    <div class="flex flex-col gap-6 mt-6">
-    <div class="flex gap-2">
-    <button
-    pButton
-    icon=""
-    label="Entrar"
-    class="flex-auto whitespace-nowrap"
-    (click)="goToClass(user.id)"
-    ></button>
-    </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    </ng-template>
-    </p-dataview>
-
-    <p-paginator (onPageChange)="onPageChange($event)" [first]="1" [rows]="10" [totalRecords]="totalRecords" />
-
     `,
 })
 export class ListUsersComponent {
@@ -94,14 +124,30 @@ export class ListUsersComponent {
         private router: Router,
         private messageService: MessageService,
         private userService: UserService,
-
+        private confirmationService: ConfirmationService
     ) { }
 
     @Input() users: any
     @Input() totalRecords: any
-    private isLoading: boolean = false
-    private typingTimeout: any
-    private curPage = 1
+    @Input() limitPerPage: any
+
+    isLoading: boolean = false
+    typingTimeout: any
+    curPage = 1
+
+    selectedUsers!: any[] // does nothing for now
+
+    selectedUserState: UserStatus | undefined = { name: "Indiferente", code: "" }
+    userStates: UserStatus[] | undefined
+    autoFilteredValue: any[] = []
+
+    emailSearch: string = ""
+    nameSearch: string = ""
+    statusSearch: string = ""
+
+
+    confirmLabel = "Confirmar"
+    rejectLabel = "Cancelar"
 
 
     onPageChange(e: any) {
@@ -110,51 +156,56 @@ export class ListUsersComponent {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    loadUsers(page: number) {
-        page += 1
-        // this.userService.getUsers(page, "").subscribe({
-        //     next: (res: any) => {
-        //         if (res.succeeded) {
-        //             this.classes.set(res.data.$values ?? [])
-        //             this.totalRecords = res.totalRecords
-        //         }
-        //     },
-        //     error: (err) => {
-        //         if (err.status) {
-        //             this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar turmas. Contate o administrador' });
-        //         }
-        //         this.isLoading = false
-        //     },
-        // })
+
+    ngOnInit() {
+        this.userStates = [
+            { name: "Indiferente", code: "" },
+            { name: "Ativo", code: "Y" },
+            { name: "Não ativo", code: "N" },
+        ]
     }
 
-    onGlobalFilter(event: Event) {
-        const input = (event.target as HTMLInputElement).value
+    loadUsers(page: number) {
+        page += 1
+        this.userService.getUsers(page, this.limitPerPage, "", "", "").subscribe({
+            next: (res: any) => {
+                this.users.set(res.data ?? [])
+                this.totalRecords = res.totalRecords
 
+            },
+            error: (err) => {
+                if (err.status) {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar usuários.' });
+                }
+                this.isLoading = false
+            },
+        })
+    }
+
+    onGlobalFilter(event: any) {
         if (this.typingTimeout) {
             clearTimeout(this.typingTimeout)
         }
 
         this.typingTimeout = setTimeout(() => {
-            // this.userService.getUsers(this.curPage, input).subscribe({
-            //     next: (res: any) => {
-            //         if (res.succeeded) {
-            //             this.classes.set(res.data.$values ?? [])
-            //             this.totalRecords = res.totalRecords
-            //         }
-            //     },
-            //     error: (err) => {
-            //         if (err.status) {
-            //             this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar turmas. Contate o administrador' });
-            //         }
-            //         this.isLoading = false
-            //     },
-            // })
+            this.userService.getUsers(this.curPage, this.limitPerPage, this.nameSearch, this.emailSearch, this.selectedUserState?.code as string).subscribe({
+                next: (res: any) => {
+                    this.users.set(res.data ?? [])
+                    this.totalRecords = res.totalRecords
+
+                },
+                error: (err) => {
+                    if (err.status) {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar usuários.' });
+                    }
+                    this.isLoading = false
+                },
+            })
         }, 500)
     }
 
     getSeverity(_user: any) {
-        if (_user.isActive == `Y`) {
+        if (_user.active == `Y`) {
             return "success"
         } else {
             return "danger"
@@ -162,7 +213,7 @@ export class ListUsersComponent {
     }
 
     getUserActiveState(_user: any) {
-        if (_user.isActive == `Y`) {
+        if (_user.active == `Y`) {
             return "Ativo"
         } else {
             return "Inativo"

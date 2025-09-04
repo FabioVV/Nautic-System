@@ -23,7 +23,6 @@ export class UserService {
         return JSON.parse(localStorage.getItem(USER_DATA) as string) ?? false
     }
 
-
     updateUser(formData: any) {
         return this.http.patch(`${environment.apiBaseURL}/updateUser`, formData)
     }
@@ -32,13 +31,12 @@ export class UserService {
         return this.http.delete(`${environment.apiBaseURL}/deleteUser/${id}`)
     }
 
-
     registerUser(formData: any) {
         return this.http.post(`${environment.apiBaseURL}/signup`, formData)
     }
 
-    getUsers(search: string) {
-        return this.http.get(`${environment.apiBaseURL}/users?q=${search ?? ""}`)
+    getUsers(page = 1, perPage = 10, name: string, email: string, active: string) {
+        return this.http.get(`${environment.apiBaseURL}/users?pageNumber=${page}&perPage=${perPage}&name=${name}&email=${email}&active=${active}`)
     }
 }
 
