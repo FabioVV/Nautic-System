@@ -22,6 +22,18 @@ import { showLoading } from '../utils';
 import { UserStatus } from '../../../pages/users/users';
 import { UserService } from '../../services/user.service';
 
+
+interface Column {
+    field: string;
+    header: string;
+    customExportHeader?: string;
+}
+
+interface ExportColumn {
+    title: string;
+    dataKey: string;
+}
+
 @Component({
     selector: 'list-users',
     imports: [DialogModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
@@ -31,7 +43,7 @@ import { UserService } from '../../services/user.service';
 
     template: `
     <p-toast></p-toast>
-    <p-table [value]="users()" stripedRows selectionMode="multiple" [(selection)]="selectedUsers" dataKey="id" [tableStyle]="{ 'min-width': '50rem', 'margin-top':'10px' }"
+    <p-table [value]="users()" [columns]="cols" csvSeparator=";" [exportHeader]="'customExportHeader'" stripedRows selectionMode="multiple" [(selection)]="selectedUsers" dataKey="id" [tableStyle]="{ 'min-width': '50rem', 'margin-top':'10px' }"
         #dt
         [rows]="10"
         [globalFilterFields]="['title']"
@@ -39,9 +51,9 @@ import { UserService } from '../../services/user.service';
         dataKey="id"
     >
         <ng-template #caption>
-        <div class="flex items-center justify-between mb-4">
-            <span class="text-xl font-bold">Usuários</span>
-        </div>
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xl font-bold">Usuários</span>
+            </div>
 
             <div class="flex flex-wrap items-center justify-end gap-2">
                 <p-iconfield>
@@ -58,6 +70,9 @@ import { UserService } from '../../services/user.service';
                 <p-iconfield>
                     <p-select [options]="userStates" [(ngModel)]="selectedUserState" optionLabel="name" (onChange)="onGlobalFilter($event)" class="w-full md:w-56" />
                 </p-iconfield>
+            </div>
+            <div class="text-end pb-4 mt-2">
+                <p-button icon="pi pi-external-link" label="Exportar CSV" (click)="dt.exportCSV()" />
             </div>
 
         </ng-template>
@@ -145,6 +160,8 @@ export class ListUsersComponent {
     nameSearch: string = ""
     statusSearch: string = ""
 
+    cols!: Column[];
+    exportColumns!: ExportColumn[];
 
     confirmLabel = "Confirmar"
     rejectLabel = "Cancelar"
@@ -163,6 +180,15 @@ export class ListUsersComponent {
             { name: "Ativo", code: "Y" },
             { name: "Não ativo", code: "N" },
         ]
+
+        this.cols = [
+            { field: 'name', header: 'Nome' },
+            { field: 'email', header: 'E-mail' },
+            { field: 'phone', header: 'Telefone' },
+            { field: 'active', header: 'Ativo' }
+        ];
+
+        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
     }
 
     loadUsers(page: number) {
