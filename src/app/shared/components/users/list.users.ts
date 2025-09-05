@@ -17,6 +17,7 @@ import { Tag } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ToastModule } from 'primeng/toast';
+import { ButtonGroupModule } from 'primeng/buttongroup';
 import { finalize } from 'rxjs';
 
 import { showLoading } from '../utils';
@@ -37,7 +38,7 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-users',
-    imports: [DialogModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrls: [],
     standalone: true,
@@ -90,6 +91,7 @@ interface ExportColumn {
                     Ativo
                     <p-sortIcon field="active" />
                 </th>
+                <th></th>
             </tr>
         </ng-template>
         <ng-template #body let-user>
@@ -114,29 +116,34 @@ interface ExportColumn {
                     />
                 </td>
 
+                <td>
+                    <p-buttongroup>
+                        <p-button icon="pi pi-pencil" severity="contrast" rounded/>
+                        <p-button (click)="deactivateUser(user.id, user.email)" icon="pi pi-trash" severity="contrast" rounded/>
+                    </p-buttongroup>
+                </td>
             </tr>
         </ng-template>
     </p-table>
 
     <p-paginator (onPageChange)="onPageChange($event)"
-    [first]="first"
-    [showCurrentPageReport]="true"
-    currentPageReportTemplate="Total: {totalRecords} | Mostrando {first} de {last}"
-    [rows]="limitPerPage"
-    [totalRecords]="totalRecords"
+        [first]="first"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Total: {totalRecords} | Mostrando {first} de {last}"
+        [rows]="limitPerPage"
+        [totalRecords]="totalRecords"
      />
 
     <p-confirmdialog
-    [rejectLabel]="rejectLabel"
-    [acceptLabel]="confirmLabel"
-    [acceptAriaLabel]="confirmLabel"
-    [rejectAriaLabel]="rejectLabel"
-    [style]="{ width: '450px' }"
+        [rejectLabel]="rejectLabel"
+        [acceptLabel]="confirmLabel"
+        [acceptAriaLabel]="confirmLabel"
+        [rejectAriaLabel]="rejectLabel"
+        [style]="{ width: '450px' }"
     />
     `,
 })
 export class ListUsersComponent {
-
     constructor(
         private router: Router,
         private messageService: MessageService,
@@ -192,10 +199,10 @@ export class ListUsersComponent {
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
     }
 
-    loadUsers(page: number) {
-
-        page++
+    loadUsers(page: number, isDelete = false) {
+        if (!isDelete) page++
         const rmLoading = showLoading()
+
         this.userService.getUsers(page, this.limitPerPage, this.nameSearch, this.emailSearch, this.selectedUserState?.code as string).pipe(finalize(() => { rmLoading() })).subscribe({
             next: (res: any) => {
                 this.users.set(res.data ?? [])
@@ -210,6 +217,38 @@ export class ListUsersComponent {
                 this.isLoading = false
             },
         })
+    }
+
+    deactivateUser(id: string, email: string) {
+        this.confirmationService.confirm({
+            message: 'Confirma desativar o usuário ' + `<mark>${email}</mark>` + ' ?',
+            header: 'Confirmação',
+            icon: 'pi pi-exclamation-triangle',
+            closeOnEscape: true,
+            rejectButtonProps: {
+                label: 'Cancelar',
+                severity: 'secondary',
+                outlined: true,
+            },
+            acceptButtonProps: {
+                label: 'Confirmar',
+                severity: 'danger',
+                outlined: true,
+            },
+            accept: () => {
+                const rmLoading = showLoading()
+
+                this.userService.deactivateUser(id).pipe(finalize(() => { rmLoading() })).subscribe({
+                    next: (res: any) => {
+                        this.loadUsers(this.curPage, true)
+                        this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Usuário desativado com sucesso' });
+                    },
+                    error: (err) => {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: "Ocorreu um erro ao tentar desativar o usuário." });
+                    },
+                })
+            }
+        });
     }
 
     onGlobalFilter(event: any) {
@@ -240,7 +279,4 @@ export class ListUsersComponent {
         }
     }
 
-    goToClass(classId: string) {
-        this.router.navigate([`/classes`, classId])
-    }
 }

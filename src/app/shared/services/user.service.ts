@@ -5,6 +5,7 @@ import { USER_DATA } from '../constants';
 import { environment } from '../../../environments/environment';
 
 export interface User {
+    id: string,
     name: string,
     email: string
     roles: Array<string>,
@@ -23,12 +24,12 @@ export class UserService {
         return JSON.parse(localStorage.getItem(USER_DATA) as string) ?? false
     }
 
-    updateUser(formData: any) {
-        return this.http.patch(`${environment.apiBaseURL}/updateUser`, formData)
+    updateUser(id: string, formData: any) {
+        return this.http.patch(`${environment.apiBaseURL}/users/${id}`, formData)
     }
 
-    deleteUser(id: string) {
-        return this.http.delete(`${environment.apiBaseURL}/deleteUser/${id}`)
+    deactivateUser(id: string) {
+        return this.http.delete(`${environment.apiBaseURL}/users/${id}`)
     }
 
     registerUser(formData: any) {

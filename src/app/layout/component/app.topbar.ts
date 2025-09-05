@@ -240,7 +240,7 @@ export class AppTopbar implements OnInit {
         if (this.form.valid) {
             this.isLoading = true
 
-            this.userService.updateUser(this.form.value).subscribe({
+            this.userService.updateUser(this.userData.id, this.form.value).subscribe({
                 next: (res: any) => {
                     if (res?.succeeded) {
                         this.isSubmited = false
