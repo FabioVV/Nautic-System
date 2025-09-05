@@ -1,21 +1,21 @@
 export function showLoading() {
 
-  function removeLoadingGif(forceClose = false){
-      const LOADING_GIF_HTML_ELEMENT = document.getElementById('loading_stuff')
+    function removeLoadingGif(forceClose = false) {
+        const LOADING_GIF_HTML_ELEMENT = document.getElementById('loading_stuff')
 
-      if(forceClose === true){
-          if(LOADING_GIF_HTML_ELEMENT){   
-              LOADING_GIF_HTML_ELEMENT.remove()        
-          }
-          return
-      }
+        if (forceClose === true) {
+            if (LOADING_GIF_HTML_ELEMENT) {
+                LOADING_GIF_HTML_ELEMENT.remove()
+            }
+            return
+        }
 
-      if(LOADING_GIF_HTML_ELEMENT){   
-          LOADING_GIF_HTML_ELEMENT.remove()        
-      }
-  }
+        if (LOADING_GIF_HTML_ELEMENT) {
+            LOADING_GIF_HTML_ELEMENT.remove()
+        }
+    }
 
-  const LOADING_GIF = `
+    const LOADING_GIF = `
       <div id='loading_stuff' style='position: fixed;
                               background-color: rgba(255, 255, 255, 0.7);
                               filter: alpha(opacity=65);
@@ -31,11 +31,11 @@ export function showLoading() {
                               top:0;'
                               ondblclick="removeLoadingGif(true);" >
           <div style="text-align: center;position:relative;top:35%; ">
-            <i class="pi pi-spin pi-spinner" style="font-size: 7rem"></i>
+            <i class="pi pi-spin pi-spinner" style="font-size: 7em"></i>
           </div>
       </div>  
   `
-  document.body.insertAdjacentHTML('beforeend', LOADING_GIF)
+    document.body.insertAdjacentHTML('beforeend', LOADING_GIF)
 
-  return removeLoadingGif
+    return removeLoadingGif
 }

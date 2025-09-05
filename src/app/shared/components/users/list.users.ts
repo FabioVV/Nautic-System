@@ -17,6 +17,7 @@ import { Tag } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
 import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ToastModule } from 'primeng/toast';
+import { finalize } from 'rxjs';
 
 import { showLoading } from '../utils';
 import { UserStatus } from '../../../pages/users/users';
@@ -43,7 +44,7 @@ interface ExportColumn {
 
     template: `
     <p-toast></p-toast>
-    <p-table [value]="users()" [columns]="cols" csvSeparator=";" [exportHeader]="'customExportHeader'" stripedRows selectionMode="multiple" [(selection)]="selectedUsers" dataKey="id" [tableStyle]="{ 'min-width': '50rem', 'margin-top':'10px' }"
+    <p-table [value]="users()"  [columns]="cols" csvSeparator=";" [exportHeader]="'customExportHeader'" stripedRows selectionMode="multiple" [(selection)]="selectedUsers" dataKey="id" [tableStyle]="{ 'min-width': '50rem', 'margin-top':'10px' }"
         #dt
         [rows]="10"
         [globalFilterFields]="['title']"
@@ -56,16 +57,16 @@ interface ExportColumn {
             </div>
 
             <div class="flex flex-wrap items-center justify-end gap-2">
-                <p-iconfield>
-                    <p-inputicon styleClass="pi pi-search" />
-                    <input [(ngModel)]="emailSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Email do usuário..." />
-                </p-iconfield>
 
                 <p-iconfield>
                     <p-inputicon styleClass="pi pi-search" />
                     <input [(ngModel)]="nameSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Nome do usuário..." />
                 </p-iconfield>
 
+                <p-iconfield>
+                    <p-inputicon styleClass="pi pi-search" />
+                    <input [(ngModel)]="emailSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Email do usuário..." />
+                </p-iconfield>
 
                 <p-iconfield>
                     <p-select [options]="userStates" [(ngModel)]="selectedUserState" optionLabel="name" (onChange)="onGlobalFilter($event)" class="w-full md:w-56" />
@@ -118,6 +119,7 @@ interface ExportColumn {
     </p-table>
 
     <p-paginator (onPageChange)="onPageChange($event)"
+    [first]="first"
     [showCurrentPageReport]="true"
     currentPageReportTemplate="Total: {totalRecords} | Mostrando {first} de {last}"
     [rows]="limitPerPage"
@@ -149,6 +151,7 @@ export class ListUsersComponent {
     isLoading: boolean = false
     typingTimeout: any
     curPage = 1
+    first = 1
 
     selectedUsers!: any[] // does nothing for now
 
@@ -166,13 +169,11 @@ export class ListUsersComponent {
     confirmLabel = "Confirmar"
     rejectLabel = "Cancelar"
 
-
     onPageChange(e: any) {
         this.loadUsers(e.page)
         this.curPage = e.page
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-
 
     ngOnInit() {
         this.userStates = [
@@ -192,11 +193,14 @@ export class ListUsersComponent {
     }
 
     loadUsers(page: number) {
-        page += 1
-        this.userService.getUsers(page, this.limitPerPage, "", "", "").subscribe({
+
+        page++
+        const rmLoading = showLoading()
+        this.userService.getUsers(page, this.limitPerPage, this.nameSearch, this.emailSearch, this.selectedUserState?.code as string).pipe(finalize(() => { rmLoading() })).subscribe({
             next: (res: any) => {
                 this.users.set(res.data ?? [])
                 this.totalRecords = res.totalRecords
+                this.first = 1
 
             },
             error: (err) => {
@@ -214,19 +218,9 @@ export class ListUsersComponent {
         }
 
         this.typingTimeout = setTimeout(() => {
-            this.userService.getUsers(this.curPage, this.limitPerPage, this.nameSearch, this.emailSearch, this.selectedUserState?.code as string).subscribe({
-                next: (res: any) => {
-                    this.users.set(res.data ?? [])
-                    this.totalRecords = res.totalRecords
-
-                },
-                error: (err) => {
-                    if (err.status) {
-                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar usuários.' });
-                    }
-                    this.isLoading = false
-                },
-            })
+            this.first = 0;
+            this.curPage = 1;
+            this.loadUsers(0)
         }, 500)
     }
 

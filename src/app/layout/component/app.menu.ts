@@ -139,9 +139,9 @@ export class AppMenu {
             const isAdmin = userjwt?.roles.includes("admin")
 
             this.model = [relatSalesMenuItem, ...this.model]
+            this.model = [productsMenu, ...this.model]
             this.model = [afterSalesMenuItem, ...this.model]
             this.model = [salesMenuItem, ...this.model]
-            this.model = [productsMenu, ...this.model]
 
             if (isAdmin || this.authService.checkUserPermissionsContains(adminMenuItem.items)) {
                 if (isAdmin) {
