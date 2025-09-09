@@ -29,6 +29,14 @@ export const appRoutes: Routes = [
         ]
     },
 
+    {
+        path: "sales",
+        component: AppLayout,
+        children: [
+            { path: '', loadChildren: () => import('./app/pages/sales.routes') },
+        ]
+    },
+
 
     { path: 'notfound', component: Notfound },
     { path: '**', redirectTo: '/notfound' }

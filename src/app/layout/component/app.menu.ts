@@ -5,6 +5,7 @@ import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
 import { AuthService } from '../../shared/services/auth.service';
 import { updatePreset } from '@primeng/themes';
+import { faPeopleArrows } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-menu',
@@ -23,6 +24,8 @@ import { updatePreset } from '@primeng/themes';
 
 export class AppMenu {
     model: MenuItem[] = [];
+    faPeopleArrows = faPeopleArrows
+
     constructor(private authService: AuthService) { }
 
     ngOnInit() {
@@ -93,13 +96,13 @@ export class AppMenu {
                 {
                     label: 'Cargos',
                     icon: 'pi pi-users',
-                    routerLink: ['/'],
+                    routerLink: ['/system/roles'],
                     code: "roles:view"
                 },
                 {
                     label: 'Permissões',
                     icon: 'pi pi-key',
-                    routerLink: ['/teachers'],
+                    routerLink: ['/system/permissions'],
                     code: "permissions:view"
                 },
             ]
@@ -108,7 +111,12 @@ export class AppMenu {
         const salesMenuItem = {
             label: 'Vendas',
             items: [
-
+                {
+                    label: 'Painel de negociações',
+                    icon: 'pi pi-comment',
+                    routerLink: ['/sales/negotiation-panel'],
+                    code: "negotiation_panel:view"
+                },
             ]
         }
 
@@ -138,21 +146,37 @@ export class AppMenu {
             const userjwt = this.authService.parseUserJwt()
             const isAdmin = userjwt?.roles.includes("admin")
 
-            this.model = [relatSalesMenuItem, ...this.model]
-            this.model = [productsMenu, ...this.model]
-            this.model = [afterSalesMenuItem, ...this.model]
-            this.model = [salesMenuItem, ...this.model]
+            const menuItems = [relatSalesMenuItem, productsMenu, afterSalesMenuItem, salesMenuItem].reverse()
 
-            if (isAdmin || this.authService.checkUserPermissionsContains(adminMenuItem.items)) {
-                if (isAdmin) {
-                    this.model = [adminMenuItem, ...this.model]
-                } else {
-                    if (this.authService.parseUserJwt().permissions.length != 0) {
-                        adminMenuItem.items = adminMenuItem.items.filter((i) => userjwt?.permissions.includes(i.code))
-                        this.model = [adminMenuItem, ...this.model]
-                    }
+            // this.model = [relatSalesMenuItem, ...this.model]
+            // this.model = [productsMenu, ...this.model]
+            // this.model = [afterSalesMenuItem, ...this.model]
+            // this.model = [salesMenuItem, ...this.model]
+
+            if (isAdmin) {
+                this.model = [relatSalesMenuItem, ...this.model]
+                this.model = [productsMenu, ...this.model]
+                this.model = [afterSalesMenuItem, ...this.model]
+                this.model = [salesMenuItem, ...this.model]
+                this.model = [adminMenuItem, ...this.model]
+            } else {
+                for (const menui of menuItems) {
+                    menui.items = menui.items.filter((i) => userjwt?.permissions.includes(i.code))
+                    this.model = [menui, ...this.model]
                 }
+
             }
+
+            // if (isAdmin || this.authService.checkUserPermissionsContains(adminMenuItem.items)) {
+            //     if (isAdmin) {
+            //         this.model = [adminMenuItem, ...this.model]
+            //     } else {
+            //         if (this.authService.parseUserJwt().permissions.length != 0) {
+            //             adminMenuItem.items = adminMenuItem.items.filter((i) => userjwt?.permissions.includes(i.code))
+            //             this.model = [adminMenuItem, ...this.model]
+            //         }
+            //     }
+            // }
 
             this.model = [dashMenu, ...this.model]
         }

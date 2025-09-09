@@ -11,3 +11,11 @@
     flex: 1 1 auto;
     padding-bottom: 2rem;
 }
+
+.hide-stuff{
+    filter:opacity(0.1) !important;
+}
+
+.show-stuff{
+    filter:opacity(1);
+}

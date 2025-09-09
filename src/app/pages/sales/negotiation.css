@@ -1,0 +1,55 @@
+.kb-board{
+
+}
+
+.kb-painel{
+    display:flex;
+    flex-direction:row;
+}
+
+.kb-painel > *{
+    border-right: 1px dashed;
+    padding-right: 7px;
+    padding-left: 7px;
+    height:1400px;
+}
+
+.kb-painel > *:last-child {
+    border-right: none;
+}
+
+.kb-cards{
+    display:flex;
+    flex-direction:column;
+    gap:1rem;
+    width:240px;
+    cursor:move;
+}
+
+.kb-cards > *{
+
+}
+
+.card-text{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor:help;
+}
+
+.card-money{
+    color:green;
+}
+
+.highlight-drag{
+    background-color:red;
+}
+
+.hide-card {
+    visibility:hidden !important;
+}
+
+.show-card{
+    visibility:visible !important;
+}
+
