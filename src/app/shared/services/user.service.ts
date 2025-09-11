@@ -33,7 +33,7 @@ export class UserService {
     }
 
     registerUser(formData: any) {
-        return this.http.post(`${environment.apiBaseURL}/signup`, formData)
+        return this.http.post(`${environment.apiBaseURL}/users`, formData)
     }
 
     getUsers(page = 1, perPage = 10, name: string, email: string, active: string) {

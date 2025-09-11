@@ -117,13 +117,24 @@ export class AppMenu {
                     routerLink: ['/sales/negotiation-panel'],
                     code: "negotiation_panel:view"
                 },
+                {
+                    label: 'Clientes',
+                    icon: 'pi pi-users',
+                    routerLink: ['/sales/customers'],
+                    code: "sales_customers:view"
+                },
             ]
         }
 
         const afterSalesMenuItem = {
             label: 'Pós vendas',
             items: [
-
+                {
+                    label: 'Clientes',
+                    icon: 'pi pi-users',
+                    routerLink: ['/after-sales/customers'],
+                    code: "aftersales_customers:view"
+                },
             ]
         }
 
@@ -137,7 +148,24 @@ export class AppMenu {
         const productsMenu = {
             label: 'Produtos',
             items: [
-
+                {
+                    label: 'Acessórios',
+                    icon: 'pi pi-hammer',
+                    routerLink: ['/sales/customers'],
+                    code: "acessories:view"
+                },
+                {
+                    label: 'Cascos',
+                    icon: 'pi pi-hammer',
+                    routerLink: ['/sales/customers'],
+                    code: "pboat:view"
+                },
+                {
+                    label: 'Motores',
+                    icon: 'pi pi-hammer',
+                    routerLink: ['/sales/customers'],
+                    code: "engines:view"
+                },
             ]
         }
 

@@ -3,7 +3,7 @@ import { RouterModule } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
@@ -17,13 +17,21 @@ import { MessageModule } from 'primeng/message';
 import { PasswordModule } from 'primeng/password';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { SelectModule } from 'primeng/select';
+
+
 import { ListUsersComponent } from '../../shared/components/users/list.users';
 import { User, UserService } from '../../shared/services/user.service';
-
+import { PASSWORD_PATTERN_VALIDATOR } from '../../shared/constants';
 
 export interface UserStatus {
     name: string
     code: string
+}
+
+interface Cargo {
+    name: string;
+    code: string;
 }
 
 @Component({
@@ -48,51 +56,118 @@ export interface UserStatus {
         PasswordModule,
         IconFieldModule,
         InputIconModule,
+        SelectModule,
         ListUsersComponent,
     ],
     providers: [MessageService, ConfirmationService],
     template: `
     <p-toast></p-toast>
     <p-toolbar styleClass="mb-6">
-    <ng-template #start>
-        <p-button label="Novo usuário" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
 
-    <!-- <p-button severity="secondary" label="Excluir professor" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" /> -->
-    </ng-template>
+        <ng-template #start>
+            <p-button label="Novo usuário" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
 
-    <ng-template #end>
-    </ng-template>
+
+        </ng-template>
+
+        <ng-template #end>
+        </ng-template>
     </p-toolbar>
 
-    <p-dialog [(visible)]="userDialog" [style]="{ width: '450px' }" header="Registrar turma" [modal]="true">
+    <p-dialog [(visible)]="userDialog" header="Registrar usuário" [modal]="true">
     <ng-template #content>
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <button id="btn_submit" style='display:none;' type="submit"></button>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" style='margin-bottom: 4rem;'>
+        <button id="btn_submit" style='display:none;' type="submit"></button>
 
-    <div class="flex flex-col gap-6">
-    <div>
-    <label for="Name" class="block font-bold mb-3">Nome</label>
-    <input formControlName="Name" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Name" required autofocus fluid />
-    <div class="error-feedback" *ngIf="hasBeenSubmited('Name')">
-    <p-message styleClass="mb-2" *ngIf="form.controls.Name.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar um nome</p-message>
-    </div>
-    </div>
-    <div>
-    <label for="Description" class="block font-bold mb-3">Descrição</label>
-    <input formControlName="Description" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Description" required autofocus fluid />
-    <div class="error-feedback" *ngIf="hasBeenSubmited('Description')">
-    <p-message styleClass="mb-2" *ngIf="form.controls.Description.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar uma descrição</p-message>
-    </div>
-    </div>
-    </div>
+        <div class='row'>
+
+            <div class='col-md-6'>
+                <label for="Name" class="block font-bold mb-3">Nome</label>
+                <input formControlName="Name" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Name" required autofocus fluid />
+                <div class="error-feedback" *ngIf="hasBeenSubmited('Name')">
+                    <p-message styleClass="mb-2" *ngIf="form.controls.Name.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar um nome</p-message>
+                </div>
+            </div>
+
+            <div class='col-md-6'>
+                <label for="Email" class="block font-bold mb-3">E-mail</label>
+                <input formControlName="Email" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Email" required autofocus fluid />
+
+                <div class="error-feedback" *ngIf="hasBeenSubmited('Email')">
+                    <p-message styleClass="mb-2" *ngIf="form.controls.Email.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar um E-email</p-message>
+                    <p-message styleClass="mb-2" *ngIf="form.controls.Email.hasError('Email')" severity="error" variant="simple" size="small">Por favor, digitar um E-mail válido</p-message>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class='row'>
+            <div class='col-md-6'>
+                <label for="Phone" class="block font-bold mb-3">Telefone</label>
+
+                <input formControlName="Phone" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Phone" required autofocus fluid />
+
+                <div class="error-feedback" *ngIf="hasBeenSubmited('Phone')">
+                    <p-message styleClass="mb-2" *ngIf="form.controls.Phone.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar um telefone</p-message>
+                </div>
+            </div>
+
+            <div class='col-md-6'>
+                <label for="ConfirmPassword" class="block font-bold mb-3">Cargo</label>
+
+                <p-select [invalid]="isInvalid('Cargo')" [options]="cargos" formControlName="Cargo" optionLabel="name" placeholder="Selecione um cargo" class="w-full mb-2" />
+                @if (isInvalid('Cargo')) {
+                    <p-message severity="error" size="small" variant="simple">Por favor, selecione um cargo</p-message>
+                }
+            </div>
+
+        </div>
+
+        <div class='row'>
+            <div class='col-md-6'>
+                <label for="Password" class="block font-bold mb-3">Senha</label>
+
+                <p-password formControlName="Password" id="Password"  placeholder="********" [toggleMask]="true" styleClass="mb-2" [fluid]="true" [feedback]="false"></p-password>
+
+                <div class="error-feedback" *ngIf="hasBeenSubmited('Password')">
+                    <p-message styleClass="mb-2" *ngIf="form.controls.Password.hasError('passwordMismatch')" severity="error" variant="simple" size="small">Por favor, digitar senhas que coincidem</p-message>
+                    <p-message styleClass="mb-2" *ngIf="form.controls.Password.hasError('pattern')" severity="error" variant="simple" size="small">
+                        Por favor, digite uma senha que contenha:<br />
+                        6 caracteres minúsculos <br />
+                        1 caractere maiúsculo <br />
+                        1 dígito <br />
+                        1 caractere especial
+                    </p-message>
+                </div>
+            </div>
+
+            <div class='col-md-6'>
+                <label for="ConfirmPassword" class="block font-bold mb-3">Confirme a senha</label>
+
+                <p-password formControlName="ConfirmPassword" id="ConfirmPassword"  placeholder="********" [toggleMask]="true" styleClass="mb-2" [fluid]="true" [feedback]="false"></p-password>
+
+                <div class="error-feedback" *ngIf="hasBeenSubmited('ConfirmPassword')">
+                    <p-message styleClass="mb-2" *ngIf="form.controls.ConfirmPassword.hasError('passwordMismatch')" severity="error" variant="simple" size="small">Por favor, digitar senhas que coincidem</p-message>
+                    <p-message styleClass="mb-2" *ngIf="form.controls.ConfirmPassword.hasError('pattern')" severity="error" variant="simple" size="small">
+                        Por favor, digite uma senha que contenha:<br />
+                        6 caracteres minúsculos <br />
+                        1 caractere maiúsculo <br />
+                        1 dígito <br />
+                        1 caractere especial
+                    </p-message>
+
+                </div>
+            </div>
+        </div>
 
     </form>
 
 
-    <ng-template #footer>
-    <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
-    <p-button [disabled]="isLoading" (click)="submit()" type="submit" label="Salvar" icon="pi pi-check" />
-    </ng-template>
+        <ng-template #footer>
+            <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
+            <p-button [disabled]="isLoading" (click)="submit()" type="submit" label="Salvar" icon="pi pi-check" />
+        </ng-template>
 
     </ng-template>
     </p-dialog>
@@ -110,6 +185,19 @@ export class UsersPage implements OnInit {
 
     ) { }
 
+    passwordMatchValidator: ValidatorFn = (control: AbstractControl): null => {
+        const password = control.get("Password")
+        const confirmPassword = control.get("ConfirmPassword")
+
+        if (password && confirmPassword && password.value != confirmPassword.value) {
+            confirmPassword?.setErrors({ passwordMismatch: true })
+        } else {
+            confirmPassword?.setErrors(null)
+        }
+
+        return null
+    }
+
     submitted: boolean = false;
     isSubmited: boolean = false
     isLoading: boolean = false
@@ -118,16 +206,26 @@ export class UsersPage implements OnInit {
     limitPerPage = 20;
 
     users = signal<User[]>([]);
-
+    cargos: Cargo[] = [{ name: 'Vendedor', code: 'NY' },
+    { name: 'Montador', code: 'RM' },
+    { name: 'Executivo', code: 'LDN' },
+    { name: 'Administrador', code: 'IST' }]
 
     form = this.formBuilder.group({
         Name: ['', [Validators.required]],
-        Description: ['', [Validators.required]],
-    })
+        Email: ['', [Validators.required, Validators.email]],
+        Password: ['', [Validators.pattern(PASSWORD_PATTERN_VALIDATOR)]],
+        ConfirmPassword: ['', [Validators.pattern(PASSWORD_PATTERN_VALIDATOR)]],
+        Phone: ['', [Validators.required]],
+        Cargo: ['', [Validators.required]],
+
+    }, { validators: [this.passwordMatchValidator] })
 
     ngOnInit(): void {
         this.loadUsers()
+
     }
+
 
     loadUsers() {
         this.userService.getUsers(1, this.limitPerPage, "", "", "").subscribe({
@@ -163,27 +261,27 @@ export class UsersPage implements OnInit {
 
         if (this.form.valid) {
             this.isLoading = true
-            /*
-                        this.classService.registerClass(this.form.value).subscribe({
-                            next: (res: any) => {
-                                this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Turma registrada com sucesso' });
-                                this.loadClasses()
-                                this.isSubmited = false
-                                this.isLoading = false
-                                this.hideDialog()
-                                this.form.reset()
-                            },
-                            error: (err) => {
-                                if (err.status == 400) {
-                                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
-                                } else {
-                                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
 
-                                }
-                                this.isLoading = false
-                            },
+            this.userService.registerUser(this.form.value).subscribe({
+                next: (res: any) => {
+                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Usuário registrado com sucesso' });
+                    this.loadUsers()
+                    this.isSubmited = false
+                    this.isLoading = false
+                    this.hideDialog()
+                    this.form.reset()
+                },
+                error: (err) => {
+                    if (err?.status == 400 && err?.error?.ErrCode === 'u1') {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'E-mail já existente' });
+                    } else {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
 
-                        })*/
+                    }
+                    this.isLoading = false
+                },
+
+            })
         }
     }
 
@@ -192,5 +290,10 @@ export class UsersPage implements OnInit {
         return Boolean(control?.invalid)
             && (this.isSubmited || Boolean(control?.touched))
         //|| Boolean(control?.dirty
+    }
+
+    isInvalid(controlName: string) {
+        const control = this.form.get(controlName);
+        return control?.invalid && (control.touched || this.isSubmited);
     }
 }

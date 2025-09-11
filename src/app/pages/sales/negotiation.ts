@@ -59,13 +59,33 @@ export interface UserStatus {
     styleUrl: "negotiation.css",
     template: `
     <p-toast></p-toast>
+
     <section class='kb-board'>
 
+        <p-toolbar>
+
+            <ng-template #start>
+                <p-button pTooltip="Cadastrar novo lead" tooltipPosition="top" icon="pi pi-plus" class="mr-2" text severity="success" />
+                <p-button pTooltip="Visualizar seus alertas" tooltipPosition="top" icon="pi pi-bell" class="mr-2" text severity="warn" />
+            </ng-template>
+
+            <ng-template #center>
+                <p-iconfield iconPosition="left">
+                    <p-inputicon class="pi pi-search" />
+                    <input type="text" pInputText placeholder="Pesquisar negócios..." />
+                </p-iconfield>
+            </ng-template>
+
+            <ng-template #end>
+            </ng-template>
+
+        </p-toolbar>
+
         <div class='kb-painel'>
-            <div class='dropzone' (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)">
+            <div id='stage1' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)">
                 <h5>Lead</h5>
                 <div class='kb-cards'>
-                    <p-card draggable="true" (dragstart)="dragstart($event, '1')" id="1">
+                    <p-card data-stage='1' draggable="true" (dragstart)="dragstart($event, '1')" id="1">
                         <h6 class='card-text' pTooltip="Enter your username" tooltipPosition="top">Fábio Gabriel Rodrigues Varela</h6>
                         <p class="m-0 card-text" pTooltip="Enter your username" tooltipPosition="top">
                             NX 250 Aenima 2.0 Volvo AAAAAAAAAAAAAAAAAAAAA
@@ -76,7 +96,7 @@ export interface UserStatus {
                         </small>
                     </p-card>
 
-                    <p-card draggable="true" (dragstart)="dragstart($event, '2')" id="2">
+                    <p-card data-stage='1' draggable="true" (dragstart)="dragstart($event, '2')" id="2">
                     <h6 class='card-text' pTooltip="Enter your username" tooltipPosition="top">Fábio Gabriel Rodrigues Varela</h6>
                     <p class="m-0 card-text" pTooltip="Enter your username" tooltipPosition="top">
                     NX 250 Aenima 2.0 Volvo AAAAAAAAAAAAAAAAAAAAA
@@ -89,10 +109,10 @@ export interface UserStatus {
                 </div>
             </div>
 
-            <div class='dropzone' (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
+            <div id='stage2' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
                 <h5>Lead convertido</h5>
                 <div class='kb-cards'>
-                    <p-card draggable="true" (dragstart)="dragstart($event, '3')" id="3">
+                    <p-card data-stage='2' draggable="true" (dragstart)="dragstart($event, '3')" id="3">
                     <h6 class='card-text' pTooltip="Enter your username" tooltipPosition="top">Fábio Gabriel Rodrigues Varela</h6>
                     <p class="m-0 card-text" pTooltip="Enter your username" tooltipPosition="top">
                     NX 250 Aenima 2.0 Volvo AAAAAAAAAAAAAAAAAAAAA
@@ -103,7 +123,7 @@ export interface UserStatus {
                     </small>
                     </p-card>
 
-                    <p-card draggable="true" (dragstart)="dragstart($event, '4')" id="4">
+                    <p-card data-stage='2' draggable="true" (dragstart)="dragstart($event, '4')" id="4">
                     <h6 class='card-text' pTooltip="Enter your username" tooltipPosition="top">Fábio Gabriel Rodrigues Varela</h6>
                     <p class="m-0 card-text" pTooltip="Enter your username" tooltipPosition="top">
                     NX 250 Aenima 2.0 Volvo AAAAAAAAAAAAAAAAAAAAA
@@ -116,26 +136,26 @@ export interface UserStatus {
                 </div>
             </div>
 
-            <div class='dropzone' (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
+            <div id='stage3' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
                 <h5>Contato pessoal</h5>
                 <div class='kb-cards'>
                 </div>
             </div>
 
-            <div class='dropzone' (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
+            <div id='stage4' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
                 <h5>Negociando</h5>
                 <div class='kb-cards'>
                 </div>
             </div>
 
-            <div class='dropzone' (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
+            <div id='stage5' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
                 <h5>Fechamento</h5>
                 <div class='kb-cards'>
 
                 </div>
             </div>
 
-            <div class='dropzone' (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
+            <div id='stage6' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
                 <h5>Entrega</h5>
                 <div class='kb-cards'>
                 </div>
@@ -179,6 +199,11 @@ export class NegotiationPanel implements OnInit {
         el.forEach((e: any) => {
             e.classList.remove('hide-card')
         })
+
+        const eld = Array.from(this.elementRef.nativeElement.getElementsByClassName('dropzone'))
+        eld.forEach((e: any) => {
+            e.classList.remove('highlight-drag')
+        })
     }
 
     ngOnInit(): void {
@@ -186,16 +211,13 @@ export class NegotiationPanel implements OnInit {
     }
 
     dragstart(e: any, dragItemId: string) {
-        console.log(Array.from(this.elementRef.nativeElement.getElementsByClassName('p-card')))
         const el = Array.from(this.elementRef.nativeElement.getElementsByClassName('p-card'))
-        el.forEach((e: any) => {
+        el.forEach((e: any) => dragItemId != e.id ? e.classList.add('hide-card') : "")
 
-            if (dragItemId != e.id) {
-                e.classList.add('hide-card')
-            }
-        })
+        e.dataTransfer.setData('text', e.target.id)
+        console.log(e.target.id)
+
     }
-
 
     dragenter(e: any) {
         const target = e.target.closest('.dropzone')
@@ -207,7 +229,7 @@ export class NegotiationPanel implements OnInit {
         const target = e.target.closest('.dropzone')
         if (!target) return
 
-        target.classList.remove('highlight-drag');
+        target.classList.remove('highlight-drag')
 
     }
 
@@ -215,6 +237,32 @@ export class NegotiationPanel implements OnInit {
         e.preventDefault()
     }
 
+    drop(e: any) {
+        const target = e.target.closest('.dropzone')
+        const card = e.dataTransfer.getData('text')
+        const card_el = document.getElementById(card)!
+        const dropzone = e.target.querySelector('.kb-cards')
+        const card_stage = card_el.getAttribute('data-stage')!
+        const dropzone_stage = target.id[target.id.length - 1]
+
+        if (dropzone_stage < card_stage) {
+            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Não é permitido retrocedor no atendimento' });
+            return
+        }
+
+        if ((parseInt(card_stage) + 1) < dropzone_stage && dropzone_stage != 3) {
+            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Não é permitido pular etapas no atendimento' });
+            return
+        }
+
+        card_el.setAttribute("data-stage", dropzone_stage)
+
+        if (!dropzone) {
+            e.target.closest('.kb-cards').appendChild(card_el)
+        } else {
+            e.target.querySelector('.kb-cards').appendChild(card_el)
+        }
+    }
 
     loadUsers() {
         this.userService.getUsers(1, this.limitPerPage, "", "", "").subscribe({
