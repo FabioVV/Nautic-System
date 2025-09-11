@@ -67,6 +67,8 @@ export interface UserStatus {
             <ng-template #start>
                 <p-button pTooltip="Cadastrar novo lead" tooltipPosition="top" icon="pi pi-plus" class="mr-2" text severity="success" />
                 <p-button pTooltip="Visualizar seus alertas" tooltipPosition="top" icon="pi pi-bell" class="mr-2" text severity="warn" />
+                <p-button (click)="showPanelExp()" pTooltip="Sobre o painel" tooltipPosition="top" icon="pi pi-question-circle" class="mr-2" text severity="secondary" />
+
             </ng-template>
 
             <ng-template #center>
@@ -165,6 +167,96 @@ export interface UserStatus {
 
     </section>
 
+
+
+
+    <p-dialog header="Sobre o painel" [modal]="true" [(visible)]="panelExpVisible" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }">
+        <p class="mb-8">
+            1 - Lead:
+
+            - Colher dados de comunicação, tais como: Nome, Telefone, E-mail e meio de comunicação ou reativar clientes.
+
+            - Possibilidade de envio de orçamento básico (casco e motor).
+
+
+            OBS: Cliente não poderá ficar mais que 24 Hrs como Lead. (caso aconteça a cor da borda ficará em vermelho)
+        </p>
+        <p class="mb-8">
+            2 - Lead convertido:
+
+            - Entrar em contato com o cliente, podendo ser por telefone ou pelo whatsapp, alternativa enviando mídias.
+
+            - Definir o perfil da negociação - Respondendo perguntas básicas:
+
+            - Qual a cidade do cliente?
+
+            - Onde o senhor vai navegar?
+
+            - Quantas pessoas o senhor quer levar na embarcação?
+
+            - Tamanho da embarcação?
+
+            - Cabinada ou proa aberta?
+
+            - Barco novo ou usado
+
+            - Tem barco na troca
+
+            - Qual o valor aproximado de investimento?
+
+
+            - OBS: Ideal que já no segundo estágio o vendedor consiga colher todas as respostas. (caso não consiga, a cor da borda ficará em rosa).
+
+            - Possibilidade de envio de orçamento com acessórios
+
+            - Envio de condições de pagamento.
+
+            - Análise de trade in
+        </p>
+        <p class="mb-8">
+            3 - Contato pessoal:
+
+            - Marcar uma reunião presencial com o cliente em loja, escritório ou Marina.
+
+            - Para entrar nessa fase necessário marcar em combo a maneira de contato (loja, escritório, marina, outros) para o sistema gerar relatório por vendedor
+        </p>
+        <p class="mb-8">
+            4 - Negociação:
+
+            - Proposta de compra do cliente
+
+            - Desconto máximo (após proposta do cliente)
+
+            - Análise do Trade in
+        </p>
+        <p>
+            5 - Fechamento:
+
+            - Encaminhar email com etapas do processo até a entrega
+
+            - Assinatura do contrato
+
+            - Pagamento sinal
+
+            - Pagamento de parcelas
+
+            - Burocrácia do trade in
+
+            - Análise de crédito bancário
+        </p>
+        <p>
+            6 - Entrega:
+
+            - Entrada do documento na marinha
+
+            - Vistoria em loja embarcação pronta
+
+            - Quitação
+
+            - Entrega técnica no seco / água
+        </p>
+    </p-dialog>
+
     `
 })
 export class NegotiationPanel implements OnInit {
@@ -177,6 +269,7 @@ export class NegotiationPanel implements OnInit {
 
     ) { }
 
+    panelExpVisible: boolean = false;
     submitted: boolean = false;
     isSubmited: boolean = false
     isLoading: boolean = false
@@ -287,6 +380,10 @@ export class NegotiationPanel implements OnInit {
     openNew() {
         this.submitted = false;
         this.userDialog = true;
+    }
+
+    showPanelExp() {
+        this.panelExpVisible = true;
     }
 
     submit() {
