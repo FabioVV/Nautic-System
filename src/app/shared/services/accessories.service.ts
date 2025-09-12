@@ -6,13 +6,13 @@ import { environment } from '../../../environments/environment';
 
 export interface Accessory {
     id: string,
-    name: string,
-    email: string
-    roles: Array<string>,
-    permissions: Array<string>,
+    model: string,
 }
 
-
+export interface AccessoryType {
+    id: string,
+    type: string,
+}
 
 @Injectable({
     providedIn: 'root'
@@ -26,6 +26,22 @@ export class AccessoryService {
 
     getAccessories(page = 1, perPage = 10, name: string, active: string) {
         return this.http.get(`${environment.apiBaseURL}/accessories?pageNumber=${page}&perPage=${perPage}&name=${name}&active=${active}`)
+    }
+
+    updateAccessoryType(id: string, formData: any) {
+        return this.http.patch(`${environment.apiBaseURL}/accessories/accessories-types/${id}`, formData)
+    }
+
+    deactivateAccessoryType(id: string) {
+        return this.http.delete(`${environment.apiBaseURL}/accessories/accessories-types/${id}`)
+    }
+
+    registerAccessoryType(formData: any) {
+        return this.http.post(`${environment.apiBaseURL}/accessories/accessories-types`, formData)
+    }
+
+    getAccessoriesTypes(page = 1, perPage = 10, _type: string, active: string) {
+        return this.http.get(`${environment.apiBaseURL}/accessories/accessories-types?pageNumber=${page}&perPage=${perPage}&type=${_type}&active=${active}`)
     }
 }
 

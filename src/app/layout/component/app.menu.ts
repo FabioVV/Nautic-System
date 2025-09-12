@@ -149,6 +149,12 @@ export class AppMenu {
             label: 'Produtos',
             items: [
                 {
+                    label: 'Tipos Acessórios',
+                    icon: 'pi pi-hammer',
+                    routerLink: ['/products/accessories-types'],
+                    code: "accessories_types:view"
+                },
+                {
                     label: 'Acessórios',
                     icon: 'pi pi-hammer',
                     routerLink: ['/products/accessories'],
