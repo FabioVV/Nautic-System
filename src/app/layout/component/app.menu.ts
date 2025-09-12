@@ -118,7 +118,7 @@ export class AppMenu {
                     code: "negotiation_panel:view"
                 },
                 {
-                    label: 'Clientes',
+                    label: 'Clientes / Contatos',
                     icon: 'pi pi-users',
                     routerLink: ['/sales/customers'],
                     code: "sales_customers:view"
@@ -151,19 +151,19 @@ export class AppMenu {
                 {
                     label: 'Acessórios',
                     icon: 'pi pi-hammer',
-                    routerLink: ['/sales/customers'],
-                    code: "acessories:view"
+                    routerLink: ['/products/accessories'],
+                    code: "accessories:view"
                 },
                 {
                     label: 'Cascos',
                     icon: 'pi pi-hammer',
-                    routerLink: ['/sales/customers'],
-                    code: "pboat:view"
+                    routerLink: ['/products/boats'],
+                    code: "pboats:view"
                 },
                 {
                     label: 'Motores',
                     icon: 'pi pi-hammer',
-                    routerLink: ['/sales/customers'],
+                    routerLink: ['/products/engines'],
                     code: "engines:view"
                 },
             ]

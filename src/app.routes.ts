@@ -37,6 +37,14 @@ export const appRoutes: Routes = [
         ]
     },
 
+    {
+        path: "products",
+        component: AppLayout,
+        children: [
+            { path: '', loadChildren: () => import('./app/pages/products.routes') },
+        ]
+    },
+
 
     { path: 'notfound', component: Notfound },
     { path: '**', redirectTo: '/notfound' }
