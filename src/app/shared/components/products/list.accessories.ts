@@ -315,7 +315,16 @@ export class ListAccessoriesComponent {
             { field: 'active', header: 'Ativo' }
         ];
 
-        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
+        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }))
+
+        this.accessoryService.getAccessoriesTypes(1, 1000, "", "Y").subscribe({
+            next: (res: any) => {
+                this.accessoriesTypes = res.data
+            }, 
+            error: (err) => {
+                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os tipos de acessórios.' });
+            },
+        })
     }
 
     loadAccessories(page: number, isDelete = false) {
