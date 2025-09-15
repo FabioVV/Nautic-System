@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '../shared/guards/auth.guard';
 
-import { AccessoriesPage } from './products.ts/accessories/accessories';
-import { BoatsPage } from './products.ts/boats/boats';
-import { EnginesPage } from './products.ts/engines/engines';
-import { AccessoriesTypesPage } from './products.ts/accessories/accessories_types';
+import { AccessoriesTypesPage } from './products/accessories/accessories_types';
+import { EnginesPage } from './products/engines/engines';
+import { BoatsPage } from './products/boats/boats';
+import { AccessoriesPage } from './products/accessories/accessories';
 
 export default [
     { path: 'accessories', component: AccessoriesPage, canActivate: [authGuard], data: { "code": "accessories_types:view" } },

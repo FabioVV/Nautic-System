@@ -99,12 +99,6 @@ export class AppMenu {
                     routerLink: ['/system/roles'],
                     code: "roles:view"
                 },
-                {
-                    label: 'Permissões',
-                    icon: 'pi pi-key',
-                    routerLink: ['/system/permissions'],
-                    code: "permissions:view"
-                },
             ]
         }
 
@@ -122,6 +116,12 @@ export class AppMenu {
                     icon: 'pi pi-users',
                     routerLink: ['/sales/customers'],
                     code: "sales_customers:view"
+                },
+                                {
+                    label: 'Meios de comunicação',
+                    icon: 'pi pi-megaphone',
+                    routerLink: ['/sales/communication-means'],
+                    code: "communication_means:view"
                 },
             ]
         }

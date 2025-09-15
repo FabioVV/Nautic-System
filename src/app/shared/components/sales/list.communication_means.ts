@@ -15,16 +15,15 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputTextModule } from 'primeng/inputtext';
 import { Tag } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
-import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ToastModule } from 'primeng/toast';
 import { ButtonGroupModule } from 'primeng/buttongroup';
 import { MessageModule } from 'primeng/message';
 import { finalize } from 'rxjs';
 
 import { showLoading } from '../utils';
-import { AccessoryService } from '../../services/accessories.service';
 import { UserService } from '../../services/user.service';
 import { AccStatus } from '../../../pages/products/accessories/accessories';
+import { SalesService } from '../../services/sales.service';
 
 interface Column {
     field: string;
@@ -38,7 +37,7 @@ interface ExportColumn {
 }
 
 @Component({
-    selector: 'list-accessories-types',
+    selector: 'list-communication-means',
     imports: [DialogModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrls: [],
@@ -46,27 +45,27 @@ interface ExportColumn {
 
     template: `
     <p-toast></p-toast>
-    <p-table [value]="accessories_types()"  [columns]="cols" csvSeparator=";" [exportHeader]="'customExportHeader'" stripedRows selectionMode="multiple" [(selection)]="selectedUsers" dataKey="id" [tableStyle]="{ 'min-width': '50rem', 'margin-top':'10px' }"
-    #dt
-    [rows]="10"
-    [globalFilterFields]="['type']"
-    [rowHover]="true"
-    dataKey="id"
+    <p-table [value]="communication_means()"  [columns]="cols" csvSeparator=";" [exportHeader]="'customExportHeader'" stripedRows selectionMode="multiple" [(selection)]="selectedUsers" dataKey="id" [tableStyle]="{ 'min-width': '50rem', 'margin-top':'10px' }"
+        #dt
+        [rows]="10"
+        [globalFilterFields]="['type']"
+        [rowHover]="true"
+        dataKey="id"
     >
     <ng-template #caption>
     <div class="flex items-center justify-between mb-4">
-        <span class="text-xl font-bold">Tipos de Acessórios</span>
+        <span class="text-xl font-bold">Meios de comunicação</span>
     </div>
 
     <div class="flex flex-wrap items-center justify-end gap-2">
 
         <p-iconfield>
-        <p-inputicon styleClass="pi pi-search" />
-        <input [(ngModel)]="typeSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Tipo..." />
+            <p-inputicon styleClass="pi pi-search" />
+            <input [(ngModel)]="nameSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Nome..." />
         </p-iconfield>
 
         <p-iconfield>
-        <p-select [options]="accStates" [(ngModel)]="selectedAccState" optionLabel="name" (onChange)="onGlobalFilter($event)" class="w-full md:w-56" />
+            <p-select [options]="accStates" [(ngModel)]="selectedAccState" optionLabel="name" (onChange)="onGlobalFilter($event)" class="w-full md:w-56" />
         </p-iconfield>
     </div>
 
@@ -79,7 +78,7 @@ interface ExportColumn {
     <ng-template #header>
         <tr>
             <th pSortableColumn="type">
-                Tipo
+                Nome
                 <p-sortIcon field="type" />
             </th>
 
@@ -91,24 +90,24 @@ interface ExportColumn {
         </tr>
     </ng-template>
 
-    <ng-template #body let-typ>
-        <tr [pSelectableRow]="typ">
+    <ng-template #body let-mc>
+        <tr [pSelectableRow]="mc">
             <td>
-                {{ typ.type }}
+                {{ mc.name }}
             </td>
 
             <td>
                 <p-tag
-                [value]="getActiveState(typ)"
-                [severity]="getSeverity(typ)"
+                [value]="getActiveState(mc)"
+                [severity]="getSeverity(mc)"
                 styleClass="dark:!bg-surface-900"
                 />
             </td>
 
             <td>
                 <p-buttongroup>
-                <p-button (click)="updateAccType(typ.id, typ.type)" icon="pi pi-pencil" severity="contrast" rounded/>
-                <p-button (click)="deactivateAccType(typ.id, typ.type)" icon="pi pi-trash" severity="contrast" rounded/>
+                <p-button (click)="update(mc.id, mc.name)" icon="pi pi-pencil" severity="contrast" rounded/>
+                <p-button (click)="deactivate(mc.id, mc.name)" icon="pi pi-trash" severity="contrast" rounded/>
                 </p-buttongroup>
             </td>
         </tr>
@@ -124,58 +123,58 @@ interface ExportColumn {
     [totalRecords]="totalRecords"
     />
 
-        <p-dialog [(visible)]="accDialog" header="Atualizar tipo" [modal]="true">
+    <p-dialog [(visible)]="accDialog" header="Atualizar meio" [modal]="true">
         <ng-template #content>
         <form [formGroup]="form" (ngSubmit)="onSubmit()" style='margin-bottom: 4rem;'>
-        <button id="btn_submit" style='display:none;' type="submit"></button>
+            <button id="btn_submit" style='display:none;' type="submit"></button>
 
-        <div class='row'>
-        <div class='col-md-12'>
-        <label for="Type" class="block font-bold mb-3">Tipo do acessório</label>
-        <input formControlName="Type" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
-        <div class="error-feedback" *ngIf="hasBeenSubmited('Type')">
-        <p-message styleClass="mb-2" *ngIf="form.controls.Type.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar um tipo/descrição do tipo</p-message>
-        </div>
-        </div>
-        </div>
+            <div class='row'>
+                <div class='col-md-12'>
+                <label for="Name" class="block font-bold mb-3">Nome</label>
+                <input formControlName="Name" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                    <div class="error-feedback" *ngIf="hasBeenSubmited('Name')">
+                        <p-message styleClass="mb-2" *ngIf="form.controls.Name.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar um nome</p-message>
+                    </div>
+                </div>
+            </div>
 
 
         </form>
 
 
         <ng-template #footer>
-        <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
-        <p-button [disabled]="isLoading" (click)="submit()" type="submit" label="Salvar" icon="pi pi-check" />
+            <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
+            <p-button [disabled]="isLoading" (click)="submit()" type="submit" label="Salvar" icon="pi pi-check" />
         </ng-template>
 
         </ng-template>
     </p-dialog>
 
     <p-confirmdialog
-    [rejectLabel]="rejectLabel"
-    [acceptLabel]="confirmLabel"
-    [acceptAriaLabel]="confirmLabel"
-    [rejectAriaLabel]="rejectLabel"
-    [style]="{ width: '450px' }"
+        [rejectLabel]="rejectLabel"
+        [acceptLabel]="confirmLabel"
+        [acceptAriaLabel]="confirmLabel"
+        [rejectAriaLabel]="rejectLabel"
+        [style]="{ width: '550px' }"
     />
     `,
 })
-export class ListAccessoriesTypesComponent {
+export class ListCommunicationMeansComponent {
     constructor(
         private router: Router,
         public formBuilder: FormBuilder,
         private messageService: MessageService,
         private userService: UserService,
-        private accessoryService: AccessoryService,
+        private salesService: SalesService,
         private confirmationService: ConfirmationService
     ) { }
 
-    @Input() accessories_types: any
+    @Input() communication_means: any
     @Input() totalRecords: any
     @Input() limitPerPage: any
 
     id: string = ""
-    _type: string = ""
+    _name: string = ""
 
     submitted: boolean = false
     accDialog: boolean = false
@@ -185,7 +184,7 @@ export class ListAccessoriesTypesComponent {
     first = 1
 
     form = this.formBuilder.group({
-        Type: ['', [Validators.required]],
+        Name: ['', [Validators.required]],
     })
 
     selectedUsers!: any[] // does nothing for now
@@ -194,7 +193,7 @@ export class ListAccessoriesTypesComponent {
     accStates: AccStatus[] | undefined
     autoFilteredValue: any[] = []
 
-    typeSearch: string = ""
+    nameSearch: string = ""
 
     cols!: Column[];
     exportColumns!: ExportColumn[];
@@ -203,7 +202,7 @@ export class ListAccessoriesTypesComponent {
     rejectLabel = "Cancelar"
 
     onPageChange(e: any) {
-        this.loadAccessoriesTypes(e.page)
+        this.loadCommunicationMeans(e.page)
         this.curPage = e.page
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -224,13 +223,13 @@ export class ListAccessoriesTypesComponent {
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
     }
 
-    loadAccessoriesTypes(page: number, isDelete = false) {
+    loadCommunicationMeans(page: number, isDelete = false) {
         if (!isDelete) page++
         const rmLoading = showLoading()
 
-        this.accessoryService.getAccessoriesTypes(page, this.limitPerPage, this.typeSearch, this.selectedAccState?.code as string).pipe(finalize(() => { rmLoading() })).subscribe({
+        this.salesService.getComs(page, this.limitPerPage, this.nameSearch, this.selectedAccState?.code as string).pipe(finalize(() => { rmLoading() })).subscribe({
             next: (res: any) => {
-                this.accessories_types.set(res.data ?? [])
+                this.communication_means.set(res.data ?? [])
                 this.totalRecords = res.totalRecords
                 this.first = 1
 
@@ -244,21 +243,21 @@ export class ListAccessoriesTypesComponent {
         })
     }
 
-    updateAccType(id: string, _type: string) {
+    update(id: string, _name: string) {
         this.submitted = false
         this.accDialog = true
 
         this.id = id
-        this._type = _type
+        this._name = _name
 
         this.form = this.formBuilder.group({
-            Type: [this._type, [Validators.required]],
+            Name: [this._name, [Validators.required]],
         });
     }
 
-    deactivateAccType(id: string, _type: string) {
+    deactivate(id: string, _type: string) {
         this.confirmationService.confirm({
-            message: 'Confirma desativar o tipo ' + `<mark>${_type}</mark>` + ' ?',
+            message: 'Confirma desativar o meio de comunicação ' + `<mark>${_type}</mark>` + ' ?',
             header: 'Confirmação',
             icon: 'pi pi-exclamation-triangle',
             closeOnEscape: true,
@@ -275,9 +274,9 @@ export class ListAccessoriesTypesComponent {
             accept: () => {
                 const rmLoading = showLoading()
 
-                this.accessoryService.deactivateAccessoryType(id).pipe(finalize(() => { rmLoading() })).subscribe({
+                this.salesService.deactivateComMean(id).pipe(finalize(() => { rmLoading() })).subscribe({
                     next: (res: any) => {
-                        this.loadAccessoriesTypes(this.curPage, true)
+                        this.loadCommunicationMeans(this.curPage, true)
                         this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Tipo desativado com sucesso' });
                     },
                     error: (err) => {
@@ -300,10 +299,10 @@ export class ListAccessoriesTypesComponent {
         if (this.form.valid) {
             this.isLoading = true
 
-            this.accessoryService.updateAccessoryType(this.id, this.form.value).subscribe({
+            this.salesService.updateComMean(this.id, this.form.value).subscribe({
                 next: (res: any) => {
-                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Tipo atualizado com sucesso' });
-                    this.loadAccessoriesTypes(this.curPage, true)
+                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Meio atualizado com sucesso' });
+                    this.loadCommunicationMeans(this.curPage, true)
                     this.submitted = false
                     this.isLoading = false
                     this.hideDialog()
@@ -313,9 +312,9 @@ export class ListAccessoriesTypesComponent {
                     this.hideDialog()
 
                     if (err?.status == 400 && err?.error?.errors?.type == "type must bet active to update it") {
-                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'O tipo precisa estar ativo para edição' });
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'O Meio precisa estar ativo para edição' });
                     } else if (err?.status == 400 && err?.error?.errors?.type == "type already exists") {
-                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'O tipo já existe' });
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'O Meio já existe' });
                     } else {
                         this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
 
@@ -339,7 +338,7 @@ export class ListAccessoriesTypesComponent {
         this.typingTimeout = setTimeout(() => {
             this.first = 0;
             this.curPage = 1;
-            this.loadAccessoriesTypes(0)
+            this.loadCommunicationMeans(0)
         }, 500)
     }
 

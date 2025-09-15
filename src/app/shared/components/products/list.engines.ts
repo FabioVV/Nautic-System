@@ -15,7 +15,6 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputTextModule } from 'primeng/inputtext';
 import { Tag } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
-import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ToastModule } from 'primeng/toast';
 import { ButtonGroupModule } from 'primeng/buttongroup';
 import { finalize } from 'rxjs';

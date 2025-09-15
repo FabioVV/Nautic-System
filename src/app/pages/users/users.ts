@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { Table, TableModule } from 'primeng/table';
+import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -18,6 +18,7 @@ import { PasswordModule } from 'primeng/password';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { SelectModule } from 'primeng/select';
+import { InputMaskModule } from 'primeng/inputmask';
 
 
 import { ListUsersComponent } from '../../shared/components/users/list.users';
@@ -57,6 +58,7 @@ interface Cargo {
         IconFieldModule,
         InputIconModule,
         SelectModule,
+        InputMaskModule,
         ListUsersComponent,
     ],
     providers: [MessageService, ConfirmationService],
@@ -105,8 +107,7 @@ interface Cargo {
         <div class='row'>
             <div class='col-md-6'>
                 <label for="Phone" class="block font-bold mb-3">Telefone</label>
-
-                <input formControlName="Phone" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Phone" required autofocus fluid />
+                <p-inputmask mask="99-99999-9999" class="w-full md:w-[30rem] mb-2" formControlName="Phone" placeholder="49-99999-9999" />
 
                 <div class="error-feedback" *ngIf="hasBeenSubmited('Phone')">
                     <p-message styleClass="mb-2" *ngIf="form.controls.Phone.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar um telefone</p-message>

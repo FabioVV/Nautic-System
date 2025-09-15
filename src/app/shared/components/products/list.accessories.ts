@@ -15,15 +15,15 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputTextModule } from 'primeng/inputtext';
 import { Tag } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
-import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ToastModule } from 'primeng/toast';
 import { ButtonGroupModule } from 'primeng/buttongroup';
 import { finalize } from 'rxjs';
 
-import { showLoading } from '../utils';
+import { showLoading, formatBRLMoney } from '../utils';
 import { AccessoryService } from '../../services/accessories.service';
 import { UserService } from '../../services/user.service';
-import { AccStatus } from '../../../pages/products.ts/accessories/accessories';
+import { AccStatus } from '../../../pages/products/accessories/accessories';
+
 
 interface Column {
     field: string;
@@ -46,95 +46,110 @@ interface ExportColumn {
     template: `
     <p-toast></p-toast>
     <p-table [value]="accessories()"  [columns]="cols" csvSeparator=";" [exportHeader]="'customExportHeader'" stripedRows selectionMode="multiple" [(selection)]="selectedUsers" dataKey="id" [tableStyle]="{ 'min-width': '50rem', 'margin-top':'10px' }"
-    #dt
-    [rows]="10"
-    [globalFilterFields]="['title']"
-    [rowHover]="true"
-    dataKey="id"
+        #dt
+        [rows]="10"
+        [globalFilterFields]="['title']"
+        [rowHover]="true"
+        dataKey="id"
     >
     <ng-template #caption>
-    <div class="flex items-center justify-between mb-4">
-    <span class="text-xl font-bold">Acessórios</span>
-    </div>
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-xl font-bold">Acessórios</span>
+        </div>
 
-    <div class="flex flex-wrap items-center justify-end gap-2">
+        <div class="flex flex-wrap items-center justify-end gap-2">
 
-    <p-iconfield>
-    <p-inputicon styleClass="pi pi-search" />
-    <input [(ngModel)]="modelSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Modelo..." />
-    </p-iconfield>
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input [(ngModel)]="modelSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Modelo..." />
+            </p-iconfield>
 
-    <p-iconfield>
-    <p-select [options]="accStates" [(ngModel)]="selectedAccState" optionLabel="name" (onChange)="onGlobalFilter($event)" class="w-full md:w-56" />
-    </p-iconfield>
-    </div>
-    <div class="text-end pb-4 mt-2">
-    <p-button icon="pi pi-external-link" label="Exportar CSV" (click)="dt.exportCSV()" />
-    </div>
+            <p-iconfield>
+                <p-select [options]="accStates" [(ngModel)]="selectedAccState" optionLabel="name" (onChange)="onGlobalFilter($event)" class="w-full md:w-56" />
+            </p-iconfield>
+        </div>
+        
+        <div class="text-end pb-4 mt-2">
+            <p-button icon="pi pi-external-link" label="Exportar CSV" (click)="dt.exportCSV()" />
+        </div>
 
     </ng-template>
 
     <ng-template #header>
-    <tr>
-    <th pSortableColumn="name">
-    Nome
-    <p-sortIcon field="name" />
-    </th>
-    <th>Email</th>
-    <th>Telefone</th>
-    <th pSortableColumn="active">
-    Ativo
-    <p-sortIcon field="active" />
-    </th>
-    <th></th>
-    </tr>
+        <tr>
+            <th pSortableColumn="Model">
+                Modelo
+                <p-sortIcon field="Model" />
+            </th>
+            <th>Preço Compra</th>
+            <th>Preço Venda</th>
+
+            <th>Tipo</th>
+
+            <th>Detalhes</th>
+
+            <th pSortableColumn="active">
+                Ativo
+                <p-sortIcon field="active" />
+            </th>
+
+            <th></th>
+        </tr>
     </ng-template>
-    <ng-template #body let-user>
-    <tr [pSelectableRow]="user">
-    <td>
-    {{ user.name }}
-    </td>
+    <ng-template #body let-acc>
+        <tr [pSelectableRow]="acc">
+            <td>
+                {{ acc.model }}
+            </td>
 
-    <td>
-    {{ user.email }}
-    </td>
+            <td>
+                {{ this._formatBRLMoney(acc.price_buy)  }}
+            </td>
 
-    <td>
-    {{ user.phone != "" ? user.phone : "-" }}
-    </td>
+            <td>
+                {{ this._formatBRLMoney(acc.price_sell) }}
+            </td>
 
-    <td>
-    <p-tag
-    [value]="getUserActiveState(user)"
-    [severity]="getSeverity(user)"
-    styleClass="dark:!bg-surface-900"
-    />
-    </td>
+            <td>
+                {{ acc.AccessoryType }}
+            </td>
 
-    <td>
-    <p-buttongroup>
-    <p-button icon="pi pi-pencil" severity="contrast" rounded/>
-    <p-button (click)="deactivateUser(user.id, user.email)" icon="pi pi-trash" severity="contrast" rounded/>
-    </p-buttongroup>
-    </td>
-    </tr>
+            <td>
+                {{ acc.details }}
+            </td>
+
+            <td>
+                <p-tag
+                    [value]="getActiveState(acc)"
+                    [severity]="getSeverity(acc)"
+                    styleClass="dark:!bg-surface-900"
+                />
+            </td>
+
+            <td>
+                <p-buttongroup>
+                    <p-button icon="pi pi-pencil" severity="contrast" rounded/>
+                    <p-button (click)="deactivate(acc.id, acc.model)" icon="pi pi-trash" severity="contrast" rounded/>
+                </p-buttongroup>
+            </td>
+        </tr>
     </ng-template>
     </p-table>
 
     <p-paginator (onPageChange)="onPageChange($event)"
-    [first]="first"
-    [showCurrentPageReport]="true"
-    currentPageReportTemplate="Total: {totalRecords} | Mostrando {first} de {last}"
-    [rows]="limitPerPage"
-    [totalRecords]="totalRecords"
+        [first]="first"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Total: {totalRecords} | Mostrando {first} de {last}"
+        [rows]="limitPerPage"
+        [totalRecords]="totalRecords"
     />
 
     <p-confirmdialog
-    [rejectLabel]="rejectLabel"
-    [acceptLabel]="confirmLabel"
-    [acceptAriaLabel]="confirmLabel"
-    [rejectAriaLabel]="rejectLabel"
-    [style]="{ width: '450px' }"
+        [rejectLabel]="rejectLabel"
+        [acceptLabel]="confirmLabel"
+        [acceptAriaLabel]="confirmLabel"
+        [rejectAriaLabel]="rejectLabel"
+        [style]="{ width: '550px' }"
     />
     `,
 })
@@ -176,6 +191,11 @@ export class ListAccessoriesComponent {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+
+    _formatBRLMoney(amount: string) { // alias
+        return formatBRLMoney(amount)
+    }
+
     ngOnInit() {
         this.accStates = [
             { name: "Indiferente", code: "" },
@@ -184,9 +204,10 @@ export class ListAccessoriesComponent {
         ]
 
         this.cols = [
-            { field: 'name', header: 'Nome' },
-            { field: 'email', header: 'E-mail' },
-            { field: 'phone', header: 'Telefone' },
+            { field: 'model', header: 'Modelo' },
+            { field: 'Preço de compra', header: 'price_buy' },
+            { field: 'Preço de venda', header: 'price_sell' },
+            { field: 'Detalhes', header: 'details' },
             { field: 'active', header: 'Ativo' }
         ];
 
@@ -206,16 +227,16 @@ export class ListAccessoriesComponent {
             },
             error: (err) => {
                 if (err.status) {
-                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar usuários.' });
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar buscar acessórios' });
                 }
                 this.isLoading = false
             },
         })
     }
 
-    deactivateUser(id: string, email: string) {
+    deactivate(id: string, model: string) {
         this.confirmationService.confirm({
-            message: 'Confirma desativar o usuário ' + `<mark>${email}</mark>` + ' ?',
+            message: 'Confirma desativar o acessório ' + `<mark>${model}</mark>` + ' ?',
             header: 'Confirmação',
             icon: 'pi pi-exclamation-triangle',
             closeOnEscape: true,
@@ -232,13 +253,13 @@ export class ListAccessoriesComponent {
             accept: () => {
                 const rmLoading = showLoading()
 
-                this.userService.deactivateUser(id).pipe(finalize(() => { rmLoading() })).subscribe({
+                this.accessoryService.deactivateAccessory(id).pipe(finalize(() => { rmLoading() })).subscribe({
                     next: (res: any) => {
                         this.loadAccessories(this.curPage, true)
-                        this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Usuário desativado com sucesso' });
+                        this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Acessório desativado com sucesso' });
                     },
                     error: (err) => {
-                        this.messageService.add({ severity: 'error', summary: "Erro", detail: "Ocorreu um erro ao tentar desativar o usuário." });
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: "Ocorreu um erro ao tentar desativar o acessório." });
                     },
                 })
             }
@@ -265,7 +286,7 @@ export class ListAccessoriesComponent {
         }
     }
 
-    getUserActiveState(_user: any) {
+    getActiveState(_user: any) {
         if (_user.active == `Y`) {
             return "Ativo"
         } else {

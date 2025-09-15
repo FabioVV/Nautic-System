@@ -28,6 +28,10 @@ export class AccessoryService {
         return this.http.get(`${environment.apiBaseURL}/accessories?pageNumber=${page}&perPage=${perPage}&name=${name}&active=${active}`)
     }
 
+    deactivateAccessory(id: string) {
+        return this.http.delete(`${environment.apiBaseURL}/accessories/${id}`)
+    }
+
     updateAccessoryType(id: string, formData: any) {
         return this.http.patch(`${environment.apiBaseURL}/accessories/accessories-types/${id}`, formData)
     }

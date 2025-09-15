@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { Table, TableModule } from 'primeng/table';
+import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -21,11 +21,25 @@ import { CardModule } from 'primeng/card';
 import { TooltipModule } from 'primeng/tooltip';
 import { inject } from '@angular/core';
 import { ElementRef } from '@angular/core';
+import { faCakeCandles } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { InputMaskModule } from 'primeng/inputmask';
+import { SelectModule } from 'primeng/select';
 
 import { User, UserService } from '../../shared/services/user.service';
 
 
 export interface UserStatus {
+    name: string
+    code: string
+}
+
+interface Qualified {
+    name: string
+    code: string
+}
+
+interface QualifiedType {
     name: string
     code: string
 }
@@ -53,7 +67,10 @@ export interface UserStatus {
         IconFieldModule,
         InputIconModule,
         CardModule,
+        FontAwesomeModule,
+        InputMaskModule,
         TooltipModule,
+        SelectModule,
     ],
     providers: [MessageService, ConfirmationService],
     styleUrl: "negotiation.css",
@@ -65,10 +82,15 @@ export interface UserStatus {
         <p-toolbar>
 
             <ng-template #start>
-                <p-button pTooltip="Cadastrar novo lead" tooltipPosition="top" icon="pi pi-plus" class="mr-2" text severity="success" />
+                <p-button (click)="openNewLead()" pTooltip="Cadastrar novo lead" tooltipPosition="top" icon="pi pi-plus" class="mr-2" text severity="success" />
                 <p-button pTooltip="Visualizar seus alertas" tooltipPosition="top" icon="pi pi-bell" class="mr-2" text severity="warn" />
-                <p-button (click)="showPanelExp()" pTooltip="Sobre o painel" tooltipPosition="top" icon="pi pi-question-circle" class="mr-2" text severity="secondary" />
 
+                <p-button pTooltip="Clientes aniversariantes" tooltipPosition="top" class="mr-2" text severity="secondary">
+                    <fa-icon style='color:#0ea5e9;' [icon]="faCakeCandles" />
+                </p-button>
+
+                <p-button (click)="showPanelExp()" pTooltip="Sobre o painel" tooltipPosition="top" icon="pi pi-question-circle" class="mr-2" text severity="secondary" />
+                
             </ng-template>
 
             <ng-template #center>
@@ -203,15 +225,6 @@ export interface UserStatus {
             - Tem barco na troca
 
             - Qual o valor aproximado de investimento?
-
-
-            - OBS: Ideal que já no segundo estágio o vendedor consiga colher todas as respostas. (caso não consiga, a cor da borda ficará em rosa).
-
-            - Possibilidade de envio de orçamento com acessórios
-
-            - Envio de condições de pagamento.
-
-            - Análise de trade in
         </p>
         <p class="mb-8">
             3 - Contato pessoal:
@@ -257,6 +270,114 @@ export interface UserStatus {
         </p>
     </p-dialog>
 
+
+
+    <p-dialog [style]="{ width: '900px' }" [(visible)]="negotiationDialog" header="Registrar Lead" [modal]="true">
+        <ng-template #content>
+
+            <form [formGroup]="form" (ngSubmit)="onSubmit()" style='margin-bottom: 7.5rem;'>
+                <button id="btn_submit" style='display:none;' type="submit"></button>
+                
+                <div class='row'>
+
+                    <div class='col-md-4'>
+                        <label for="Name" class="block font-bold mb-3">Nome do cliente</label>
+                        <input formControlName="Name" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                        
+                        <div class="error-feedback" *ngIf="hasBeenSubmited('Name')">
+                            <p-message styleClass="mb-2" *ngIf="form.controls.Name.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o nome do cliente</p-message>
+                        </div>
+                    </div>
+
+                    <div class='col-md-4'>
+                        <label for="Email" class="block font-bold mb-3">E-mail do cliente</label>
+                        <input formControlName="Email" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                        
+                        <div class="error-feedback" *ngIf="hasBeenSubmited('Email')">
+                            <p-message styleClass="mb-2" *ngIf="form.controls.Email.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o e-mail do cliente</p-message>
+                        </div>
+                    </div>
+
+                    <div class='col-md-4'>
+                        <label for="Phone" class="block font-bold mb-3">Telefone do cliente</label>
+                        <p-inputmask mask="99-99999-9999" class="w-full md:w-[30rem] mb-2" formControlName="Phone" placeholder="49-99999-9999" />
+                        
+                        <div class="error-feedback" *ngIf="hasBeenSubmited('Phone')">
+                            <p-message styleClass="mb-2" *ngIf="form.controls.Phone.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o telefone do cliente</p-message>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class='row'>
+
+                    <div class='col-md-4'>
+                        <label for="Name" class="block font-bold mb-3">Meio de comunicação que trouxe o cliente</label>
+                        <input formControlName="Name" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                        
+                        <div class="error-feedback" *ngIf="hasBeenSubmited('Name')">
+                            <p-message styleClass="mb-2" *ngIf="form.controls.Name.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o nome do cliente</p-message>
+                        </div>
+                    </div>
+
+                    <div class='col-md-4'>
+                        <label for="EstimatedValue" class="block font-bold mb-3">Valor estimado</label>
+                        <p-inputnumber formControlName="EstimatedValue" class="w-full mb-2" mode="currency" currency="BRL" locale="pt-BR" />
+
+                        <div class="error-feedback" *ngIf="hasBeenSubmited('EstimatedValue')">
+                            <p-message styleClass="mb-2" *ngIf="form.controls.EstimatedValue.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o valor estimado da embarcação</p-message>
+                        </div>
+                    </div>
+
+                    <div class='col-md-4'>
+                        <label for="BoatName" class="block font-bold mb-3">Embarcação aproximada</label>
+                        <input formControlName="BoatName" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+
+                        <div class="error-feedback" *ngIf="hasBeenSubmited('BoatName')">
+                            <p-message styleClass="mb-2" *ngIf="form.controls.BoatName.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar a embarcação escolhida do cliente</p-message>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class='row'>
+
+                    <div class='col-md-4'>
+                        <label for="Name" class="block font-bold mb-3">Lead qualificado?</label>
+
+                        <p-select [invalid]="isInvalid('Qualified')" [options]="qualified" formControlName="Qualified" optionLabel="name" placeholder="Selecione se o lead é qualificado ou não" class="w-full mb-2" />
+                        @if (isInvalid('Qualified')) {
+                            <p-message severity="error" size="small" variant="simple">Por favor, selecione se o lead é qualificado ou não</p-message>
+                        }
+                    </div>
+
+                </div>
+
+                <div *ngIf="showQualifiedDiv" class='row'>
+                    <div class='col-md-12'>
+                        <label for="" class="block font-bold mb-3">Tipo de qualificação</label>
+                        <p-select [invalid]="isInvalid('QualifiedType')" [options]="qualifiedType" formControlName="QualifiedType" optionLabel="name" placeholder="Selecione o tipo de qualificação" class="w-full mb-2" />
+                       
+                        @if (isInvalid('Qualified') && showQualifiedDiv) {
+                            <p-message severity="error" size="small" variant="simple">Por favor, selecione se o tipo de qualificação do lead</p-message>
+                        }
+                    </div>
+
+                </div>
+
+
+
+            </form>
+
+
+            <ng-template #footer>
+                <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
+                <p-button [disabled]="isLoading" (click)="submit()" type="submit" label="Salvar" icon="pi pi-check" />
+            </ng-template>
+
+        </ng-template>
+    </p-dialog>
+
     `
 })
 export class NegotiationPanel implements OnInit {
@@ -266,25 +387,35 @@ export class NegotiationPanel implements OnInit {
         private messageService: MessageService,
         private userService: UserService,
         private confirmationService: ConfirmationService,
-
     ) { }
 
-    panelExpVisible: boolean = false;
-    submitted: boolean = false;
-    isSubmited: boolean = false
+    faCakeCandles = faCakeCandles
+    panelExpVisible: boolean = false
+    submitted: boolean = false
     isLoading: boolean = false
-    userDialog: boolean = false;
-    totalRecords = 0;
-    limitPerPage = 20;
-    elementRef = inject(ElementRef);
+    negotiationDialog: boolean = false
+    totalRecords = 0
+    limitPerPage = 20
+    elementRef = inject(ElementRef)
 
-    users = signal<User[]>([]);
-
+    users = signal<User[]>([])
+    qualified: Qualified[] = [{ name: 'Sim', code: 'Y' }, { name: 'Não', code: 'N' }]
+    qualifiedType: QualifiedType[] = [
+        { name: 'Muito decidido. Intenção clara de compra imediata', code: 'A' }, 
+        { name: 'Interesse real, mas precisa de mais informação', code: 'B' }, 
+        { name: 'Inicio de pesquisa, médio/longo prazo', code: 'C' }]
 
     form = this.formBuilder.group({
         Name: ['', [Validators.required]],
-        Description: ['', [Validators.required]],
+        Email: ['', [Validators.required]],
+        Phone: ['', [Validators.required]],
+        EstimatedValue: ['', [Validators.required]],
+        Qualified: ['', [Validators.required]],
+        QualifiedType: ['', []],
+        BoatName: ['', [Validators.required]],
     })
+
+    
 
     @HostListener('dragend', ['$event'])
     dragend(e: any) {
@@ -339,7 +470,7 @@ export class NegotiationPanel implements OnInit {
         const dropzone_stage = target.id[target.id.length - 1]
 
         if (dropzone_stage < card_stage) {
-            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Não é permitido retrocedor no atendimento' });
+            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Não é permitido retroceder no atendimento' });
             return
         }
 
@@ -372,14 +503,23 @@ export class NegotiationPanel implements OnInit {
         })
     }
 
+    get showQualifiedDiv(): boolean {
+        const c: any = this.form.get('Qualified')
+        if(c!['value']!['code'] == 'Y'){
+            return true
+        }
+
+        return false
+    }
+
     hideDialog() {
-        this.userDialog = false;
+        this.negotiationDialog = false;
         this.submitted = false;
     }
 
-    openNew() {
+    openNewLead() {
         this.submitted = false;
-        this.userDialog = true;
+        this.negotiationDialog = true;
     }
 
     showPanelExp() {
@@ -391,18 +531,23 @@ export class NegotiationPanel implements OnInit {
     }
 
     onSubmit() {
-        this.isSubmited = true
+        this.submitted = true
 
         if (this.form.valid) {
             this.isLoading = true
-
+            console.log(this.form.value.Qualified)
         }
     }
 
     hasBeenSubmited(controlName: string): boolean {
         const control = this.form.get(controlName)
         return Boolean(control?.invalid)
-            && (this.isSubmited || Boolean(control?.touched))
+            && (this.submitted || Boolean(control?.touched))
         //|| Boolean(control?.dirty
+    }
+
+    isInvalid(controlName: string) {
+        const control = this.form.get(controlName);
+        return control?.invalid && (control.touched || this.submitted);
     }
 }

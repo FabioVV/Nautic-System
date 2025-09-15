@@ -39,3 +39,16 @@ export function showLoading() {
 
     return removeLoadingGif
 }
+
+export function formatBRLMoney(amount: string) {
+    const _amount = parseFloat(amount)
+
+    const formatter = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    })
+
+    // Format the amount
+    const formattedAmount = formatter.format(_amount)
+    return formattedAmount
+}
