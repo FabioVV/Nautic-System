@@ -163,7 +163,7 @@ export class AccessoriesPage implements OnInit {
     totalRecords = 0
     limitPerPage = 20
 
-    accessoriesTypes: any[] = [ ]
+    accessoriesTypes: any[] = []
     autoFilteredValue: any[] = []
     accessories = signal<Accessory[]>([])
 

@@ -25,9 +25,10 @@ import { faCakeCandles } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { InputMaskModule } from 'primeng/inputmask';
 import { SelectModule } from 'primeng/select';
+import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 
 import { User, UserService } from '../../shared/services/user.service';
-
+import { SalesService } from '../../shared/services/sales.service';
 
 export interface UserStatus {
     name: string
@@ -71,6 +72,7 @@ interface QualifiedType {
         InputMaskModule,
         TooltipModule,
         SelectModule,
+        AutoCompleteModule,
     ],
     providers: [MessageService, ConfirmationService],
     styleUrl: "negotiation.css",
@@ -312,11 +314,11 @@ interface QualifiedType {
                 <div class='row'>
 
                     <div class='col-md-4'>
-                        <label for="Name" class="block font-bold mb-3">Meio de comunicação que trouxe o cliente</label>
-                        <input formControlName="Name" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
-                        
-                        <div class="error-feedback" *ngIf="hasBeenSubmited('Name')">
-                            <p-message styleClass="mb-2" *ngIf="form.controls.Name.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o nome do cliente</p-message>
+                        <label for="ComMeanName" class="block font-bold mb-3">Meio de comunicação que trouxe o cliente</label>
+                        <p-autocomplete class="w-full mb-2" formControlName="ComMeanName" placeholder="Procure o tipo" [suggestions]="autoFilteredValue" optionLabel="name" (completeMethod)="filterClassAutocomplete($event)" (onSelect)="setComMeanChoosen($event)" />
+
+                        <div class="error-feedback" *ngIf="hasBeenSubmited('ComMeanName')">
+                            <p-message styleClass="mb-2" *ngIf="form.controls.ComMeanName.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o nome do cliente</p-message>
                         </div>
                     </div>
 
@@ -387,6 +389,7 @@ export class NegotiationPanel implements OnInit {
         private messageService: MessageService,
         private userService: UserService,
         private confirmationService: ConfirmationService,
+        private salesService: SalesService
     ) { }
 
     faCakeCandles = faCakeCandles
@@ -398,8 +401,11 @@ export class NegotiationPanel implements OnInit {
     limitPerPage = 20
     elementRef = inject(ElementRef)
 
+    autoFilteredValue: any[] = []
+    ComMeans: any[] = []
     users = signal<User[]>([])
     qualified: Qualified[] = [{ name: 'Sim', code: 'Y' }, { name: 'Não', code: 'N' }]
+
     qualifiedType: QualifiedType[] = [
         { name: 'Muito decidido. Intenção clara de compra imediata', code: 'A' }, 
         { name: 'Interesse real, mas precisa de mais informação', code: 'B' }, 
@@ -413,6 +419,9 @@ export class NegotiationPanel implements OnInit {
         Qualified: ['', [Validators.required]],
         QualifiedType: ['', []],
         BoatName: ['', [Validators.required]],
+
+        ComMeanName: ['', [Validators.required]],
+        ComMeanId: ['', [Validators.required]],
     })
 
     
@@ -432,6 +441,15 @@ export class NegotiationPanel implements OnInit {
 
     ngOnInit(): void {
         this.loadUsers()
+
+        this.salesService.getComs(1, 1000, "", "Y").subscribe({
+            next: (res: any) => {
+                this.ComMeans = res.data
+            }, 
+            error: (err: any) => {
+                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os meios de comunicaçao.' });
+            },
+        })
     }
 
     dragstart(e: any, dragItemId: string) {
@@ -524,6 +542,28 @@ export class NegotiationPanel implements OnInit {
 
     showPanelExp() {
         this.panelExpVisible = true;
+    }
+
+    setComMeanChoosen(e: any){
+        //@ts-ignore
+        this.form.get("ComMeanName")?.setValue(e.value.name)
+        //@ts-ignore
+        this.form.get("ComMeanId")?.setValue(e.value.id)
+    }
+
+    filterClassAutocomplete(event: AutoCompleteCompleteEvent){
+        const filtered: any[] = []
+        const query = event.query   
+
+        for (let i = 0; i < this.ComMeans.length; i++) {
+            const mc = this.ComMeans[i]
+            console.log(this.ComMeans)
+            if (mc.name.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+                filtered.push(mc)
+            }
+        }
+
+        this.autoFilteredValue = filtered
     }
 
     submit() {
