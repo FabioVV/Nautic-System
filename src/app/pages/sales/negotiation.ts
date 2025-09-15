@@ -26,6 +26,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { InputMaskModule } from 'primeng/inputmask';
 import { SelectModule } from 'primeng/select';
 import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 
 import { User, UserService } from '../../shared/services/user.service';
 import { SalesService } from '../../shared/services/sales.service';
@@ -73,6 +75,8 @@ interface QualifiedType {
         TooltipModule,
         SelectModule,
         AutoCompleteModule,
+        InputGroupModule,
+        InputGroupAddonModule,
     ],
     providers: [MessageService, ConfirmationService],
     styleUrl: "negotiation.css",
@@ -315,7 +319,14 @@ interface QualifiedType {
 
                     <div class='col-md-4'>
                         <label for="ComMeanName" class="block font-bold mb-3">Meio de comunicação que trouxe o cliente</label>
-                        <p-autocomplete class="w-full mb-2" formControlName="ComMeanName" placeholder="Procure o tipo" [suggestions]="autoFilteredValue" optionLabel="name" (completeMethod)="filterClassAutocomplete($event)" (onSelect)="setComMeanChoosen($event)" />
+
+                        <p-inputgroup>
+                            <p-inputgroup-addon pTooltip="Digite na caixa ao lado para pesquisar um meio e selecione na lista" tooltipPosition="top" [style]="{ cursor:'help' }">
+                                <i class="pi pi-filter"></i>
+                            </p-inputgroup-addon>
+
+                            <p-autocomplete class="w-full mb-2" formControlName="ComMeanName" placeholder="Procure o tipo" [suggestions]="autoFilteredValue" optionLabel="name" (completeMethod)="filterClassAutocomplete($event)" (onSelect)="setComMeanChoosen($event)" />
+                        </p-inputgroup>
 
                         <div class="error-feedback" *ngIf="hasBeenSubmited('ComMeanName')">
                             <p-message styleClass="mb-2" *ngIf="form.controls.ComMeanName.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o nome do cliente</p-message>

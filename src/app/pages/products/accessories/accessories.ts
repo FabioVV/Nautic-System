@@ -22,6 +22,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
+import { TooltipModule } from 'primeng/tooltip';
 
 import { AccessoryService, Accessory } from '../../../shared/services/accessories.service';
 import { ListAccessoriesComponent } from '../../../shared/components/products/list.accessories';
@@ -60,6 +61,7 @@ export interface AccStatus {
         InputGroupAddonModule,
         AutoCompleteModule,
         ListAccessoriesComponent,
+        TooltipModule
     ],
     providers: [MessageService, ConfirmationService],
     template: `
@@ -93,7 +95,15 @@ export interface AccStatus {
 
                     <div class='col-md-4'>
                         <label for="AccessoryTypeModel" class="block font-bold mb-3">Tipo de acessório</label>
-                        <p-autocomplete class="w-full mb-2" formControlName="AccessoryTypeModel" placeholder="Procure o tipo" [suggestions]="autoFilteredValue" optionLabel="type" (completeMethod)="filterClassAutocomplete($event)" (onSelect)="setAccessoryTypeChoosen($event)" />
+
+                        <p-inputgroup>
+                            <p-inputgroup-addon pTooltip="Digite na caixa ao lado para pesquisar um novo tipo e selecione na lista" tooltipPosition="top" [style]="{ cursor:'help' }">
+                                <i class="pi pi-filter"></i>
+                            </p-inputgroup-addon>
+
+                            <p-autocomplete class="w-full mb-2" formControlName="AccessoryTypeModel" placeholder="Procure o tipo" [suggestions]="autoFilteredValue" optionLabel="type" (completeMethod)="filterClassAutocomplete($event)" (onSelect)="setAccessoryTypeChoosen($event)" />
+                        </p-inputgroup>
+
                         
                         <div class="error-feedback" *ngIf="hasBeenSubmited('AccessoryTypeModel')">
                             <p-message styleClass="mb-2" *ngIf="form.controls.AccessoryTypeModel.hasError('required')" severity="error" variant="simple" size="small">Por favor, escolher um tipo</p-message>
@@ -165,13 +175,13 @@ export class AccessoriesPage implements OnInit {
 
     accessoriesTypes: any[] = []
     autoFilteredValue: any[] = []
-    accessories = signal<Accessory[]>([])
+    accessories = signal<Accessory[]>([])   
 
     form = this.formBuilder.group({
         Model: ['', [Validators.required]],
         Details: ['', [Validators.required]],
-        PriceBuy: ['', []],
-        PriceSell: ['', []],
+        PriceBuy: [0, []],
+        PriceSell: [0, []],
         AccessoryTypeModel: ['', [Validators.required]],
         AccessoryTypeId: ['', [Validators.required]],
     })
@@ -242,8 +252,6 @@ export class AccessoriesPage implements OnInit {
 
     onSubmit() {
         this.isSubmited = true
-
-        console.log((this.form.value.PriceBuy as string))
 
         if (this.form.valid) { 
             this.isLoading = true
