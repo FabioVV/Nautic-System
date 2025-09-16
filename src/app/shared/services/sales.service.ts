@@ -10,11 +10,23 @@ export interface ComMean {
     name: string,
 }
 
+export interface Negotiation {
+
+}
+
 @Injectable({
     providedIn: 'root'
 })
 export class SalesService {
     constructor(private http: HttpClient) { }
+
+    registerNegotiation(formData: any) {
+        return this.http.post(`${environment.apiBaseURL}/sales/negotiations`, formData)
+    }
+
+    getNegotiations(search: string){
+        return this.http.get(`${environment.apiBaseURL}/sales/negotiations?search=${search}`)
+    }
 
     registerComMean(formData: any) {
         return this.http.post(`${environment.apiBaseURL}/sales/communication-means`, formData)

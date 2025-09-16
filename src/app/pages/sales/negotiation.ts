@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
@@ -30,7 +30,10 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 
 import { User, UserService } from '../../shared/services/user.service';
-import { SalesService } from '../../shared/services/sales.service';
+import { SalesService, Negotiation } from '../../shared/services/sales.service';
+import { ListNegotiationsComponent } from '../../shared/components/sales/list.negotiations';
+import { showLoading } from '../../shared/components/utils';
+import { finalize } from 'rxjs';
 
 export interface UserStatus {
     name: string
@@ -77,9 +80,9 @@ interface QualifiedType {
         AutoCompleteModule,
         InputGroupModule,
         InputGroupAddonModule,
+        ListNegotiationsComponent,
     ],
     providers: [MessageService, ConfirmationService],
-    styleUrl: "negotiation.css",
     template: `
     <p-toast></p-toast>
 
@@ -111,90 +114,9 @@ interface QualifiedType {
 
         </p-toolbar>
 
-        <div class='kb-painel'>
-            <div id='stage1' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)">
-                <h5>Lead</h5>
-                <div class='kb-cards'>
-                    <p-card data-stage='1' draggable="true" (dragstart)="dragstart($event, '1')" id="1">
-                        <h6 class='card-text' pTooltip="Enter your username" tooltipPosition="top">Fábio Gabriel Rodrigues Varela</h6>
-                        <p class="m-0 card-text" pTooltip="Enter your username" tooltipPosition="top">
-                            NX 250 Aenima 2.0 Volvo AAAAAAAAAAAAAAAAAAAAA
-                        </p>
-                        <br>
-                        <small class="m-0 card-money">
-                            R$ 100.000.000,00
-                        </small>
-                    </p-card>
-
-                    <p-card data-stage='1' draggable="true" (dragstart)="dragstart($event, '2')" id="2">
-                    <h6 class='card-text' pTooltip="Enter your username" tooltipPosition="top">Fábio Gabriel Rodrigues Varela</h6>
-                    <p class="m-0 card-text" pTooltip="Enter your username" tooltipPosition="top">
-                    NX 250 Aenima 2.0 Volvo AAAAAAAAAAAAAAAAAAAAA
-                    </p>
-                    <br>
-                    <small class="m-0 card-money">
-                    R$ 100.000.000,00
-                    </small>
-                    </p-card>
-                </div>
-            </div>
-
-            <div id='stage2' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-                <h5>Lead convertido</h5>
-                <div class='kb-cards'>
-                    <p-card data-stage='2' draggable="true" (dragstart)="dragstart($event, '3')" id="3">
-                    <h6 class='card-text' pTooltip="Enter your username" tooltipPosition="top">Fábio Gabriel Rodrigues Varela</h6>
-                    <p class="m-0 card-text" pTooltip="Enter your username" tooltipPosition="top">
-                    NX 250 Aenima 2.0 Volvo AAAAAAAAAAAAAAAAAAAAA
-                    </p>
-                    <br>
-                    <small class="m-0 card-money">
-                    R$ 100.000.000,00
-                    </small>
-                    </p-card>
-
-                    <p-card data-stage='2' draggable="true" (dragstart)="dragstart($event, '4')" id="4">
-                    <h6 class='card-text' pTooltip="Enter your username" tooltipPosition="top">Fábio Gabriel Rodrigues Varela</h6>
-                    <p class="m-0 card-text" pTooltip="Enter your username" tooltipPosition="top">
-                    NX 250 Aenima 2.0 Volvo AAAAAAAAAAAAAAAAAAAAA
-                    </p>
-                    <br>
-                    <small class="m-0 card-money">
-                    R$ 100.000.000,00
-                    </small>
-                    </p-card>
-                </div>
-            </div>
-
-            <div id='stage3' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-                <h5>Contato pessoal</h5>
-                <div class='kb-cards'>
-                </div>
-            </div>
-
-            <div id='stage4' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-                <h5>Negociando</h5>
-                <div class='kb-cards'>
-                </div>
-            </div>
-
-            <div id='stage5' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-                <h5>Fechamento</h5>
-                <div class='kb-cards'>
-
-                </div>
-            </div>
-
-            <div id='stage6' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-                <h5>Entrega</h5>
-                <div class='kb-cards'>
-                </div>
-            </div>
-
-        </div>
+        <list-negotiations [negotiations]="negotiations"/>
 
     </section>
-
 
 
 
@@ -415,12 +337,15 @@ export class NegotiationPanel implements OnInit {
     autoFilteredValue: any[] = []
     ComMeans: any[] = []
     users = signal<User[]>([])
+    negotiations = signal<Negotiation[]>([])
+
     qualified: Qualified[] = [{ name: 'Sim', code: 'Y' }, { name: 'Não', code: 'N' }]
 
     qualifiedType: QualifiedType[] = [
         { name: 'Muito decidido. Intenção clara de compra imediata', code: 'A' }, 
         { name: 'Interesse real, mas precisa de mais informação', code: 'B' }, 
-        { name: 'Inicio de pesquisa, médio/longo prazo', code: 'C' }]
+        { name: 'Inicio de pesquisa, médio/longo prazo', code: 'C' }
+    ]
 
     form = this.formBuilder.group({
         Name: ['', [Validators.required]],
@@ -435,99 +360,13 @@ export class NegotiationPanel implements OnInit {
         ComMeanId: ['', [Validators.required]],
     })
 
-    
-
-    @HostListener('dragend', ['$event'])
-    dragend(e: any) {
-        const el = Array.from(this.elementRef.nativeElement.getElementsByClassName('p-card'))
-        el.forEach((e: any) => {
-            e.classList.remove('hide-card')
-        })
-
-        const eld = Array.from(this.elementRef.nativeElement.getElementsByClassName('dropzone'))
-        eld.forEach((e: any) => {
-            e.classList.remove('highlight-drag')
-        })
-    }
-
     ngOnInit(): void {
-        this.loadUsers()
-
         this.salesService.getComs(1, 1000, "", "Y").subscribe({
             next: (res: any) => {
                 this.ComMeans = res.data
             }, 
             error: (err: any) => {
-                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os meios de comunicaçao.' });
-            },
-        })
-    }
-
-    dragstart(e: any, dragItemId: string) {
-        const el = Array.from(this.elementRef.nativeElement.getElementsByClassName('p-card'))
-        el.forEach((e: any) => dragItemId != e.id ? e.classList.add('hide-card') : "")
-
-        e.dataTransfer.setData('text', e.target.id)
-        console.log(e.target.id)
-
-    }
-
-    dragenter(e: any) {
-        const target = e.target.closest('.dropzone')
-        if (!target) return
-        target.classList.add('highlight-drag')
-    }
-
-    dragleave(e: any) {
-        const target = e.target.closest('.dropzone')
-        if (!target) return
-
-        target.classList.remove('highlight-drag')
-
-    }
-
-    dragover(e: any) {
-        e.preventDefault()
-    }
-
-    drop(e: any) {
-        const target = e.target.closest('.dropzone')
-        const card = e.dataTransfer.getData('text')
-        const card_el = document.getElementById(card)!
-        const dropzone = e.target.querySelector('.kb-cards')
-        const card_stage = card_el.getAttribute('data-stage')!
-        const dropzone_stage = target.id[target.id.length - 1]
-
-        if (dropzone_stage < card_stage) {
-            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Não é permitido retroceder no atendimento' });
-            return
-        }
-
-        if ((parseInt(card_stage) + 1) < dropzone_stage && dropzone_stage != 3) {
-            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Não é permitido pular etapas no atendimento' });
-            return
-        }
-
-        card_el.setAttribute("data-stage", dropzone_stage)
-
-        if (!dropzone) {
-            e.target.closest('.kb-cards').appendChild(card_el)
-        } else {
-            e.target.querySelector('.kb-cards').appendChild(card_el)
-        }
-    }
-
-    loadUsers() {
-        this.userService.getUsers(1, this.limitPerPage, "", "", "").subscribe({
-            next: (res: any) => {
-                this.users.set(res.data ?? [])
-                this.totalRecords = res.totalRecords
-            },
-            error: (err) => {
-                if (err.status) {
-                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar usuários.' });
-                }
-                this.isLoading = false
+                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar as negociações.' });
             },
         })
     }
@@ -586,7 +425,35 @@ export class NegotiationPanel implements OnInit {
 
         if (this.form.valid) {
             this.isLoading = true
-            console.log(this.form.value.Qualified)
+
+            // @ts-ignore
+            if(this.form.value.Qualified?.code == 'N'){
+                this.form.get("Qualified")?.setValue('N')
+            } else {
+                this.form.get("Qualified")?.setValue('S')
+            }
+
+            this.salesService.registerNegotiation(this.form.value).subscribe({
+                next: (res: any) => {
+                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Meio registrado com sucesso' });
+                    //this.loadCommunicationMeans()
+                    
+                    this.submitted = false
+                    this.isLoading = false
+                    this.hideDialog()
+                    this.form.reset()
+
+                    window.location.reload()
+                },
+                error: (err) => {
+                    if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
+                    } else {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                    }
+                    this.isLoading = false
+                },
+
+            })
         }
     }
 

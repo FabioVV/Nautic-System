@@ -114,7 +114,7 @@ export class CommunicationMeanPage implements OnInit {
     totalRecords = 0;
     limitPerPage = 20;
 
-    communication_means = signal<ComMean[]>([]);
+    communication_means = signal<ComMean[]>([])
 
     form = this.formBuilder.group({
         Name: ['', [Validators.required]],
