@@ -10,8 +10,49 @@ export interface ComMean {
     name: string,
 }
 
-export interface Negotiation {
+// {
+//     "data": [
+//         {
+//             "id": 2,
+//             "id_customer": 1,
+//             "id_mean_communication": 2,
+//             "customer_name": "Fábio Varela",
+//             "customer_email": "fabio@teste.com",
+//             "customer_phone": "49-99999-9999",
+//             "com_name": "Facebook #updated",
+//             "boat_name": "NX 340",
+//             "estimated_value": 1500000,
+//             "max_estimated_value": 0,
+//             "customer_city": "",
+//             "customer_nav_city": "",
+//             "boat_cap_needed": 0,
+//             "new_used": "",
+//             "cab_open": "",
+//             "stage": "",
+//             "Qualified": ""
+//         }
+//     ],
+//     "totalRecords": 1
+// }
 
+export interface Negotiation {
+    id: number,
+    id_customer: number,
+    id_mean_communication: number,
+    customer_name: string,
+    customer_email: string,
+    customer_phone: string,
+    com_name: string,
+    boat_name: string,
+    estimated_value: number,
+    max_estimated_value: number,
+    customer_city: string,
+    customer_nav_city: string,
+    boat_cap_needed: number,
+    new_used: string,
+    cab_open: string,
+    stage: number,
+    Qualified: string,
 }
 
 @Injectable({

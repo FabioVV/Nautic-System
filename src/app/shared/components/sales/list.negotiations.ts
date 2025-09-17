@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, HostListener, inject, input, Input, OnInit } from '@angular/core';
+import { Component, computed, ElementRef, HostListener, inject, input, Input, OnInit, signal } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
@@ -20,11 +20,12 @@ import { ButtonGroupModule } from 'primeng/buttongroup';
 import { MessageModule } from 'primeng/message';
 import { finalize } from 'rxjs';
 import { CardModule } from 'primeng/card';
+import { TooltipModule } from 'primeng/tooltip';
 
-import { showLoading } from '../utils';
+import { formatBRLMoney, showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
 import { AccStatus } from '../../../pages/products/accessories/accessories';
-import { SalesService } from '../../services/sales.service';
+import { Negotiation, SalesService } from '../../services/sales.service';
 
 interface Column {
     field: string;
@@ -39,7 +40,7 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-negotiations',
-    imports: [DialogModule, CardModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, CardModule, TooltipModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrl: "negotiation.css",
     standalone: true,
@@ -50,66 +51,91 @@ interface ExportColumn {
         <div id='stage1' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)">
             <h5>Lead</h5>
             <div class='kb-cards'>
-                <p-card data-stage='1' draggable="true" (dragstart)="dragstart($event, '1')" id="1">
-                    <h6 class='card-text' pTooltip="Enter your username" tooltipPosition="top">Fábio Gabriel Rodrigues Varela</h6>
-                    <p class="m-0 card-text" pTooltip="Enter your username" tooltipPosition="top">
-                        NX 250 Aenima 2.0 Volvo AAAAAAAAAAAAAAAAAAAAA
+                <p-card *ngFor="let n of stageOne(); trackBy: trackById"
+                    [attr.data-stage]="n.stage"
+                    draggable="true"
+                    (dragstart)="dragstart($event, n.id)"
+                    [id]="n.id"
+                >
+                    <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
+                    <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
+                        {{ n.boat_name }}
                     </p>
                     <br>
                     <small class="m-0 card-money">
-                        R$ 100.000.000,00
+                        {{ this._formatBRLMoney(n.estimated_value) }}
                     </small>
                 </p-card>
 
-                <p-card data-stage='1' draggable="true" (dragstart)="dragstart($event, '2')" id="2">
-                <h6 class='card-text' pTooltip="Enter your username" tooltipPosition="top">Fábio Gabriel Rodrigues Varela</h6>
-                <p class="m-0 card-text" pTooltip="Enter your username" tooltipPosition="top">
-                NX 250 Aenima 2.0 Volvo AAAAAAAAAAAAAAAAAAAAA
-                </p>
-                <br>
-                <small class="m-0 card-money">
-                R$ 100.000.000,00
-                </small>
-                </p-card>
             </div>
         </div>
 
         <div id='stage2' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
             <h5>Lead convertido</h5>
             <div class='kb-cards'>
-                <p-card data-stage='2' draggable="true" (dragstart)="dragstart($event, '3')" id="3">
-                <h6 class='card-text' pTooltip="Enter your username" tooltipPosition="top">Fábio Gabriel Rodrigues Varela</h6>
-                <p class="m-0 card-text" pTooltip="Enter your username" tooltipPosition="top">
-                NX 250 Aenima 2.0 Volvo AAAAAAAAAAAAAAAAAAAAA
-                </p>
-                <br>
-                <small class="m-0 card-money">
-                R$ 100.000.000,00
-                </small>
+
+                <p-card *ngFor="let n of stageTwo(); trackBy: trackById"
+                    [attr.data-stage]="n.stage"
+                    draggable="true"
+                    (dragstart)="dragstart($event, n.id)"
+                    [id]="n.id"
+                >
+                    <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
+                    <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
+                        {{ n.boat_name }}
+                    </p>
+                    <br>
+                    <small class="m-0 card-money">
+                        {{ this._formatBRLMoney(n.estimated_value) }}
+                    </small>
                 </p-card>
 
-                <p-card data-stage='2' draggable="true" (dragstart)="dragstart($event, '4')" id="4">
-                <h6 class='card-text' pTooltip="Enter your username" tooltipPosition="top">Fábio Gabriel Rodrigues Varela</h6>
-                <p class="m-0 card-text" pTooltip="Enter your username" tooltipPosition="top">
-                NX 250 Aenima 2.0 Volvo AAAAAAAAAAAAAAAAAAAAA
-                </p>
-                <br>
-                <small class="m-0 card-money">
-                R$ 100.000.000,00
-                </small>
-                </p-card>
             </div>
         </div>
 
         <div id='stage3' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
             <h5>Contato pessoal</h5>
             <div class='kb-cards'>
+
+                <p-card *ngFor="let n of stageThree(); trackBy: trackById"
+                    [attr.data-stage]="n.stage"
+                    draggable="true"
+                    (dragstart)="dragstart($event, n.id)"
+                    [id]="n.id"
+                >
+                    <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
+                    <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
+                        {{ n.boat_name }}
+                    </p>
+                    <br>
+                    <small class="m-0 card-money">
+                        {{ this._formatBRLMoney(n.estimated_value) }}
+                    </small>
+                </p-card>
+
             </div>
         </div>
 
         <div id='stage4' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
             <h5>Negociando</h5>
             <div class='kb-cards'>
+
+                <p-card *ngFor="let n of stageFour(); trackBy: trackById"
+                    [attr.data-stage]="n.stage"
+                    draggable="true"
+                    (dragstart)="dragstart($event, n.id)"
+                    [id]="n.id"
+                >
+                    <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
+                    <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
+                        {{ n.boat_name }}
+                    </p>
+                    <br>
+                    <small class="m-0 card-money">
+                        {{ this._formatBRLMoney(n.estimated_value) }}
+                    </small>
+                </p-card>
+
             </div>
         </div>
 
@@ -117,12 +143,45 @@ interface ExportColumn {
             <h5>Fechamento</h5>
             <div class='kb-cards'>
 
+                <p-card *ngFor="let n of stageFive(); trackBy: trackById"
+                    [attr.data-stage]="n.stage"
+                    draggable="true"
+                    (dragstart)="dragstart($event, n.id)"
+                    [id]="n.id"
+                >
+                    <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
+                    <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
+                        {{ n.boat_name }}
+                    </p>
+                    <br>
+                    <small class="m-0 card-money">
+                        {{ this._formatBRLMoney(n.estimated_value) }}
+                    </small>
+                </p-card>
+
             </div>
         </div>
 
         <div id='stage6' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
             <h5>Entrega</h5>
             <div class='kb-cards'>
+
+                <p-card *ngFor="let n of stageSix(); trackBy: trackById"
+                    [attr.data-stage]="n.stage"
+                    draggable="true"
+                    (dragstart)="dragstart($event, n.id)"
+                    [id]="n.id"
+                >
+                    <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
+                    <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
+                        {{ n.boat_name }}
+                    </p>
+                    <br>
+                    <small class="m-0 card-money">
+                        {{ this._formatBRLMoney(n.estimated_value) }}
+                    </small>
+                </p-card>
+
             </div>
         </div>
 
@@ -148,8 +207,16 @@ export class ListNegotiationsComponent {
     ) { }
 
 
-    @Input() negotiations: any
+    //@Input() negotiations: any
     elementRef = inject(ElementRef)
+
+    negotiations = signal<Negotiation[]>([])
+    stageOne = computed(() => this.negotiations().filter(n => n.stage === 1))
+    stageTwo = computed(() => this.negotiations().filter(n => n.stage === 2))
+    stageThree = computed(() => this.negotiations().filter(n => n.stage === 3))
+    stageFour = computed(() => this.negotiations().filter(n => n.stage === 4))
+    stageFive = computed(() => this.negotiations().filter(n => n.stage === 5))
+    stageSix = computed(() => this.negotiations().filter(n => n.stage === 6))
 
     id: string = ""
     _name: string = ""
@@ -183,7 +250,8 @@ export class ListNegotiationsComponent {
 
     ngOnInit() {
         this.loadNegotiations()
-
+        console.log(this.negotiations())
+        
         this.accStates = [
             { name: "Indiferente", code: "" },
             { name: "Ativo", code: "Y" },
@@ -203,10 +271,7 @@ export class ListNegotiationsComponent {
 
         this.salesService.getNegotiations(this.nameSearch).pipe(finalize(() => { rmLoading() })).subscribe({
             next: (res: any) => {
-                this.negotiations.set(res.data ?? [])
-
-                
-            
+                this.negotiations.set(res.data)
             },
             error: (err) => {
                 if (err.status) {
@@ -230,9 +295,9 @@ export class ListNegotiationsComponent {
         })
     }
 
-        dragstart(e: any, dragItemId: string) {
+        dragstart(e: any, dragItemId: number) {
         const el = Array.from(this.elementRef.nativeElement.getElementsByClassName('p-card'))
-        el.forEach((e: any) => dragItemId != e.id ? e.classList.add('hide-card') : "")
+        el.forEach((e: any) => dragItemId?.toString() != e.id ? e.classList.add('hide-card') : "")
 
         e.dataTransfer.setData('text', e.target.id)
         console.log(e.target.id)
@@ -250,7 +315,6 @@ export class ListNegotiationsComponent {
         if (!target) return
 
         target.classList.remove('highlight-drag')
-
     }
 
     dragover(e: any) {
@@ -318,6 +382,14 @@ export class ListNegotiationsComponent {
                 })
             }
         });
+    }
+
+    _formatBRLMoney(amount: number) { // alias
+        return formatBRLMoney(amount.toString())
+    }
+
+    trackById(index: number, item: Negotiation) {
+        return item.id;
     }
 
     hideDialog() {

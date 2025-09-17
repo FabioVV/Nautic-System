@@ -114,7 +114,7 @@ interface QualifiedType {
 
         </p-toolbar>
 
-        <list-negotiations [negotiations]="negotiations"/>
+        <list-negotiations />
 
     </section>
 
@@ -337,7 +337,7 @@ export class NegotiationPanel implements OnInit {
     autoFilteredValue: any[] = []
     ComMeans: any[] = []
     users = signal<User[]>([])
-    negotiations = signal<Negotiation[]>([])
+    //negotiations = signal<Negotiation[]>([])
 
     qualified: Qualified[] = [{ name: 'Sim', code: 'Y' }, { name: 'Não', code: 'N' }]
 
@@ -433,6 +433,9 @@ export class NegotiationPanel implements OnInit {
                 this.form.get("Qualified")?.setValue('S')
             }
 
+            // @ts-ignore
+            this.form.get("QualifiedType")?.setValue(this.form.value.QualifiedType?.code)
+            
             this.salesService.registerNegotiation(this.form.value).subscribe({
                 next: (res: any) => {
                     this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Meio registrado com sucesso' });

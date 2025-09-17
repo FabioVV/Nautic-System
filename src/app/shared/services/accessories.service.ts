@@ -41,19 +41,19 @@ export class AccessoryService {
     }
 
     updateAccessoryType(id: string, formData: any) {
-        return this.http.patch(`${environment.apiBaseURL}/accessories/accessories-types/${id}`, formData)
+        return this.http.patch(`${environment.apiBaseURL}/accessories/types/${id}`, formData)
     }
 
     deactivateAccessoryType(id: string) {
-        return this.http.delete(`${environment.apiBaseURL}/accessories/accessories-types/${id}`)
+        return this.http.delete(`${environment.apiBaseURL}/accessories/types/${id}`)
     }
 
     registerAccessoryType(formData: any) {
-        return this.http.post(`${environment.apiBaseURL}/accessories/accessories-types`, formData)
+        return this.http.post(`${environment.apiBaseURL}/accessories/types`, formData)
     }
 
     getAccessoriesTypes(page = 1, perPage = 10, _type: string, active: string) {
-        return this.http.get(`${environment.apiBaseURL}/accessories/accessories-types?pageNumber=${page}&perPage=${perPage}&type=${_type}&active=${active}`)
+        return this.http.get(`${environment.apiBaseURL}/accessories/types?pageNumber=${page}&perPage=${perPage}&type=${_type}&active=${active}`)
     }
 }
 
