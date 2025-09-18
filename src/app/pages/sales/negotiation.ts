@@ -32,8 +32,6 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { User, UserService } from '../../shared/services/user.service';
 import { SalesService, Negotiation } from '../../shared/services/sales.service';
 import { ListNegotiationsComponent } from '../../shared/components/sales/list.negotiations';
-import { showLoading } from '../../shared/components/utils';
-import { finalize } from 'rxjs';
 
 export interface UserStatus {
     name: string
@@ -436,7 +434,7 @@ export class NegotiationPanel implements OnInit {
             // @ts-ignore
             this.form.get("QualifiedType")?.setValue(this.form.value.QualifiedType?.code)
             this.form.get("UserId")?.setValue(this.userService?.getUserData()?.id)
-            
+
             this.salesService.registerNegotiation(this.form.value).subscribe({
                 next: (res: any) => {
                     this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Meio registrado com sucesso' });

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, ElementRef, HostListener, inject, input, Input, OnInit, signal } from '@angular/core';
+import { Component, computed, ElementRef, HostListener, inject, input, Input, OnInit, signal, ViewChild } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
@@ -20,6 +20,8 @@ import { MessageModule } from 'primeng/message';
 import { finalize } from 'rxjs';
 import { CardModule } from 'primeng/card';
 import { TooltipModule } from 'primeng/tooltip';
+import { ContextMenu, ContextMenuModule } from 'primeng/contextmenu';
+import { MenuItem } from 'primeng/api';
 
 import { formatBRLMoney, showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
@@ -39,13 +41,15 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-negotiations',
-    imports: [DialogModule, CardModule, TooltipModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, CardModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrl: "negotiation.css",
     standalone: true,
 
     template: `
     <p-toast></p-toast>
+    <p-contextmenu #cm [model]="pcard_menu" (onHide)="onHide()" />
+
     <div class='kb-painel' style='margin-top:1rem;'>
         <div id='stage1' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)">
             <h5>Lead</h5>
@@ -53,8 +57,9 @@ interface ExportColumn {
                 <p-card *ngFor="let n of stageOne(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
                     draggable="true"
-                    (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
+                    (dragstart)="dragstart($event, n.id)"
+                    (contextmenu)="onContextMenu($event, n)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -78,6 +83,7 @@ interface ExportColumn {
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
+                    (contextmenu)="onContextMenu($event, n)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -101,6 +107,7 @@ interface ExportColumn {
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
+                    (contextmenu)="onContextMenu($event, n)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -124,6 +131,7 @@ interface ExportColumn {
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
+                    (contextmenu)="onContextMenu($event, n)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -147,6 +155,7 @@ interface ExportColumn {
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
+                    (contextmenu)="onContextMenu($event, n)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -170,6 +179,7 @@ interface ExportColumn {
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
+                    (contextmenu)="onContextMenu($event, n)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -206,8 +216,11 @@ export class ListNegotiationsComponent {
     ) { }
 
 
-    //@Input() negotiations: any
+    //@ts-ignore
+    @ViewChild('cm') cm: ContextMenu
     elementRef = inject(ElementRef)
+    pcard_menu: MenuItem[] | undefined
+    selectedCard: any
 
     negotiations = signal<Negotiation[]>([])
     stageOne = computed(() => this.negotiations()?.filter(n => n.stage === 1))
@@ -260,6 +273,61 @@ export class ListNegotiationsComponent {
             { field: 'type', header: 'Tipo' },
             { field: 'active', header: 'Ativo' }
         ];
+
+        this.pcard_menu = [
+            // {
+            //     label: 'Roles',
+            //     icon: 'pi pi-users',
+            //     items: [
+            //         {
+            //             label: 'Admin',
+            //             command: () => {
+                            
+            //             }
+            //         },
+            //         {
+            //             label: 'Member',
+            //             command: () => {
+                            
+            //             }
+            //         },
+            //         {
+            //             label: 'Guest',
+            //             command: () => {
+                            
+            //             }
+            //         }
+            //     ]
+            // },
+            {
+                label: 'Acompanhamento',
+                icon: 'pi pi-user-edit',
+                command: () => {
+                    console.log(this.selectedCard)
+                }
+            },
+            {
+                label: 'Alterar negocição',
+                icon: 'pi pi-pencil',
+                command: () => {
+                    console.log(this.selectedCard)
+                }
+            },
+            {
+                label: 'Perdeu negociação',
+                icon: 'pi pi-user-plus',
+                command: () => {
+                    console.log(this.selectedCard)
+                }
+            },
+            {
+                label: 'WhatsApp',
+                icon: 'pi pi-whatsapp',
+                command: () => {
+                    console.log(this.selectedCard)
+                }
+            }
+        ]
 
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
     }
@@ -382,6 +450,15 @@ export class ListNegotiationsComponent {
         });
     }
 
+    onContextMenu(event: any, card: any) {
+        this.selectedCard = card
+        this.cm.show(event)
+    }
+
+   onHide() {
+        this.selectedCard = null
+    }
+
     _formatBRLMoney(amount: number) { // alias
         return formatBRLMoney(amount.toString())
     }
@@ -391,8 +468,8 @@ export class ListNegotiationsComponent {
     }
 
     hideDialog() {
-        this.accDialog = false;
-        this.submitted = false;
+        this.accDialog = false
+        this.submitted = false
     }
 
     onGlobalFilter(event: any) {
