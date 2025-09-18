@@ -60,8 +60,8 @@ export class SalesService {
         return this.http.get(`${environment.apiBaseURL}/sales/customers-birthday`)
     }
 
-    getCustomers(page = 1, perPage = 10, name: string, email: string, phone: string){
-        return this.http.get(`${environment.apiBaseURL}/sales/customers?pageNumber=${page}&perPage=${perPage}&name=${name}&email=${email}&phone=${phone}`)
+    getCustomers(page = 1, perPage = 10, name: string, email: string, phone: string, boat: string){
+        return this.http.get(`${environment.apiBaseURL}/sales/customers?pageNumber=${page}&perPage=${perPage}&name=${name}&email=${email}&phone=${phone}&boat=${boat}`)
     }
 
     registerNegotiation(formData: any) {

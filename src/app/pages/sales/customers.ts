@@ -80,7 +80,7 @@ export class SalesCustomersPage implements OnInit {
     }
 
     loadSalesCustomers() {
-        this.salesService.getCustomers(1, this.limitPerPage, "", "", "").subscribe({
+        this.salesService.getCustomers(1, this.limitPerPage, "", "", "", "").subscribe({
             next: (res: any) => {
                 this.customers.set(res.data ?? [])
                 this.totalRecords = res.totalRecords

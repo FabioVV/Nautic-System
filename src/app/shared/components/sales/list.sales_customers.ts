@@ -202,7 +202,7 @@ export class ListSalesCustomersComponent {
         if (!isDelete) page++
         // const rmLoading = showLoading()
 
-        this.salesService.getCustomers(page, this.limitPerPage, this.nameSearch, this.emailSearch, this.phoneSearch).pipe(finalize(() => { })).subscribe({
+        this.salesService.getCustomers(page, this.limitPerPage, this.nameSearch, this.emailSearch, this.phoneSearch, "").pipe(finalize(() => { })).subscribe({
             next: (res: any) => {
                 this.customers.set(res.data ?? [])
 

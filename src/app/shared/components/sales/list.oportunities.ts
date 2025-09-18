@@ -34,6 +34,11 @@ interface ExportColumn {
     dataKey: string;
 }
 
+export interface BoatSel {
+    name: string
+    code: string
+}
+
 @Component({
     selector: 'list-oportunities',
     imports: [DialogModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
@@ -58,8 +63,7 @@ interface ExportColumn {
             <div class="flex flex-wrap items-center justify-center gap-2">
 
                 <p-iconfield>
-                        <p-select [options]="boats" optionLabel="name" placeholder="Selecione a embarcação" class="w-full mb-2" />
-
+                    <p-select [(ngModel)]="selectedBoat" [options]="boats()" (onChange)="onGlobalFilter($event)" optionLabel="model" placeholder="Selecione a embarcação" class="w-full mb-2" />
                 </p-iconfield>
 
 
@@ -117,6 +121,8 @@ interface ExportColumn {
                 <td>
                     <p-buttongroup>
                         <p-button icon="pi pi-pencil" severity="contrast" rounded/>
+                        <p-button (click)="openWpp(user.customer_phone)" icon="pi pi-whatsapp" severity="contrast" rounded/>
+
                     </p-buttongroup>
                 </td>
             </tr>
@@ -154,7 +160,9 @@ export class ListOportunitiesComponent {
     limitPerPage = 20
     
     customers = signal<SalesCustomer[]>([])
-    boats: Boat[] = []
+    boats = signal<Boat[]>([])
+
+    selectedBoat: BoatSel | undefined
 
     id: string = ""
     _name: string = ""
@@ -187,16 +195,33 @@ export class ListOportunitiesComponent {
         this.cols = [
             { field: 'type', header: 'Tipo' },
             { field: 'active', header: 'Ativo' }
-        ];
+        ]
 
-        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
+        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }))
+
+        this.boatService.getBoats(1, 100, "",  "", "", 'Y').pipe(finalize(() => { })).subscribe({
+            next: (res: any) => {
+                this.boats.set(res.data ?? [])
+
+                this.totalRecords = res.totalRecords
+                this.first = 1
+
+            },
+            error: (err) => {
+                if (err.status) {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar clientes.' });
+                }
+                this.isLoading = false
+            },
+        })
     }
 
     loadSalesCustomers(page: number, isDelete = false) {
         if (!isDelete) page++
         // const rmLoading = showLoading()
-
-        this.salesService.getCustomers(page, this.limitPerPage, this.nameSearch, this.emailSearch, this.phoneSearch).pipe(finalize(() => { })).subscribe({
+        console.log( this.selectedBoat)
+        //@ts-ignore
+        this.salesService.getCustomers(page, this.limitPerPage, "",  "", "", this.selectedBoat?.model ?? "").pipe(finalize(() => { })).subscribe({
             next: (res: any) => {
                 this.customers.set(res.data ?? [])
 
@@ -211,6 +236,10 @@ export class ListOportunitiesComponent {
                 this.isLoading = false
             },
         })
+    }
+
+    openWpp(phone: string){
+        window.open(`https://api.whatsapp.com/send?phone=+55${phone}&text=Ola`, "_blank")
     }
 
     onGlobalFilter(event: any) {
