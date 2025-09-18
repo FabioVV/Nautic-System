@@ -13,7 +13,6 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputTextModule } from 'primeng/inputtext';
-import { Tag } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { ButtonGroupModule } from 'primeng/buttongroup';
@@ -40,7 +39,7 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-negotiations',
-    imports: [DialogModule, CardModule, TooltipModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, CardModule, TooltipModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrl: "negotiation.css",
     standalone: true,
@@ -211,12 +210,12 @@ export class ListNegotiationsComponent {
     elementRef = inject(ElementRef)
 
     negotiations = signal<Negotiation[]>([])
-    stageOne = computed(() => this.negotiations().filter(n => n.stage === 1))
-    stageTwo = computed(() => this.negotiations().filter(n => n.stage === 2))
-    stageThree = computed(() => this.negotiations().filter(n => n.stage === 3))
-    stageFour = computed(() => this.negotiations().filter(n => n.stage === 4))
-    stageFive = computed(() => this.negotiations().filter(n => n.stage === 5))
-    stageSix = computed(() => this.negotiations().filter(n => n.stage === 6))
+    stageOne = computed(() => this.negotiations()?.filter(n => n.stage === 1))
+    stageTwo = computed(() => this.negotiations()?.filter(n => n.stage === 2))
+    stageThree = computed(() => this.negotiations()?.filter(n => n.stage === 3))
+    stageFour = computed(() => this.negotiations()?.filter(n => n.stage === 4))
+    stageFive = computed(() => this.negotiations()?.filter(n => n.stage === 5))
+    stageSix = computed(() => this.negotiations()?.filter(n => n.stage === 6))
 
     id: string = ""
     _name: string = ""
@@ -250,7 +249,6 @@ export class ListNegotiationsComponent {
 
     ngOnInit() {
         this.loadNegotiations()
-        console.log(this.negotiations())
         
         this.accStates = [
             { name: "Indiferente", code: "" },

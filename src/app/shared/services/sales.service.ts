@@ -5,35 +5,30 @@ import { USER_DATA } from '../constants';
 import { environment } from '../../../environments/environment';
 
 
+export interface SalesCustomer {
+    id: string,
+    id_user: string, // employee that registered this customer
+    name: string,
+    email: string,
+    phone: string,
+    birthdate: string,
+    pf_pj: string,
+    cpf: string,
+    cnpj: string,
+    cep: string,
+    street: string,
+    neighborhood: string,
+    city: string,
+    complement: string,
+    qualified: string,
+    active: string,
+    active_contact: string,
+}
+
 export interface ComMean {
     id: string,
     name: string,
 }
-
-// {
-//     "data": [
-//         {
-//             "id": 2,
-//             "id_customer": 1,
-//             "id_mean_communication": 2,
-//             "customer_name": "Fábio Varela",
-//             "customer_email": "fabio@teste.com",
-//             "customer_phone": "49-99999-9999",
-//             "com_name": "Facebook #updated",
-//             "boat_name": "NX 340",
-//             "estimated_value": 1500000,
-//             "max_estimated_value": 0,
-//             "customer_city": "",
-//             "customer_nav_city": "",
-//             "boat_cap_needed": 0,
-//             "new_used": "",
-//             "cab_open": "",
-//             "stage": "",
-//             "Qualified": ""
-//         }
-//     ],
-//     "totalRecords": 1
-// }
 
 export interface Negotiation {
     id: number,
@@ -61,6 +56,10 @@ export interface Negotiation {
 export class SalesService {
     constructor(private http: HttpClient) { }
 
+    getCustomers(page = 1, perPage = 10, name: string, email: string, phone: string){
+        return this.http.get(`${environment.apiBaseURL}/sales/customers?pageNumber=${page}&perPage=${perPage}&name=${name}&email=${email}&phone=${phone}`)
+    }
+
     registerNegotiation(formData: any) {
         return this.http.post(`${environment.apiBaseURL}/sales/negotiations`, formData)
     }
@@ -87,4 +86,3 @@ export class SalesService {
 
 
 }
-

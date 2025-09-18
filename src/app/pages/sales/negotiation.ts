@@ -358,6 +358,7 @@ export class NegotiationPanel implements OnInit {
 
         ComMeanName: ['', [Validators.required]],
         ComMeanId: ['', [Validators.required]],
+        UserId: ['', []],
     })
 
     ngOnInit(): void {
@@ -407,7 +408,6 @@ export class NegotiationPanel implements OnInit {
 
         for (let i = 0; i < this.ComMeans.length; i++) {
             const mc = this.ComMeans[i]
-            console.log(this.ComMeans)
             if (mc.name.toLowerCase().indexOf(query.toLowerCase()) == 0) {
                 filtered.push(mc)
             }
@@ -435,6 +435,7 @@ export class NegotiationPanel implements OnInit {
 
             // @ts-ignore
             this.form.get("QualifiedType")?.setValue(this.form.value.QualifiedType?.code)
+            this.form.get("UserId")?.setValue(this.userService?.getUserData()?.id)
             
             this.salesService.registerNegotiation(this.form.value).subscribe({
                 next: (res: any) => {
