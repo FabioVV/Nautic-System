@@ -315,7 +315,7 @@ export class ListNegotiationsComponent {
             },
             {
                 label: 'Perdeu negociação',
-                icon: 'pi pi-user-plus',
+                icon: 'pi pi-user-minus',
                 command: () => {
                     console.log(this.selectedCard)
                 }

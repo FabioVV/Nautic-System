@@ -28,10 +28,12 @@ import { SelectModule } from 'primeng/select';
 import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { ButtonGroupModule } from 'primeng/buttongroup';
 
 import { User, UserService } from '../../shared/services/user.service';
-import { SalesService, Negotiation } from '../../shared/services/sales.service';
+import { SalesService, Negotiation, SalesCustomer } from '../../shared/services/sales.service';
 import { ListNegotiationsComponent } from '../../shared/components/sales/list.negotiations';
+import { finalize } from 'rxjs';
 
 export interface UserStatus {
     name: string
@@ -46,6 +48,18 @@ interface Qualified {
 interface QualifiedType {
     name: string
     code: string
+}
+
+
+interface Column {
+    field: string;
+    header: string;
+    customExportHeader?: string;
+}
+
+interface ExportColumn {
+    title: string;
+    dataKey: string;
 }
 
 @Component({
@@ -76,6 +90,7 @@ interface QualifiedType {
         TooltipModule,
         SelectModule,
         AutoCompleteModule,
+        ButtonGroupModule,
         InputGroupModule,
         InputGroupAddonModule,
         ListNegotiationsComponent,
@@ -92,7 +107,7 @@ interface QualifiedType {
                 <p-button (click)="openNewLead()" pTooltip="Cadastrar novo lead" tooltipPosition="top" icon="pi pi-plus" class="mr-2" text severity="success" />
                 <p-button pTooltip="Visualizar seus alertas" tooltipPosition="top" icon="pi pi-bell" class="mr-2" text severity="warn" />
 
-                <p-button pTooltip="Clientes aniversariantes" tooltipPosition="top" class="mr-2" text severity="secondary">
+                <p-button (click)="openCustomerBirthdays()" pTooltip="Clientes aniversariantes" tooltipPosition="top" class="mr-2" text severity="secondary">
                     <fa-icon style='color:#0ea5e9;' [icon]="faCakeCandles" />
                 </p-button>
 
@@ -196,7 +211,64 @@ interface QualifiedType {
         </p>
     </p-dialog>
 
+    <p-dialog header="Clientes aniversariantes" [modal]="true" [(visible)]="birthdaysDialog" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }">
+        <p-table [value]="customers()"  [columns]="cols" csvSeparator=";" [exportHeader]="'customExportHeader'" stripedRows selectionMode="multiple" [(selection)]="selectedData" dataKey="id" [tableStyle]="{ 'min-width': '50rem', 'margin-top':'10px' }"
+            #dt
+            [rows]="10"
+            [globalFilterFields]="['name']"
+            [rowHover]="true"
+            dataKey="id"
+        >
+            <ng-template #caption>
+                <div class="text-end pb-4 mt-2">
+                    <p-button icon="pi pi-external-link" label="Exportar CSV" (click)="dt.exportCSV()" />
+                </div>
+            </ng-template>
 
+            <ng-template #header>
+                <tr>
+                    <th pSortableColumn="customer_name">
+                        Nome
+                        <p-sortIcon field="name" />
+                    </th>
+
+                    <th pSortableColumn="customer_email">
+                        E-mail
+                        <p-sortIcon field="name" />
+                    </th>
+
+                    <th>
+                        Telefone
+                    </th>
+
+                    <th></th>
+                </tr>
+            </ng-template>
+
+            <ng-template #body let-user>
+                <tr [pSelectableRow]="user">
+                    <td>
+                        {{ user.customer_name }}
+                    </td>
+
+                    <td>
+                        {{ user.customer_email }}
+                    </td>
+
+                    <td>
+                        {{ user.customer_phone }}
+                    </td>
+
+                    <td>
+                        <p-buttongroup>
+                            <p-button icon="pi pi-pencil" severity="contrast" rounded/>
+                        </p-buttongroup>
+                    </td>
+                </tr>
+
+            </ng-template>
+        </p-table>
+    </p-dialog>
 
     <p-dialog [style]="{ width: '900px' }" [(visible)]="negotiationDialog" header="Registrar Lead" [modal]="true">
         <ng-template #content>
@@ -328,13 +400,21 @@ export class NegotiationPanel implements OnInit {
     submitted: boolean = false
     isLoading: boolean = false
     negotiationDialog: boolean = false
+    birthdaysDialog: boolean = false
     totalRecords = 0
     limitPerPage = 20
     elementRef = inject(ElementRef)
 
+    selectedData!: any[] 
+    cols!: Column[]
+    exportColumns!: ExportColumn[]
+
+
     autoFilteredValue: any[] = []
     ComMeans: any[] = []
     users = signal<User[]>([])
+    customers = signal<SalesCustomer[]>([])
+
     //negotiations = signal<Negotiation[]>([])
 
     qualified: Qualified[] = [{ name: 'Sim', code: 'Y' }, { name: 'Não', code: 'N' }]
@@ -380,17 +460,36 @@ export class NegotiationPanel implements OnInit {
     }
 
     hideDialog() {
-        this.negotiationDialog = false;
-        this.submitted = false;
+        this.negotiationDialog = false
+        this.submitted = false
+    }
+
+    openCustomerBirthdays(){
+        this.birthdaysDialog = true
+
+        this.salesService.getCustomersBirthday().pipe(finalize(() => { })).subscribe({
+            next: (res: any) => {
+                this.customers.set(res.data ?? [])
+
+                this.totalRecords = res.totalRecords
+            },
+            error: (err) => {
+                if (err.status) {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar aniversário de clientes.' });
+                }
+                this.isLoading = false
+            },
+        })
+
     }
 
     openNewLead() {
-        this.submitted = false;
-        this.negotiationDialog = true;
+        this.submitted = false
+        this.negotiationDialog = true
     }
 
     showPanelExp() {
-        this.panelExpVisible = true;
+        this.panelExpVisible = true
     }
 
     setComMeanChoosen(e: any){
