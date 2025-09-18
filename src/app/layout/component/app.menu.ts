@@ -123,6 +123,12 @@ export class AppMenu {
                     code: "sales_oportunities:view"
                 },
                 {
+                    label: 'Mala-Direta',
+                    icon: 'pi pi-send',
+                    routerLink: ['/sales/direct-mail'],
+                    code: "sales_direct_mail:view"
+                },
+                {
                     label: 'Meios de comunicação',
                     icon: 'pi pi-megaphone',
                     routerLink: ['/sales/communication-means'],

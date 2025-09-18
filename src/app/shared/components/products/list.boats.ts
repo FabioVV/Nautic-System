@@ -23,6 +23,7 @@ import { finalize } from 'rxjs';
 import { showLoading } from '../utils';
 import { UserStatus } from '../../../pages/users/users';
 import { UserService } from '../../services/user.service';
+import { BoatService } from '../../services/boats.service';
 
 
 interface Column {
@@ -45,84 +46,124 @@ interface ExportColumn {
 
     template: `
     <p-toast></p-toast>
-    <p-table [value]="users()"  [columns]="cols" csvSeparator=";" [exportHeader]="'customExportHeader'" stripedRows selectionMode="multiple" [(selection)]="selectedUsers" dataKey="id" [tableStyle]="{ 'min-width': '50rem', 'margin-top':'10px' }"
-    #dt
-    [rows]="10"
-    [globalFilterFields]="['title']"
-    [rowHover]="true"
-    dataKey="id"
+    <p-table [value]="boats()"  [columns]="cols" csvSeparator=";" [exportHeader]="'customExportHeader'" stripedRows selectionMode="multiple" [(selection)]="selectedUsers" dataKey="id" [tableStyle]="{ 'min-width': '50rem', 'margin-top':'10px' }"
+        #dt
+        [rows]="10"
+        [globalFilterFields]="['model']"
+        [rowHover]="true"
+        dataKey="id"
     >
     <ng-template #caption>
-    <div class="flex items-center justify-between mb-4">
-    <span class="text-xl font-bold">Cascos</span>
-    </div>
+        <div class="flex items-center justify-between mb-4">
+            <span class="text-xl font-bold">Cascos</span>
+        </div>
 
-    <div class="flex flex-wrap items-center justify-end gap-2">
+        <div class="flex flex-wrap items-center justify-end gap-2">
 
-    <p-iconfield>
-    <p-inputicon styleClass="pi pi-search" />
-    <input [(ngModel)]="nameSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Nome do usuário..." />
-    </p-iconfield>
+        
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input [(ngModel)]="idSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Código..." />
+            </p-iconfield>
 
-    <p-iconfield>
-    <p-inputicon styleClass="pi pi-search" />
-    <input [(ngModel)]="emailSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Email do usuário..." />
-    </p-iconfield>
 
-    <p-iconfield>
-    <p-select [options]="userStates" [(ngModel)]="selectedUserState" optionLabel="name" (onChange)="onGlobalFilter($event)" class="w-full md:w-56" />
-    </p-iconfield>
-    </div>
-    <div class="text-end pb-4 mt-2">
-    <p-button icon="pi pi-external-link" label="Exportar CSV" (click)="dt.exportCSV()" />
-    </div>
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input [(ngModel)]="modelSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Modelo..." />
+            </p-iconfield>
+
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input [(ngModel)]="priceSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Preço aproximado..." />
+            </p-iconfield>
+
+            <p-iconfield>
+                <p-select [options]="boatStates" [(ngModel)]="selectedBoatState" optionLabel="name" (onChange)="onGlobalFilter($event)" class="w-full md:w-56" />
+            </p-iconfield>
+        </div>
+        <div class="text-end pb-4 mt-2">
+        <p-button icon="pi pi-external-link" label="Exportar CSV" (click)="dt.exportCSV()" />
+        </div>
 
     </ng-template>
 
     <ng-template #header>
-    <tr>
-    <th pSortableColumn="name">
-    Nome
-    <p-sortIcon field="name" />
-    </th>
-    <th>Email</th>
-    <th>Telefone</th>
-    <th pSortableColumn="active">
-    Ativo
-    <p-sortIcon field="active" />
-    </th>
-    <th></th>
-    </tr>
+        <tr>
+            <th>Cód. casco</th>
+
+            <th pSortableColumn="model">
+                Modelo
+                <p-sortIcon field="model" />
+            </th>
+
+            <th pSortableColumn="new_used">
+                Novo/Usado
+                <p-sortIcon field="new_used" />
+            </th>
+            <th pSortableColumn="year">
+                Ano
+                <p-sortIcon field="year" />
+            </th>
+            <th pSortableColumn="hours">
+                Horas
+                <p-sortIcon field="hours" />
+
+            </th>
+            <th pSortableColumn="selling_price">
+                Valor
+                <p-sortIcon field="selling_price" />
+            </th>
+
+            <th pSortableColumn="active">
+                Ativo
+                <p-sortIcon field="active" />
+            </th>
+
+            <th></th>
+        </tr>
     </ng-template>
-    <ng-template #body let-user>
-    <tr [pSelectableRow]="user">
-    <td>
-    {{ user.name }}
-    </td>
+    <ng-template #body let-boat>
+        <tr [pSelectableRow]="boat">
+            <td>
+                {{ boat.id }}
+            </td>
 
-    <td>
-    {{ user.email }}
-    </td>
+            <td>
+                {{ boat.model }}
+            </td>
 
-    <td>
-    {{ user.phone != "" ? user.phone : "-" }}
-    </td>
+            <td>
+                {{ boat.new_used == 'N' ? "Novo" : "Usado" }}
+            </td>
 
-    <td>
-    <p-tag
-    [value]="getUserActiveState(user)"
-    [severity]="getSeverity(user)"
-    styleClass="dark:!bg-surface-900"
-    />
-    </td>
+            <td>
+                {{ boat.year }}
+            </td>
 
-    <td>
-    <p-buttongroup>
-    <p-button icon="pi pi-pencil" severity="contrast" rounded/>
-    <p-button (click)="deactivateUser(user.id, user.email)" icon="pi pi-trash" severity="contrast" rounded/>
-    </p-buttongroup>
-    </td>
-    </tr>
+            <td>
+                {{ boat.hours }}
+            </td>
+
+            <td>
+                {{ boat.selling_price }}
+            </td>
+
+
+            <td>
+                <p-tag
+                [value]="getActiveState(boat)"
+                [severity]="getSeverity(boat)"
+                styleClass="dark:!bg-surface-900"
+                />
+            </td>
+
+            <td>
+                <p-buttongroup>
+                    <p-button icon="pi pi-pencil" severity="contrast" rounded/>
+                    <p-button (click)="deactivateBoat(boat.id, boat.model)" icon="pi pi-trash" severity="contrast" rounded/>
+                </p-buttongroup>
+            </td>
+        </tr>
     </ng-template>
     </p-table>
 
@@ -148,10 +189,11 @@ export class ListBoatsComponent {
         private router: Router,
         private messageService: MessageService,
         private userService: UserService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private boatsService: BoatService,
     ) { }
 
-    @Input() users: any
+    @Input() boats: any
     @Input() totalRecords: any
     @Input() limitPerPage: any
 
@@ -162,66 +204,70 @@ export class ListBoatsComponent {
 
     selectedUsers!: any[] // does nothing for now
 
-    selectedUserState: UserStatus | undefined = { name: "Indiferente", code: "" }
-    userStates: UserStatus[] | undefined
+    selectedBoatState: UserStatus | undefined = { name: "Indiferente", code: "" }
+    boatStates: UserStatus[] | undefined
     autoFilteredValue: any[] = []
 
-    emailSearch: string = ""
-    nameSearch: string = ""
+    modelSearch: string = ""
+    priceSearch: string = ""
     statusSearch: string = ""
+    idSearch: string= ""
 
-    cols!: Column[];
-    exportColumns!: ExportColumn[];
+    cols!: Column[]
+    exportColumns!: ExportColumn[]
 
     confirmLabel = "Confirmar"
     rejectLabel = "Cancelar"
 
     onPageChange(e: any) {
-        this.loadUsers(e.page)
+        this.loadBoats(e.page)
         this.curPage = e.page
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     ngOnInit() {
-        this.userStates = [
+        this.boatStates = [
             { name: "Indiferente", code: "" },
             { name: "Ativo", code: "Y" },
             { name: "Não ativo", code: "N" },
         ]
 
         this.cols = [
-            { field: 'name', header: 'Nome' },
-            { field: 'email', header: 'E-mail' },
-            { field: 'phone', header: 'Telefone' },
-            { field: 'active', header: 'Ativo' }
-        ];
+            { field: 'id', header: 'Cód. Casco' },
+            { field: 'model', header: 'E-mail' },
+            { field: 'new_used', header: 'Novo/Usado' },
+            { field: 'year', header: 'Ano' },
+            { field: 'hours', header: 'Horas usado' },
+            { field: 'selling_price', header: 'Preço' },
+            { field: 'active', header: 'Ativo' },
+        ]
 
-        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
+        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }))
     }
 
-    loadUsers(page: number, isDelete = false) {
+    loadBoats(page: number, isDelete = false) {
         if (!isDelete) page++
-        const rmLoading = showLoading()
+        //const rmLoading = showLoading()
 
-        this.userService.getUsers(page, this.limitPerPage, this.nameSearch, this.emailSearch, this.selectedUserState?.code as string).pipe(finalize(() => { rmLoading() })).subscribe({
+        this.boatsService.getBoats(page, this.limitPerPage, this.modelSearch, this.priceSearch, this.idSearch, this.selectedBoatState?.code as string).pipe(finalize(() => { })).subscribe({
             next: (res: any) => {
-                this.users.set(res.data ?? [])
+                this.boats.set(res.data ?? [])
                 this.totalRecords = res.totalRecords
                 this.first = 1
 
             },
             error: (err) => {
                 if (err.status) {
-                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar usuários.' });
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar cascos.' });
                 }
                 this.isLoading = false
             },
         })
     }
 
-    deactivateUser(id: string, email: string) {
+    deactivateBoat(id: string, model: string) {
         this.confirmationService.confirm({
-            message: 'Confirma desativar o usuário ' + `<mark>${email}</mark>` + ' ?',
+            message: 'Confirma desativar o casco ' + `<mark>${model}</mark>` + ' ?',
             header: 'Confirmação',
             icon: 'pi pi-exclamation-triangle',
             closeOnEscape: true,
@@ -240,7 +286,7 @@ export class ListBoatsComponent {
 
                 this.userService.deactivateUser(id).pipe(finalize(() => { rmLoading() })).subscribe({
                     next: (res: any) => {
-                        this.loadUsers(this.curPage, true)
+                        this.loadBoats(this.curPage, true)
                         this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Usuário desativado com sucesso' });
                     },
                     error: (err) => {
@@ -259,20 +305,20 @@ export class ListBoatsComponent {
         this.typingTimeout = setTimeout(() => {
             this.first = 0;
             this.curPage = 1;
-            this.loadUsers(0)
+            this.loadBoats(0)
         }, 500)
     }
 
-    getSeverity(_user: any) {
-        if (_user.active == `Y`) {
+    getSeverity(_boat: any) {
+        if (_boat.active == `Y`) {
             return "success"
         } else {
             return "danger"
         }
     }
 
-    getUserActiveState(_user: any) {
-        if (_user.active == `Y`) {
+    getActiveState(_boat: any) {
+        if (_boat.active == `Y`) {
             return "Ativo"
         } else {
             return "Inativo"
