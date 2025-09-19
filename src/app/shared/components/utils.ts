@@ -1,3 +1,8 @@
+export interface SelectItem {
+    name: string
+    code: string
+}
+
 export function showLoading() {
 
     function removeLoadingGif(forceClose = false) {
@@ -52,3 +57,4 @@ export function formatBRLMoney(amount: string) {
     const formattedAmount = formatter.format(_amount)
     return formattedAmount
 }
+

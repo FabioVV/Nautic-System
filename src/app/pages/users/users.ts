@@ -115,7 +115,7 @@ interface Cargo {
             </div>
 
             <div class='col-md-6'>
-                <label for="ConfirmPassword" class="block font-bold mb-3">Cargo</label>
+                <label for="Cargo" class="block font-bold mb-3">Cargo</label>
 
                 <p-select [invalid]="isInvalid('Cargo')" [options]="cargos" formControlName="Cargo" optionLabel="name" placeholder="Selecione um cargo" class="w-full mb-2" />
                 @if (isInvalid('Cargo')) {

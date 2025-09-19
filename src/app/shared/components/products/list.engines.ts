@@ -22,6 +22,7 @@ import { finalize } from 'rxjs';
 import { showLoading } from '../utils';
 import { UserStatus } from '../../../pages/users/users';
 import { UserService } from '../../services/user.service';
+import { EngineService } from '../../services/engine.service';
 
 
 interface Column {
@@ -44,29 +45,25 @@ interface ExportColumn {
 
     template: `
     <p-toast></p-toast>
-    <p-table [value]="users()"  [columns]="cols" csvSeparator=";" [exportHeader]="'customExportHeader'" stripedRows selectionMode="multiple" [(selection)]="selectedUsers" dataKey="id" [tableStyle]="{ 'min-width': '50rem', 'margin-top':'10px' }"
-    #dt
-    [rows]="10"
-    [globalFilterFields]="['title']"
-    [rowHover]="true"
-    dataKey="id"
+    <p-table [value]="engines()"  [columns]="cols" csvSeparator=";" [exportHeader]="'customExportHeader'" stripedRows selectionMode="multiple" [(selection)]="selectedUsers" dataKey="id" [tableStyle]="{ 'min-width': '50rem', 'margin-top':'10px' }"
+        #dt
+        [rows]="10"
+        [globalFilterFields]="['model']"
+        [rowHover]="true"
+        dataKey="id"
     >
     <ng-template #caption>
     <div class="flex items-center justify-between mb-4">
-    <span class="text-xl font-bold">Motores</span>
+        <span class="text-xl font-bold">Motores</span>
     </div>
 
     <div class="flex flex-wrap items-center justify-end gap-2">
 
     <p-iconfield>
-    <p-inputicon styleClass="pi pi-search" />
-    <input [(ngModel)]="nameSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Nome do usuário..." />
+        <p-inputicon styleClass="pi pi-search" />
+        <input [(ngModel)]="nameSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Modelo..." />
     </p-iconfield>
 
-    <p-iconfield>
-    <p-inputicon styleClass="pi pi-search" />
-    <input [(ngModel)]="emailSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Email do usuário..." />
-    </p-iconfield>
 
     <p-iconfield>
     <p-select [options]="userStates" [(ngModel)]="selectedUserState" optionLabel="name" (onChange)="onGlobalFilter($event)" class="w-full md:w-56" />
@@ -79,48 +76,48 @@ interface ExportColumn {
     </ng-template>
 
     <ng-template #header>
-    <tr>
-    <th pSortableColumn="name">
-    Nome
-    <p-sortIcon field="name" />
-    </th>
-    <th>Email</th>
-    <th>Telefone</th>
-    <th pSortableColumn="active">
-    Ativo
-    <p-sortIcon field="active" />
-    </th>
-    <th></th>
-    </tr>
+        <tr>
+            <th pSortableColumn="model">
+                Modelo
+                <p-sortIcon field="model" />
+            </th>
+            <th>Tipo</th>
+            <th>Potência</th>
+            <th pSortableColumn="active">
+                Ativo
+                <p-sortIcon field="active" />
+            </th>
+            <th></th>
+        </tr>
     </ng-template>
-    <ng-template #body let-user>
-    <tr [pSelectableRow]="user">
-    <td>
-    {{ user.name }}
-    </td>
+    <ng-template #body let-eng>
+    <tr [pSelectableRow]="eng">
+        <td>
+            {{ eng.model }}
+        </td>
 
-    <td>
-    {{ user.email }}
-    </td>
+        <td>
+            {{ eng.type == 'P' ? 'Popa' : 'Centro' }}
+        </td>
 
-    <td>
-    {{ user.phone != "" ? user.phone : "-" }}
-    </td>
+        <td>
+            {{ eng.power }}
+        </td>
 
-    <td>
-    <p-tag
-    [value]="getUserActiveState(user)"
-    [severity]="getSeverity(user)"
-    styleClass="dark:!bg-surface-900"
-    />
-    </td>
+        <td>
+            <p-tag
+            [value]="getActiveState(eng)"
+            [severity]="getSeverity(eng)"
+            styleClass="dark:!bg-surface-900"
+            />
+        </td>
 
-    <td>
-    <p-buttongroup>
-    <p-button icon="pi pi-pencil" severity="contrast" rounded/>
-    <p-button (click)="deactivateUser(user.id, user.email)" icon="pi pi-trash" severity="contrast" rounded/>
-    </p-buttongroup>
-    </td>
+        <td>
+            <p-buttongroup>
+                <p-button icon="pi pi-pencil" severity="contrast" rounded/>
+                <p-button (click)="deactivateUser(eng.id, eng.model)" icon="pi pi-trash" severity="contrast" rounded/>
+            </p-buttongroup>
+        </td>
     </tr>
     </ng-template>
     </p-table>
@@ -134,11 +131,11 @@ interface ExportColumn {
     />
 
     <p-confirmdialog
-    [rejectLabel]="rejectLabel"
-    [acceptLabel]="confirmLabel"
-    [acceptAriaLabel]="confirmLabel"
-    [rejectAriaLabel]="rejectLabel"
-    [style]="{ width: '450px' }"
+        [rejectLabel]="rejectLabel"
+        [acceptLabel]="confirmLabel"
+        [acceptAriaLabel]="confirmLabel"
+        [rejectAriaLabel]="rejectLabel"
+        [style]="{ width: '450px' }"
     />
     `,
 })
@@ -147,10 +144,11 @@ export class ListEnginesComponent {
         private router: Router,
         private messageService: MessageService,
         private userService: UserService,
+        private engineService: EngineService,
         private confirmationService: ConfirmationService
     ) { }
 
-    @Input() users: any
+    @Input() engines: any
     @Input() totalRecords: any
     @Input() limitPerPage: any
 
@@ -165,7 +163,6 @@ export class ListEnginesComponent {
     userStates: UserStatus[] | undefined
     autoFilteredValue: any[] = []
 
-    emailSearch: string = ""
     nameSearch: string = ""
     statusSearch: string = ""
 
@@ -176,7 +173,7 @@ export class ListEnginesComponent {
     rejectLabel = "Cancelar"
 
     onPageChange(e: any) {
-        this.loadUsers(e.page)
+        this.loadEngines(e.page)
         this.curPage = e.page
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -198,29 +195,28 @@ export class ListEnginesComponent {
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
     }
 
-    loadUsers(page: number, isDelete = false) {
+    loadEngines(page: number, isDelete = false) {
         if (!isDelete) page++
-        const rmLoading = showLoading()
 
-        this.userService.getUsers(page, this.limitPerPage, this.nameSearch, this.emailSearch, this.selectedUserState?.code as string).pipe(finalize(() => { rmLoading() })).subscribe({
+        this.engineService.getEngines(page, this.limitPerPage, this.nameSearch, this.selectedUserState?.code as string).pipe(finalize(() => { })).subscribe({
             next: (res: any) => {
-                this.users.set(res.data ?? [])
+                this.engines.set(res.data ?? [])
                 this.totalRecords = res.totalRecords
                 this.first = 1
 
             },
             error: (err) => {
                 if (err.status) {
-                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar usuários.' });
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar motores.' });
                 }
                 this.isLoading = false
             },
         })
     }
 
-    deactivateUser(id: string, email: string) {
+    deactivateUser(id: string, model: string) {
         this.confirmationService.confirm({
-            message: 'Confirma desativar o usuário ' + `<mark>${email}</mark>` + ' ?',
+            message: 'Confirma desativar o motor ' + `<mark>${model}</mark>` + ' ?',
             header: 'Confirmação',
             icon: 'pi pi-exclamation-triangle',
             closeOnEscape: true,
@@ -237,15 +233,15 @@ export class ListEnginesComponent {
             accept: () => {
                 const rmLoading = showLoading()
 
-                this.userService.deactivateUser(id).pipe(finalize(() => { rmLoading() })).subscribe({
-                    next: (res: any) => {
-                        this.loadUsers(this.curPage, true)
-                        this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Usuário desativado com sucesso' });
-                    },
-                    error: (err) => {
-                        this.messageService.add({ severity: 'error', summary: "Erro", detail: "Ocorreu um erro ao tentar desativar o usuário." });
-                    },
-                })
+                // this.userService.deactivateUser(id).pipe(finalize(() => { rmLoading() })).subscribe({
+                //     next: (res: any) => {
+                //         this.loadUsers(this.curPage, true)
+                //         this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Usuário desativado com sucesso' });
+                //     },
+                //     error: (err) => {
+                //         this.messageService.add({ severity: 'error', summary: "Erro", detail: "Ocorreu um erro ao tentar desativar o usuário." });
+                //     },
+                // })
             }
         });
     }
@@ -256,22 +252,22 @@ export class ListEnginesComponent {
         }
 
         this.typingTimeout = setTimeout(() => {
-            this.first = 0;
-            this.curPage = 1;
-            this.loadUsers(0)
+            this.first = 
+            this.curPage = 1
+            this.loadEngines(0)
         }, 500)
     }
 
-    getSeverity(_user: any) {
-        if (_user.active == `Y`) {
+    getSeverity(_engine: any) {
+        if (_engine.active == `Y`) {
             return "success"
         } else {
             return "danger"
         }
     }
 
-    getUserActiveState(_user: any) {
-        if (_user.active == `Y`) {
+    getActiveState(_engine: any) {
+        if (_engine.active == `Y`) {
             return "Ativo"
         } else {
             return "Inativo"

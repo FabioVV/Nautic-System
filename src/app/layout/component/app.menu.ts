@@ -102,7 +102,7 @@ export class AppMenu {
         }
 
         const salesMenuItem = {
-            label: 'Vendas',
+            label: 'Relacionamento',
             items: [
                 {
                     label: 'Painel de negociações',
@@ -191,7 +191,7 @@ export class AppMenu {
             const userjwt = this.authService.parseUserJwt()
             const isAdmin = userjwt?.roles.includes("admin")
 
-            const menuItems = [relatSalesMenuItem, productsMenu, afterSalesMenuItem, salesMenuItem].reverse()
+            const menuItems = [relatSalesMenuItem, productsMenu, salesMenuItem].reverse()
 
             // this.model = [relatSalesMenuItem, ...this.model]
             // this.model = [productsMenu, ...this.model]
@@ -201,7 +201,7 @@ export class AppMenu {
             if (isAdmin) {
                 this.model = [relatSalesMenuItem, ...this.model]
                 this.model = [productsMenu, ...this.model]
-                this.model = [afterSalesMenuItem, ...this.model]
+                // this.model = [afterSalesMenuItem, ...this.model]
                 this.model = [salesMenuItem, ...this.model]
                 this.model = [adminMenuItem, ...this.model]
             } else {
