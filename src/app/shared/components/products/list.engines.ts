@@ -233,15 +233,15 @@ export class ListEnginesComponent {
             accept: () => {
                 const rmLoading = showLoading()
 
-                // this.userService.deactivateUser(id).pipe(finalize(() => { rmLoading() })).subscribe({
-                //     next: (res: any) => {
-                //         this.loadUsers(this.curPage, true)
-                //         this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Usuário desativado com sucesso' });
-                //     },
-                //     error: (err) => {
-                //         this.messageService.add({ severity: 'error', summary: "Erro", detail: "Ocorreu um erro ao tentar desativar o usuário." });
-                //     },
-                // })
+                this.engineService.deactivateEngine(id).pipe(finalize(() => { rmLoading() })).subscribe({
+                    next: (res: any) => {
+                        this.loadEngines(this.curPage, true)
+                        this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Motor desativado com sucesso' });
+                    },
+                    error: (err) => {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: "Ocorreu um erro ao tentar desativar o motor." });
+                    },
+                })
             }
         });
     }

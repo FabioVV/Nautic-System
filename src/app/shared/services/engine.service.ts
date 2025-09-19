@@ -35,5 +35,16 @@ export class EngineService {
         return this.http.get(`${environment.apiBaseURL}/engines?pageNumber=${page}&perPage=${perPage}&model=${model}&active=${active}`)
     }
 
+    getEngine(id: string) {
+        return this.http.get(`${environment.apiBaseURL}/engines/${id}`)
+    }
+
+    updateEngine(id: string, formData: any) {
+        return this.http.patch(`${environment.apiBaseURL}/engines/${id}`, formData)
+    }
+
+    deactivateEngine(id: string) {
+        return this.http.delete(`${environment.apiBaseURL}/engines/${id}`)
+    }
 }
 
