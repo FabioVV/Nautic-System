@@ -127,31 +127,7 @@ interface QualifiedType {
         </div>
 
         <div id='stage2' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-            <h5>Lead convertido</h5>
-            <div class='kb-cards'>
-
-                <p-card *ngFor="let n of stageTwo(); trackBy: trackById"
-                    [attr.data-stage]="n.stage"
-                    draggable="true"
-                    (dragstart)="dragstart($event, n.id)"
-                    [id]="n.id"
-                    (contextmenu)="onContextMenu($event, n)"
-                >
-                    <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
-                    <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
-                        {{ n.boat_name }}
-                    </p>
-                    <br>
-                    <small class="m-0 card-money">
-                        {{ this._formatBRLMoney(n.estimated_value) }}
-                    </small>
-                </p-card>
-
-            </div>
-        </div>
-
-        <div id='stage3' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-            <h5>Contato pessoal</h5>
+            <h5>Inicio de negociação</h5>
             <div class='kb-cards'>
 
                 <p-card *ngFor="let n of stageThree(); trackBy: trackById"
@@ -174,7 +150,7 @@ interface QualifiedType {
             </div>
         </div>
 
-        <div id='stage4' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
+        <div id='stage3' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
             <h5>Negociando</h5>
             <div class='kb-cards'>
 
@@ -198,7 +174,7 @@ interface QualifiedType {
             </div>
         </div>
 
-        <div id='stage5' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
+        <div id='stage4' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
             <h5>Fechamento</h5>
             <div class='kb-cards'>
 
@@ -222,7 +198,7 @@ interface QualifiedType {
             </div>
         </div>
 
-        <div id='stage6' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
+        <div id='stage5' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
             <h5>Entrega</h5>
             <div class='kb-cards'>
 
@@ -251,77 +227,63 @@ interface QualifiedType {
     <p-dialog header="Sobre o painel" [modal]="true" [(visible)]="panelExpVisible" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }">
         <p class="mb-8">
             1 - Lead:
-
-            - Colher dados de comunicação, tais como: Nome, Telefone, E-mail e meio de comunicação ou reativar clientes.
-
-            - Possibilidade de envio de orçamento básico (casco e motor).
-
-
-            OBS: Cliente não poderá ficar mais que 24 Hrs como Lead. (caso aconteça a cor da borda ficará em vermelho)
+            <br/>
+            - Colher dados de comunicação, tais como: Nome, Telefone, E-mail e meio de comunicação.
         </p>
+
         <p class="mb-8">
-            2 - Lead convertido:
+            2 - Contato pessoal / Inicio de negociação:
 
-            - Entrar em contato com o cliente, podendo ser por telefone ou pelo whatsapp, alternativa enviando mídias.
-
+            <br/>
+            - De prefêrencia, Marcar uma reunião presencial com o cliente em loja, escritório ou Marina. Caso não seja possivel, pode ser por telefone ou pelo whatsapp
+            <br/>
             - Definir o perfil da negociação - Respondendo perguntas básicas:
-
+            <br/>
             - Qual a cidade do cliente?
-
+            <br/>
             - Onde o senhor vai navegar?
-
+            <br/>
             - Quantas pessoas o senhor quer levar na embarcação?
-
+            <br/>
             - Tamanho da embarcação?
-
+            <br/>
             - Cabinada ou proa aberta?
-
+            <br/>
             - Barco novo ou usado
-
-            - Tem barco na troca
-
+            <br/>
             - Qual o valor aproximado de investimento?
         </p>
         <p class="mb-8">
-            3 - Contato pessoal:
-
-            - Marcar uma reunião presencial com o cliente em loja, escritório ou Marina.
-
-            - Para entrar nessa fase necessário marcar em combo a maneira de contato (loja, escritório, marina, outros) para o sistema gerar relatório por vendedor
-        </p>
-        <p class="mb-8">
-            4 - Negociação:
-
+            3 - Negociação:
+            <br/>
             - Proposta de compra do cliente
-
+            <br/>
             - Desconto máximo (após proposta do cliente)
-
-            - Análise do Trade in
         </p>
         <p>
-            5 - Fechamento:
-
+            4 - Fechamento:
+            <br/>
             - Encaminhar email com etapas do processo até a entrega
-
+            <br/>
             - Assinatura do contrato
-
+            <br/>
             - Pagamento sinal
-
+            <br/>
             - Pagamento de parcelas
-
+            <br/>
             - Burocrácia do trade in
-
+            <br/>
             - Análise de crédito bancário
         </p>
         <p>
-            6 - Entrega:
-
+            5 - Entrega:
+            <br/>
             - Entrada do documento na marinha
-
+            <br/>
             - Vistoria em loja embarcação pronta
-
+            <br/>
             - Quitação
-
+            <br/>
             - Entrega técnica no seco / água
         </p>
     </p-dialog>

@@ -30,6 +30,7 @@
     gap:1rem;
     width:240px;
     cursor:move;
+    margin: 0 auto;
 }
 
 .kb-cards > *{
