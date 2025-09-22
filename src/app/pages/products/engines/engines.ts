@@ -1,9 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { Table, TableModule } from 'primeng/table';
+import { TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormsModule, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { ToastModule } from 'primeng/toast';
@@ -14,7 +14,6 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageModule } from 'primeng/message';
-import { PasswordModule } from 'primeng/password';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { SelectModule } from 'primeng/select';
@@ -43,7 +42,6 @@ import { Engine, EngineService } from '../../../shared/services/engine.service';
         ReactiveFormsModule,
         ToastModule,
         MessageModule,
-        PasswordModule,
         IconFieldModule,
         InputIconModule,
         SelectModule,
@@ -64,148 +62,148 @@ import { Engine, EngineService } from '../../../shared/services/engine.service';
     </ng-template>
     </p-toolbar>
 
-    <p-dialog [(visible)]="userDialog" header="Registrar motor" [style]="{width: '900px'}" [modal]="true">
-    <ng-template #content>
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" style='margin-bottom: 4rem;'>
-            <button id="btn_submit" style='display:none;' type="submit"></button>
+    <p-dialog [(visible)]="engineDialog" header="Registrar motor" [style]="{width: '900px'}" [modal]="true">
+        <ng-template #content>
+            <form [formGroup]="form" (ngSubmit)="onSubmit()" style='margin-bottom: 4rem;'>
+                <button id="btn_submit" style='display:none;' type="submit"></button>
 
 
-            <div class='row'>
-                <div class='col-md-8'>
-                    <label for="Model" class="block font-bold mb-3">Modelo</label>
-                    <input formControlName="Model" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
-                    
-                    <div class="error-feedback" *ngIf="hasBeenSubmited('Model')">
-                        <p-message styleClass="mb-2" *ngIf="form.controls.Model.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o modelo do motor</p-message>
+                <div class='row'>
+                    <div class='col-md-8'>
+                        <label for="Model" class="block font-bold mb-3">Modelo</label>
+                        <input formControlName="Model" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                        
+                        <div class="error-feedback" *ngIf="hasBeenSubmited('Model')">
+                            <p-message styleClass="mb-2" *ngIf="form.controls.Model.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o modelo do motor</p-message>
+                        </div>
+                    </div>
+
+                    <div class='col-md-4'>
+                        <label for="Model" class="block font-bold mb-3">Preço</label>
+
+                        <p-inputnumber formControlName="SellingPrice" class="w-full mb-2" mode="currency" currency="BRL" locale="pt-BR" />
+
+                        <div class="error-feedback" *ngIf="hasBeenSubmited('SellingPrice')">
+                            <p-message styleClass="mb-2" *ngIf="form.controls.SellingPrice.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o preço de venda</p-message>
+                        </div>
                     </div>
                 </div>
 
-                <div class='col-md-4'>
-                    <label for="Model" class="block font-bold mb-3">Preço</label>
+                <div class='row'>
+                    <div class='col-md-6'>
+                        <label for="Model" class="block font-bold mb-3">Propulsão</label>
 
-                    <p-inputnumber formControlName="SellingPrice" class="w-full mb-2" mode="currency" currency="BRL" locale="pt-BR" />
-
-                    <div class="error-feedback" *ngIf="hasBeenSubmited('SellingPrice')">
-                        <p-message styleClass="mb-2" *ngIf="form.controls.SellingPrice.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o preço de venda</p-message>
+                        <p-select [invalid]="isInvalid('Propulsion')" [options]="propulsions" formControlName="Propulsion" optionLabel="name" placeholder="Selecione uma propulsão" class="w-full mb-2" />
+                        @if (isInvalid('Propulsion')) {
+                            <p-message severity="error" size="small" variant="simple">Por favor, selecione uma propulsão    </p-message>
+                        }
                     </div>
-                </div>
-            </div>
 
-            <div class='row'>
-                <div class='col-md-6'>
-                    <label for="Model" class="block font-bold mb-3">Propulsão</label>
+                    <div class='col-md-6'>
+                        <label for="Type" class="block font-bold mb-3">Tipo</label>
 
-                    <p-select [invalid]="isInvalid('Propulsion')" [options]="propulsions" formControlName="Propulsion" optionLabel="name" placeholder="Selecione uma propulsão" class="w-full mb-2" />
-                    @if (isInvalid('Propulsion')) {
-                        <p-message severity="error" size="small" variant="simple">Por favor, selecione uma propulsão    </p-message>
-                    }
-                </div>
-
-                <div class='col-md-6'>
-                    <label for="Type" class="block font-bold mb-3">Tipo</label>
-
-                    <p-select [invalid]="isInvalid('Type')" [options]="types" formControlName="Type" optionLabel="name" placeholder="Selecione um tipo" class="w-full mb-2" />
-                    @if (isInvalid('Type')) {
-                        <p-message severity="error" size="small" variant="simple">Por favor, selecione um tipo  </p-message>
-                    }
-                </div>
-
-            </div>
-
-            <div class='row'>
-                <div class='col-md-6'>
-                    <label for="Command" class="block font-bold mb-3">Comando</label>
-
-                    <p-select [invalid]="isInvalid('Command')" [options]="commands" formControlName="Command" optionLabel="name" placeholder="Selecione um comando" class="w-full mb-2" />
-                    @if (isInvalid('Command')) {
-                        <p-message severity="error" size="small" variant="simple">Por favor, selecione um comando  </p-message>
-                    }
-                </div>
-
-                <div class='col-md-6'>
-                    <label for="FuelType" class="block font-bold mb-3">Combustível</label>
-
-                    <p-select [invalid]="isInvalid('FuelType')" [options]="fuels" formControlName="FuelType" optionLabel="name" placeholder="Selecione um tipo" class="w-full mb-2" />
-                    @if (isInvalid('FuelType')) {
-                        <p-message severity="error" size="small" variant="simple">Por favor, selecione um tipo  </p-message>
-                    }
-                </div>
-
-            </div>
- 
-            <div class='row'>
-                <div class='col-md-6'>
-                    <label for="Tempo" class="block font-bold mb-3">Tempo</label>
-
-                    <p-select [invalid]="isInvalid('Tempo')" [options]="tempos" formControlName="Tempo" optionLabel="name" placeholder="Selecione um tipo" class="w-full mb-2" />
-                    @if (isInvalid('Tempo')) {
-                        <p-message severity="error" size="small" variant="simple">Por favor, selecione um tipo  </p-message>
-                    }
-                </div>
-
-
-            </div>
-
-
- 
-            <div class='row'>
-                <div class='col-md-4'>
-                    <label for="Model" class="block font-bold mb-3">Peso </label>
-                    <p-inputnumber formControlName="Weight" suffix=" KG"  mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="5" class="w-full mb-2" locale="pt-BR" />
-
-                    <div class="error-feedback" *ngIf="hasBeenSubmited('Weight')">
-                        <p-message styleClass="mb-2" *ngIf="form.controls.Weight.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o preço de venda</p-message>
+                        <p-select [invalid]="isInvalid('Type')" [options]="types" formControlName="Type" optionLabel="name" placeholder="Selecione um tipo" class="w-full mb-2" />
+                        @if (isInvalid('Type')) {
+                            <p-message severity="error" size="small" variant="simple">Por favor, selecione um tipo  </p-message>
+                        }
                     </div>
-                </div>
-
-                <div class='col-md-4'>
-                    <label for="Rotation" class="block font-bold mb-3">Rotações</label>
-                    <input formControlName="Rotation" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
 
                 </div>
 
-                <div class='col-md-4'>
-                    <label for="Power" class="block font-bold mb-3">Potência</label>
-                    <p-inputnumber formControlName="Power" [useGrouping]="false" class="w-full mb-2"  />
+                <div class='row'>
+                    <div class='col-md-6'>
+                        <label for="Command" class="block font-bold mb-3">Comando</label>
 
-                    <div class="error-feedback" *ngIf="hasBeenSubmited('Power')">
-                        <p-message styleClass="mb-2" *ngIf="form.controls.Power.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o valor da potência</p-message>
+                        <p-select [invalid]="isInvalid('Command')" [options]="commands" formControlName="Command" optionLabel="name" placeholder="Selecione um comando" class="w-full mb-2" />
+                        @if (isInvalid('Command')) {
+                            <p-message severity="error" size="small" variant="simple">Por favor, selecione um comando  </p-message>
+                        }
                     </div>
-                </div>
 
-            </div>
+                    <div class='col-md-6'>
+                        <label for="FuelType" class="block font-bold mb-3">Combustível</label>
 
-            <div class='row'>
-                <div class='col-md-4'>
-                    <label for="Cylinders" class="block font-bold mb-3">Cilindro</label>
-                    <p-inputnumber formControlName="Weight" [useGrouping]="false" class="w-full mb-2"  />
-
-                    <div class="error-feedback" *ngIf="hasBeenSubmited('Cylinders')">
-                        <p-message styleClass="mb-2" *ngIf="form.controls.Cylinders.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o valor dos cilindros</p-message>
+                        <p-select [invalid]="isInvalid('FuelType')" [options]="fuels" formControlName="FuelType" optionLabel="name" placeholder="Selecione um tipo" class="w-full mb-2" />
+                        @if (isInvalid('FuelType')) {
+                            <p-message severity="error" size="small" variant="simple">Por favor, selecione um tipo  </p-message>
+                        }
                     </div>
+
                 </div>
+    
+                <div class='row'>
+                    <div class='col-md-6'>
+                        <label for="Tempo" class="block font-bold mb-3">Tempo</label>
 
-                <div class='col-md-4'>
-                    <label for="Clocks" class="block font-bold mb-3">Relógio</label>
-                    <p-inputnumber formControlName="Clocks" [useGrouping]="false" class="w-full mb-2"  />
-
-                    <div class="error-feedback" *ngIf="hasBeenSubmited('Clocks')">
-                        <p-message styleClass="mb-2" *ngIf="form.controls.Clocks.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o valor dos relógios</p-message>
+                        <p-select [invalid]="isInvalid('Tempo')" [options]="tempos" formControlName="Tempo" optionLabel="name" placeholder="Selecione um tipo" class="w-full mb-2" />
+                        @if (isInvalid('Tempo')) {
+                            <p-message severity="error" size="small" variant="simple">Por favor, selecione um tipo  </p-message>
+                        }
                     </div>
+
+
                 </div>
 
-            </div>
+
+    
+                <div class='row'>
+                    <div class='col-md-4'>
+                        <label for="Model" class="block font-bold mb-3">Peso </label>
+                        <p-inputnumber formControlName="Weight" suffix=" KG"  mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="5" class="w-full mb-2" locale="pt-BR" />
+
+                        <div class="error-feedback" *ngIf="hasBeenSubmited('Weight')">
+                            <p-message styleClass="mb-2" *ngIf="form.controls.Weight.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o preço de venda</p-message>
+                        </div>
+                    </div>
+
+                    <div class='col-md-4'>
+                        <label for="Rotation" class="block font-bold mb-3">Rotações</label>
+                        <input formControlName="Rotation" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+
+                    </div>
+
+                    <div class='col-md-4'>
+                        <label for="Power" class="block font-bold mb-3">Potência</label>
+                        <p-inputnumber formControlName="Power" [useGrouping]="false" class="w-full mb-2"  />
+
+                        <div class="error-feedback" *ngIf="hasBeenSubmited('Power')">
+                            <p-message styleClass="mb-2" *ngIf="form.controls.Power.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o valor da potência</p-message>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class='row'>
+                    <div class='col-md-4'>
+                        <label for="Cylinders" class="block font-bold mb-3">Cilindro</label>
+                        <p-inputnumber formControlName="Weight" [useGrouping]="false" class="w-full mb-2"  />
+
+                        <div class="error-feedback" *ngIf="hasBeenSubmited('Cylinders')">
+                            <p-message styleClass="mb-2" *ngIf="form.controls.Cylinders.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o valor dos cilindros</p-message>
+                        </div>
+                    </div>
+
+                    <div class='col-md-4'>
+                        <label for="Clocks" class="block font-bold mb-3">Relógio</label>
+                        <p-inputnumber formControlName="Clocks" [useGrouping]="false" class="w-full mb-2"  />
+
+                        <div class="error-feedback" *ngIf="hasBeenSubmited('Clocks')">
+                            <p-message styleClass="mb-2" *ngIf="form.controls.Clocks.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o valor dos relógios</p-message>
+                        </div>
+                    </div>
+
+                </div>
 
 
-        </form>
+            </form>
 
 
-        <ng-template #footer>
-            <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
-            <p-button [disabled]="isLoading" (click)="submit()" type="submit" label="Salvar" icon="pi pi-check" />
+            <ng-template #footer>
+                <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
+                <p-button [disabled]="isLoading" (click)="submit()" type="submit" label="Salvar" icon="pi pi-check" />
+            </ng-template>
+
         </ng-template>
-
-    </ng-template>
     </p-dialog>
 
     <list-engines [engines]="engines" [totalRecords]="totalRecords" [limitPerPage]="limitPerPage" ></list-engines>
@@ -225,7 +223,7 @@ export class EnginesPage implements OnInit {
     submitted: boolean = false
     isSubmited: boolean = false
     isLoading: boolean = false
-    userDialog: boolean = false
+    engineDialog: boolean = false
     totalRecords = 0
     limitPerPage = 20
 
@@ -293,13 +291,13 @@ export class EnginesPage implements OnInit {
     }
 
     hideDialog() {
-        this.userDialog = false;
-        this.submitted = false;
+        this.engineDialog = false
+        this.submitted = false
     }
 
     openNew() {
-        this.submitted = false;
-        this.userDialog = true;
+        this.submitted = false
+        this.engineDialog = true
     }
 
     submit() {

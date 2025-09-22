@@ -400,12 +400,10 @@ export class ListAccessoriesComponent {
                 this.form.get("AccessoryTypeId")?.setValue(res.data['AccessoryTypeId'])
                 this._id = id
             }, 
-            error: (err) => {
+            error: (err: any) => {
                 this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar o acessório .' });
             },
         })
-
-
     }
 
     onSubmit(){
