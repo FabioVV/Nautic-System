@@ -88,7 +88,7 @@ export interface BoatNU {
 
                 <div class='col-md-6'>
                     <label for="Details" class="block font-bold mb-3">Novo/Usado</label>
-                    <p-select [invalid]="isInvalid('NewUsed')" [options]="boatNU" formControlName="NewUsed" optionLabel="name" placeholder="Selecione o se é usado ou novo" class="w-full mb-2" />
+                    <p-select [invalid]="isInvalid('NewUsed')" [options]="boatNU" formControlName="NewUsed" optionLabel="name" placeholder="Selecione se o casco é usado ou novo" class="w-full mb-2" />
                     @if (isInvalid('NewUsed')) {
                         <p-message severity="error" size="small" variant="simple">Por favor, selecione um tipo</p-message>
                     }
