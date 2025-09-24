@@ -211,7 +211,7 @@ interface ExportColumn {
                 <div class='row'>
                     <div class='col-md-4'>
                         <label for="Model" class="block font-bold mb-3">Peso </label>
-                        <p-inputnumber formControlName="Weight" suffix=" KG"  mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="5" class="w-full mb-2" locale="pt-BR" />
+                        <p-inputnumber formControlName="Weight" suffix=" KG" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="5" class="w-full mb-2" locale="pt-BR" />
 
                         <div class="error-feedback" *ngIf="hasBeenSubmited('Weight')">
                             <p-message styleClass="mb-2" *ngIf="form.controls.Weight.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o preço de venda</p-message>

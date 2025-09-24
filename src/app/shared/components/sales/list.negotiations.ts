@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, ElementRef, HostListener, inject, input, Input, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, computed, ElementRef, HostListener, inject, signal, ViewChild } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
@@ -30,12 +30,13 @@ import { AutoCompleteModule } from 'primeng/autocomplete';
 import { InputMaskModule } from 'primeng/inputmask';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { TabsModule } from 'primeng/tabs';
 
 import { formatBRLMoney, showLoading } from '../utils';
 import { User, UserService } from '../../services/user.service';
-import { AccStatus } from '../../../pages/products/accessories/accessories';
 import { Negotiation, SalesCustomer, SalesService } from '../../services/sales.service';
 import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
+import { SelectItem } from '../utils';
 
 interface Column {
     field: string
@@ -48,25 +49,10 @@ interface ExportColumn {
     dataKey: string
 }
 
-export interface UserStatus {
-    name: string
-    code: string
-}
-
-interface Qualified {
-    name: string
-    code: string
-}
-
-interface QualifiedType {
-    name: string
-    code: string
-}
-
 
 @Component({
     selector: 'list-negotiations',
-    imports: [DialogModule, CardModule, InputGroupAddonModule, InputNumberModule, InputMaskModule, AutoCompleteModule, InputGroupModule, FontAwesomeModule, ToolbarModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, CardModule, TabsModule, InputGroupAddonModule, InputNumberModule, InputMaskModule, AutoCompleteModule, InputGroupModule, FontAwesomeModule, ToolbarModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrl: "negotiation.css",
     standalone: true,
@@ -112,6 +98,7 @@ interface QualifiedType {
                     [id]="n.id"
                     (dragstart)="dragstart($event, n.id)"
                     (contextmenu)="onContextMenu($event, n)"
+                    (dblclick)="openFollowUp(n.id)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -130,12 +117,13 @@ interface QualifiedType {
             <h5>Inicio de negociação</h5>
             <div class='kb-cards'>
 
-                <p-card *ngFor="let n of stageThree(); trackBy: trackById"
+                <p-card *ngFor="let n of stageTwo(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
                     (contextmenu)="onContextMenu($event, n)"
+                    (dblclick)="openFollowUp(n.id)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -154,12 +142,13 @@ interface QualifiedType {
             <h5>Negociando</h5>
             <div class='kb-cards'>
 
-                <p-card *ngFor="let n of stageFour(); trackBy: trackById"
+                <p-card *ngFor="let n of stageThree(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
                     (contextmenu)="onContextMenu($event, n)"
+                    (dblclick)="openFollowUp(n.id)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -178,12 +167,13 @@ interface QualifiedType {
             <h5>Fechamento</h5>
             <div class='kb-cards'>
 
-                <p-card *ngFor="let n of stageFive(); trackBy: trackById"
+                <p-card *ngFor="let n of stageFour(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
                     (contextmenu)="onContextMenu($event, n)"
+                    (dblclick)="openFollowUp(n.id)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -202,7 +192,7 @@ interface QualifiedType {
             <h5>Entrega</h5>
             <div class='kb-cards'>
 
-                <p-card *ngFor="let n of stageSix(); trackBy: trackById"
+                <p-card *ngFor="let n of stageFive(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
@@ -460,6 +450,189 @@ interface QualifiedType {
         </ng-template>
     </p-dialog>
 
+    <p-dialog [style]="{ width: '1000px' }" [(visible)]="followupDialog" header="Acompanhamento" [modal]="true">
+        <ng-template #content>
+
+            <p-tabs value="0">
+                <p-tablist>
+                    <p-tab value="0">Negociação</p-tab>
+                    <p-tab value="1">Acompanhamento</p-tab>
+                </p-tablist>
+                <p-tabpanels>
+                    <p-tabpanel value="0">
+
+                        <form [formGroup]="updateNegForm" (ngSubmit)="onSubmitUpdate()" style='margin-bottom: 7.5rem;'>
+                            <button id="btn_submit_up" style='display:none;' type="submit"></button>
+                            
+                            <div class='row'>
+
+                                <div class='col-md-4'>
+                                    <label for="Name" class="block font-bold mb-3">Nome do cliente</label>
+                                    <input formControlName="Name" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                                    
+                                    <div class="error-feedback" *ngIf="hasBeenSubmited('Name')">
+                                        <p-message styleClass="mb-2" *ngIf="updateNegForm.controls.Name.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o nome do cliente</p-message>
+                                    </div>
+                                </div>
+
+                                <div class='col-md-4'>
+                                    <label for="Email" class="block font-bold mb-3">E-mail do cliente</label>
+                                    <input formControlName="Email" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                                    
+                                    <div class="error-feedback" *ngIf="hasBeenSubmited('Email')">
+                                        <p-message styleClass="mb-2" *ngIf="updateNegForm.controls.Email.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o e-mail do cliente</p-message>
+                                    </div>
+                                </div>
+
+                                <div class='col-md-4'>
+                                    <label for="Phone" class="block font-bold mb-3">Telefone do cliente</label>
+                                    <p-inputmask mask="99-99999-9999" class="w-full md:w-[30rem] mb-2" formControlName="Phone" placeholder="49-99999-9999" />
+                                    
+                                    <div class="error-feedback" *ngIf="hasBeenSubmited('Phone')">
+                                        <p-message styleClass="mb-2" *ngIf="updateNegForm.controls.Phone.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o telefone do cliente</p-message>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class='row'>
+
+                                <div class='col-md-4'>
+                                    <label for="ComMeanName" class="block font-bold mb-3">Meio de comunicação que trouxe o cliente</label>
+
+                                    <p-inputgroup>
+                                        <p-inputgroup-addon pTooltip="Digite na caixa ao lado para pesquisar um meio e selecione na lista" tooltipPosition="top" [style]="{ cursor:'help' }">
+                                            <i class="pi pi-filter"></i>
+                                        </p-inputgroup-addon>
+
+                                        <p-autocomplete class="w-full mb-2" formControlName="ComMeanName" placeholder="Procure o tipo" [suggestions]="autoFilteredValue" optionLabel="name" (completeMethod)="filterClassAutocomplete($event)" (onSelect)="setComMeanChoosen($event)" />
+                                    </p-inputgroup>
+
+                                    <div class="error-feedback" *ngIf="hasBeenSubmited('ComMeanName')">
+                                        <p-message styleClass="mb-2" *ngIf="updateNegForm.controls.ComMeanName.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o nome do cliente</p-message>
+                                    </div>
+                                </div>
+
+                                <div class='col-md-4'>
+                                    <label for="EstimatedValue" class="block font-bold mb-3">Valor estimado</label>
+                                    <p-inputnumber formControlName="EstimatedValue" class="w-full mb-2" mode="currency" currency="BRL" locale="pt-BR" />
+
+                                    <div class="error-feedback" *ngIf="hasBeenSubmited('EstimatedValue')">
+                                        <p-message styleClass="mb-2" *ngIf="updateNegForm.controls.EstimatedValue.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o valor estimado da embarcação</p-message>
+                                    </div>
+                                </div>
+
+                                <div class='col-md-4'>
+                                    <label for="BoatName" class="block font-bold mb-3">Embarcação aproximada</label>
+                                    <input formControlName="BoatName" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+
+                                    <div class="error-feedback" *ngIf="hasBeenSubmited('BoatName')">
+                                        <p-message styleClass="mb-2" *ngIf="updateNegForm.controls.BoatName.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar a embarcação escolhida do cliente</p-message>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class='row'>
+
+                                <div class='col-md-4'>
+                                    <label for="Name" class="block font-bold mb-3">Lead qualificado?</label>
+
+                                    <p-select [invalid]="isInvalidUpdate('Qualified')" [options]="qualified" formControlName="Qualified" optionLabel="name" placeholder="Selecione se o lead é qualificado ou não" class="w-full mb-2" />
+                                    @if (isInvalidUpdate('Qualified')) {
+                                        <p-message severity="error" size="small" variant="simple">Por favor, selecione se o lead é qualificado ou não</p-message>
+                                    }
+                                </div>
+
+                            </div>
+
+                            <div *ngIf="showQualifiedDiv" class='row'>
+                                <div class='col-md-12'>
+                                    <label for="" class="block font-bold mb-3">Tipo de qualificação</label>
+                                    <p-select [invalid]="isInvalidUpdate('QualifiedType')" [options]="qualifiedType" formControlName="QualifiedType" optionLabel="name" placeholder="Selecione o tipo de qualificação" class="w-full mb-2" />
+                                
+                                    @if (isInvalidUpdate('Qualified') && showQualifiedDiv) {
+                                        <p-message severity="error" size="small" variant="simple">Por favor, selecione se o tipo de qualificação do lead</p-message>
+                                    }
+                                </div>
+
+                            </div>
+
+                            <hr>
+
+                            <div class='row'>
+
+                                <div class='col-md-4'>
+                                    <label for="City" class="block font-bold mb-3">Cidade do cliente</label>
+                                    <input formControlName="City" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                                    
+                                    <div class="error-feedback" *ngIf="hasBeenSubmited('City')">
+                                        <p-message styleClass="mb-2" *ngIf="updateNegForm.controls.City.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar a cidade do cliente</p-message>
+                                    </div>
+                                </div>
+
+                                <div class='col-md-4'>
+                                    <label for="NavigationCity" class="block font-bold mb-3">E-mail do cliente</label>
+                                    <input formControlName="NavigationCity" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                                    
+                                    <div class="error-feedback" *ngIf="hasBeenSubmited('NavigationCity')">
+                                        <p-message styleClass="mb-2" *ngIf="updateNegForm.controls.NavigationCity.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar a cidade de navegação do cliente</p-message>
+                                    </div>
+                                </div>
+
+                                <div class='col-md-4'>
+                                    <label for="BoatCapacity" class="block font-bold mb-3">Capacidade da embarcação</label>
+                                    <p-inputnumber  [useGrouping]="false" class="w-full mb-2" formControlName="BoatCapacity" placeholder="*" />
+                                    
+                                    <div class="error-feedback" *ngIf="hasBeenSubmited('BoatCapacity')">
+                                        <p-message styleClass="mb-2" *ngIf="updateNegForm.controls.BoatCapacity.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar a capacidade da embarcação</p-message>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class='row'> 
+                                <div class='col-md-4'>
+                                    <label for="" class="block font-bold mb-3">Embarcação nova/usada</label>
+                                    <p-select [invalid]="isInvalidUpdate('NewUsed')" [options]="NewUsed" formControlName="NewUsed" optionLabel="name" placeholder="Selecione o tipo da embarcação" class="w-full mb-2" />
+                                
+                                    @if (isInvalidUpdate('NewUsed')) {
+                                        <p-message severity="error" size="small" variant="simple">Por favor, selecione o tipo da embarcação</p-message>
+                                    }
+                                </div>
+
+                                <div class='col-md-4'>
+                                    <label for="" class="block font-bold mb-3">Embarcação cabinada/aberta</label>
+                                    <p-select [invalid]="isInvalidUpdate('CabinatedOpen')" [options]="CabinatedOpen" formControlName="CabinatedOpen" optionLabel="name" placeholder="Selecione o tipo da embarcação" class="w-full mb-2" />
+                                
+                                    @if (isInvalidUpdate('CabinatedOpen') && showQualifiedDiv) {
+                                        <p-message severity="error" size="small" variant="simple">Por favor, selecione se o tipo da embarcação</p-message>
+                                    }
+                                </div>
+
+
+                            </div>
+
+                        </form>
+
+
+                    </p-tabpanel>
+                    <p-tabpanel value="1">
+
+
+                    </p-tabpanel>
+                </p-tabpanels>
+            </p-tabs>
+
+
+            <ng-template #footer>
+                <p-button label="Cancelar" icon="pi pi-times" text (click)="hideFollowUp()" />
+                <p-button [disabled]="isLoading" (click)="submitUpdate()" type="submit" label="Salvar" icon="pi pi-check" />
+            </ng-template>
+
+        </ng-template>
+    </p-dialog>
+
     <p-confirmdialog
         [rejectLabel]="rejectLabel"
         [acceptLabel]="confirmLabel"
@@ -493,15 +666,15 @@ export class ListNegotiationsComponent {
     stageThree = computed(() => this.negotiations()?.filter(n => n.stage === 3))
     stageFour = computed(() => this.negotiations()?.filter(n => n.stage === 4))
     stageFive = computed(() => this.negotiations()?.filter(n => n.stage === 5))
-    stageSix = computed(() => this.negotiations()?.filter(n => n.stage === 6))
 
-    id: string = ""
-    _name: string = ""
+    _id: string = ""
     totalRecords = 0
     limitPerPage = 20
     submitted: boolean = false
     accDialog: boolean = false
     negotiationDialog: boolean = false
+    followupDialog: boolean = false
+
     birthdaysDialog: boolean = false
     panelExpVisible: boolean = false
     typingTimeout: any
@@ -509,6 +682,26 @@ export class ListNegotiationsComponent {
 
     negotiationSearch: string = ""
 
+    updateNegForm = this.formBuilder.group({
+        Name: ['', [Validators.required]],
+        Email: ['', [Validators.required]],
+        Phone: ['', [Validators.required]],
+        EstimatedValue: ['', [Validators.required]],
+        Qualified: ['', [Validators.required]],
+        QualifiedType: ['', []],
+        BoatName: ['', [Validators.required]],
+
+        City: ['', []],
+        NavigationCity: ['', []],
+        BoatCapacity: ['', []],
+        NewUsed: ['', []],
+        CabinatedOpen: ['', []],
+
+
+        ComMeanName: ['', [Validators.required]],
+        ComMeanId: ['', [Validators.required]],
+        UserId: ['', []],
+    })
 
     form = this.formBuilder.group({
         Name: ['', [Validators.required]],
@@ -529,19 +722,21 @@ export class ListNegotiationsComponent {
     customers = signal<SalesCustomer[]>([])
 
     selectedData!: any[] 
-    selectedAccState: AccStatus | undefined = { name: "Indiferente", code: "" }
-    accStates: AccStatus[] | undefined
+    selectedAccState: SelectItem = { name: "Indiferente", code: "" }
+    accStates: SelectItem[] | undefined
     autoFilteredValue: any[] = []
 
-    cols!: Column[];
-    exportColumns!: ExportColumn[];
+    cols!: Column[]
+    exportColumns!: ExportColumn[]
 
     confirmLabel = "Confirmar"
     rejectLabel = "Cancelar"
 
-    qualified: Qualified[] = [{ name: 'Sim', code: 'Y' }, { name: 'Não', code: 'N' }]
+    qualified: SelectItem[] = [{ name: 'Sim', code: 'Y' }, { name: 'Não', code: 'N' }]
+    CabinatedOpen: SelectItem[] = [ { name: 'Aberta', code: 'A' }, { name: 'Cabinada', code: 'C' }]
+    NewUsed: SelectItem[] = [{ name: 'Nova', code: 'N' }, { name: 'Usada', code: 'U' }]
 
-    qualifiedType: QualifiedType[] = [
+    qualifiedType: SelectItem[] = [
         { name: 'Muito decidido. Intenção clara de compra imediata', code: 'A' }, 
         { name: 'Interesse real, mas precisa de mais informação', code: 'B' }, 
         { name: 'Inicio de pesquisa, médio/longo prazo', code: 'C' }
@@ -804,6 +999,51 @@ export class ListNegotiationsComponent {
         document.getElementById(`btn_submit`)?.click()
     }
 
+    submitUpdate() {
+        document.getElementById(`btn_submit_up`)?.click()
+    }
+
+    onSubmitUpdate() {
+        this.submitted = true
+
+        if (this.updateNegForm.valid) {
+            this.isLoading = true
+
+            // @ts-ignore
+            if(this.updateNegForm.value.Qualified?.code == 'N'){
+                this.updateNegForm.get("Qualified")?.setValue('N')
+            } else {
+                this.updateNegForm.get("Qualified")?.setValue('S')
+            }
+
+            // @ts-ignore
+            this.updateNegForm.get("QualifiedType")?.setValue(this.updateNegForm.value.QualifiedType?.code)
+            this.updateNegForm.get("UserId")?.setValue(this.userService?.getUserData()?.id)
+
+            this.salesService.updateNegotiation(this._id, this.updateNegForm.value).subscribe({
+                next: (res: any) => {
+                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Negociação atualizada com sucesso' });
+                    //this.loadCommunicationMeans()
+                    
+                    this.submitted = false
+                    this.isLoading = false
+                    this.hideDialog()
+                    this.updateNegForm.reset()
+
+                    window.location.reload()
+                },
+                error: (err) => {
+                    if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
+                    } else {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                    }
+                    this.isLoading = false
+                },
+
+            })
+        }
+    }
+        
     onSubmit() {
         this.submitted = true
 
@@ -823,7 +1063,7 @@ export class ListNegotiationsComponent {
 
             this.salesService.registerNegotiation(this.form.value).subscribe({
                 next: (res: any) => {
-                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Meio registrado com sucesso' });
+                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Negociação registrada com sucesso' });
                     //this.loadCommunicationMeans()
                     
                     this.submitted = false
@@ -846,13 +1086,13 @@ export class ListNegotiationsComponent {
     }
 
     isInvalid(controlName: string) {
-        const control = this.form.get(controlName);
-        return control?.invalid && (control.touched || this.submitted);
+        const control = this.form.get(controlName)
+        return control?.invalid && (control.touched || this.submitted)
     }
 
-    hideDialog() {
-        this.negotiationDialog = false
-        this.submitted = false
+    isInvalidUpdate(controlName: string) {
+        const control = this.updateNegForm.get(controlName)
+        return control?.invalid && (control.touched || this.submitted)
     }
 
     openCustomerBirthdays(){
@@ -874,6 +1114,73 @@ export class ListNegotiationsComponent {
 
     }
 
+    openFollowUp(id: number) {
+        this.submitted = false
+        this.followupDialog = true
+
+        this.salesService.getNegotiation(id?.toString()).pipe(finalize(() => { })).subscribe({
+            next: (res: any) => {
+
+                if(res.data['qualified_type']?.trimEnd() == 'A'){
+                    //@ts-ignore
+                    this.updateNegForm.get("QualifiedType")?.setValue(this.qualifiedType[0])
+                } else if(res.data['qualified_type']?.trimEnd() == 'B'){
+                    //@ts-ignore
+                    this.updateNegForm.get("QualifiedType")?.setValue(this.qualifiedType[1])
+                } else {
+                    //@ts-ignore
+                    this.updateNegForm.get("QualifiedType")?.setValue(this.qualifiedType[2])
+                }
+
+                if(res.data['cab_open']?.trimEnd() == 'A'){
+                    //@ts-ignore
+                    this.updateNegForm.get("CabinatedOpen")?.setValue(this.CabinatedOpen[0])
+                } else {
+                    //@ts-ignore
+                    this.updateNegForm.get("CabinatedOpen")?.setValue(this.CabinatedOpen[1])
+                }
+
+                if(res.data['new_used']?.trimEnd() == 'N'){
+                    //@ts-ignore
+                    this.updateNegForm.get("NewUsed")?.setValue(this.NewUsed[0])
+                } else {
+                    //@ts-ignore
+                    this.updateNegForm.get("NewUsed")?.setValue(this.NewUsed[1])
+                }
+
+                //@ts-ignore
+                this.updateNegForm.get("Name")?.setValue(res.data['customer_name'])
+                this.updateNegForm.get("Email")?.setValue(res.data['customer_email'])
+                this.updateNegForm.get("Phone")?.setValue(res.data['customer_phone'])
+
+                this.updateNegForm.get("City")?.setValue(res.data['city'])
+                this.updateNegForm.get("NavigationCity")?.setValue(res.data['navigation_city'])
+                this.updateNegForm.get("BoatCapacity")?.setValue(res.data['boat_capacity'])
+
+                this.updateNegForm.get("ComMeanName")?.setValue(res.data['com_name'])
+                this.updateNegForm.get("ComMeanId")?.setValue(res.data['id_mean_communication'])
+                this.updateNegForm.get("BoatName")?.setValue(res.data['boat_name'])
+                this.updateNegForm.get("EstimatedValue")?.setValue(res.data['estimated_value'])
+                this.updateNegForm.get("UserId")?.setValue(this.userService?.getUserData()?.id)
+                //@ts-ignore
+                this.updateNegForm.get("Qualified")?.setValue(res.data['qualified'] == "S" ? this.qualified[0] : this.qualified[1])
+
+            },
+            error: (err) => {
+                if (err.status) {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar negociação.' });
+                }
+                this.isLoading = false
+            },
+        })
+
+    }
+
+    hideFollowUp() {
+        this.followupDialog = false
+        this.submitted = false
+    }
+
     openNewLead() {
         this.submitted = false
         this.negotiationDialog = true
@@ -881,6 +1188,11 @@ export class ListNegotiationsComponent {
 
     showPanelExp() {
         this.panelExpVisible = true
+    }
+
+    hideDialog() {
+        this.negotiationDialog = false
+        this.submitted = false
     }
 
     onGlobalFilter(event: any) {

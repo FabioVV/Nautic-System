@@ -68,8 +68,16 @@ export class SalesService {
         return this.http.post(`${environment.apiBaseURL}/sales/negotiations`, formData)
     }
 
+    updateNegotiation(id: string, formData: any) {
+        return this.http.patch(`${environment.apiBaseURL}/sales/negotiations/${id}`, formData)
+    }
+
     getNegotiations(search: string){
         return this.http.get(`${environment.apiBaseURL}/sales/negotiations?search=${search}`)
+    }
+
+    getNegotiation(id: string) {
+        return this.http.get(`${environment.apiBaseURL}/sales/negotiations/${id}`)
     }
 
     registerComMean(formData: any) {
