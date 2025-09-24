@@ -37,6 +37,7 @@ import { User, UserService } from '../../services/user.service';
 import { Negotiation, SalesCustomer, SalesService } from '../../services/sales.service';
 import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { SelectItem } from '../utils';
+import { SalesCustomerModal } from './frame.user';
 
 interface Column {
     field: string
@@ -52,7 +53,7 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-negotiations',
-    imports: [DialogModule, CardModule, TabsModule, InputGroupAddonModule, InputNumberModule, InputMaskModule, AutoCompleteModule, InputGroupModule, FontAwesomeModule, ToolbarModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, SalesCustomerModal, CardModule, TabsModule, InputGroupAddonModule, InputNumberModule, InputMaskModule, AutoCompleteModule, InputGroupModule, FontAwesomeModule, ToolbarModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrl: "negotiation.css",
     standalone: true,
@@ -624,7 +625,7 @@ interface ExportColumn {
                 </p-tabpanels>
             </p-tabs>
 
-
+            
             <ng-template #footer>
                 <p-button label="Cancelar" icon="pi pi-times" text (click)="hideFollowUp()" />
                 <p-button [disabled]="isLoading" (click)="submitUpdate()" type="submit" label="Salvar" icon="pi pi-check" />
@@ -640,6 +641,8 @@ interface ExportColumn {
         [rejectAriaLabel]="rejectLabel"
         [style]="{ width: '550px' }"
     />
+    <button (click)="openCustomerSales(1)">teste</button>
+    <open-customer-sales #customerModal title="Cliente"/>
     `,
 })
 export class ListNegotiationsComponent {
@@ -654,8 +657,9 @@ export class ListNegotiationsComponent {
     faCakeCandles = faCakeCandles
 
 
-    //@ts-ignore
-    @ViewChild('cm') cm: ContextMenu
+    @ViewChild('cm') cm!: ContextMenu
+    @ViewChild('customerModal') customerModal!: SalesCustomerModal
+    
     elementRef = inject(ElementRef)
     pcard_menu: MenuItem[] | undefined
     selectedCard: any
@@ -741,6 +745,10 @@ export class ListNegotiationsComponent {
         { name: 'Interesse real, mas precisa de mais informação', code: 'B' }, 
         { name: 'Inicio de pesquisa, médio/longo prazo', code: 'C' }
     ]
+
+    openCustomerSales(id: number){
+        this.customerModal.showCustomer(id.toString())
+    }
 
     onPageChange(e: any) {
         this.loadNegotiations()
