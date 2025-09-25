@@ -3,6 +3,7 @@ import { AppLayout } from './app/layout/component/app.layout';
 import { Dashboard } from './app/pages/dashboard/dashboard';
 import { Notfound } from './app/pages/notfound/notfound';
 import { authGuard } from './app/shared/guards/auth.guard';
+import { SalesCustomer } from './app/shared/components/sales/iframe.user';
 
 
 export const appRoutes: Routes = [
@@ -34,6 +35,13 @@ export const appRoutes: Routes = [
         component: AppLayout,
         children: [
             { path: '', loadChildren: () => import('./app/pages/sales.routes') },
+        ]
+    },
+
+    {
+        path: "if-customers",
+        children: [
+            { path: ':id', component: SalesCustomer, canActivate: [authGuard], data: { "code": "sales_customer:view" } },
         ]
     },
 

@@ -66,6 +66,6 @@ export class SalesCustomerModal {
         this.myDialog.maximizable = true
         this.myDialog.maximize()
 
-        this.url = this.sanitizer.bypassSecurityTrustUrl(`http://localhost:4200/sales/customer/${this.id}`)
+        this.url = this.sanitizer.bypassSecurityTrustResourceUrl(`http://localhost:4200/if-customers/customer/${this.id}`)
     }
 }
