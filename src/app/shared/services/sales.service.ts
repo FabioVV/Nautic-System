@@ -72,6 +72,10 @@ export class SalesService {
         return this.http.patch(`${environment.apiBaseURL}/sales/negotiations/${id}`, formData)
     }
 
+    createNegotiationHistory(id: string, formData: any) {
+        return this.http.patch(`${environment.apiBaseURL}/sales/negotiations/${id}`, formData)
+    }
+
     getNegotiations(search: string){
         return this.http.get(`${environment.apiBaseURL}/sales/negotiations?search=${search}`)
     }
