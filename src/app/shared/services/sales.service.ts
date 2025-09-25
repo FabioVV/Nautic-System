@@ -30,6 +30,18 @@ export interface ComMean {
     name: string,
 }
 
+
+export interface NegotiationHistory {
+    id: number,
+    id_customer: number,
+    id_mean_communication: number,
+    com_name: string,
+    customer_name: string,
+    description: string,
+    created_at: Date
+}
+
+
 export interface Negotiation {
     id: number,
     id_customer: number,
@@ -73,7 +85,11 @@ export class SalesService {
     }
 
     createNegotiationHistory(id: string, formData: any) {
-        return this.http.patch(`${environment.apiBaseURL}/sales/negotiations/${id}`, formData)
+        return this.http.post(`${environment.apiBaseURL}/sales/negotiations/${id}/history`, formData)
+    }
+
+    GetNegotiationHistory(id: string) {
+        return this.http.get(`${environment.apiBaseURL}/sales/negotiations/${id}/history`)
     }
 
     getNegotiations(search: string){

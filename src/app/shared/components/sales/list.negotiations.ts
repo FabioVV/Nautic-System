@@ -35,10 +35,12 @@ import { TextareaModule } from 'primeng/textarea';
 
 import { formatBRLMoney, showLoading } from '../utils';
 import { User, UserService } from '../../services/user.service';
-import { Negotiation, SalesCustomer, SalesService } from '../../services/sales.service';
+import { Negotiation, NegotiationHistory, SalesCustomer, SalesService } from '../../services/sales.service';
 import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { SelectItem } from '../utils';
 import { SalesCustomerModal } from './frame.user';
+import { SalesAboutPanel } from './about.sales_panel';
+import { ListCustomerNegotiationHistoryComponent } from './list.customer_bhistory';
 
 interface Column {
     field: string
@@ -51,10 +53,9 @@ interface ExportColumn {
     dataKey: string
 }
 
-
 @Component({
     selector: 'list-negotiations',
-    imports: [DialogModule, SalesCustomerModal, CardModule, TextareaModule, TabsModule, InputGroupAddonModule, InputNumberModule, InputMaskModule, AutoCompleteModule, InputGroupModule, FontAwesomeModule, ToolbarModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, ListCustomerNegotiationHistoryComponent, SalesCustomerModal, SalesAboutPanel, CardModule, TextareaModule, TabsModule, InputGroupAddonModule, InputNumberModule, InputMaskModule, AutoCompleteModule, InputGroupModule, FontAwesomeModule, ToolbarModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrl: "negotiation.css",
     standalone: true,
@@ -63,7 +64,6 @@ interface ExportColumn {
     <p-toast></p-toast>
     <p-contextmenu #cm [model]="pcard_menu" (onHide)="onHide()" />
 
-    
     <p-toolbar>
 
         <ng-template #start>
@@ -96,11 +96,12 @@ interface ExportColumn {
             <div class='kb-cards'>
                 <p-card *ngFor="let n of stageOne(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
+                    [attr.data-customer-id]="n.id_customer"
                     draggable="true"
                     [id]="n.id"
                     (dragstart)="dragstart($event, n.id)"
                     (contextmenu)="onContextMenu($event, n)"
-                    (dblclick)="openFollowUp(n.id)"
+                    (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -121,11 +122,12 @@ interface ExportColumn {
 
                 <p-card *ngFor="let n of stageTwo(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
+                    [attr.data-customer-id]="n.id_customer"
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
                     (contextmenu)="onContextMenu($event, n)"
-                    (dblclick)="openFollowUp(n.id)"
+                    (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -146,11 +148,12 @@ interface ExportColumn {
 
                 <p-card *ngFor="let n of stageThree(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
+                    [attr.data-customer-id]="n.id_customer"
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
                     (contextmenu)="onContextMenu($event, n)"
-                    (dblclick)="openFollowUp(n.id)"
+                    (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -171,11 +174,12 @@ interface ExportColumn {
 
                 <p-card *ngFor="let n of stageFour(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
+                    [attr.data-customer-id]="n.id_customer"
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
                     (contextmenu)="onContextMenu($event, n)"
-                    (dblclick)="openFollowUp(n.id)"
+                    (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -196,10 +200,12 @@ interface ExportColumn {
 
                 <p-card *ngFor="let n of stageFive(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
+                    [attr.data-customer-id]="n.id_customer"
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
                     (contextmenu)="onContextMenu($event, n)"
+                    (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -217,67 +223,7 @@ interface ExportColumn {
     </div>
 
     <p-dialog header="Sobre o painel" [modal]="true" [(visible)]="panelExpVisible" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }">
-        <p class="mb-8">
-            1 - Lead:
-            <br/>
-            - Colher dados de comunicação, tais como: Nome, Telefone, E-mail e meio de comunicação.
-        </p>
-
-        <p class="mb-8">
-            2 - Contato pessoal / Inicio de negociação:
-
-            <br/>
-            - De prefêrencia, Marcar uma reunião presencial com o cliente em loja, escritório ou Marina. Caso não seja possivel, pode ser por telefone ou pelo whatsapp
-            <br/>
-            - Definir o perfil da negociação - Respondendo perguntas básicas:
-            <br/>
-            - Qual a cidade do cliente?
-            <br/>
-            - Onde o senhor vai navegar?
-            <br/>
-            - Quantas pessoas o senhor quer levar na embarcação?
-            <br/>
-            - Tamanho da embarcação?
-            <br/>
-            - Cabinada ou proa aberta?
-            <br/>
-            - Barco novo ou usado
-            <br/>
-            - Qual o valor aproximado de investimento?
-        </p>
-        <p class="mb-8">
-            3 - Negociação:
-            <br/>
-            - Proposta de compra do cliente
-            <br/>
-            - Desconto máximo (após proposta do cliente)
-        </p>
-        <p>
-            4 - Fechamento:
-            <br/>
-            - Encaminhar email com etapas do processo até a entrega
-            <br/>
-            - Assinatura do contrato
-            <br/>
-            - Pagamento sinal
-            <br/>
-            - Pagamento de parcelas
-            <br/>
-            - Burocrácia do trade in
-            <br/>
-            - Análise de crédito bancário
-        </p>
-        <p>
-            5 - Entrega:
-            <br/>
-            - Entrada do documento na marinha
-            <br/>
-            - Vistoria em loja embarcação pronta
-            <br/>
-            - Quitação
-            <br/>
-            - Entrega técnica no seco / água
-        </p>
+        <sales-about-panel />
     </p-dialog>
 
     <p-dialog header="Clientes aniversariantes" [modal]="true" [(visible)]="birthdaysDialog" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }">
@@ -619,7 +565,7 @@ interface ExportColumn {
 
                     </p-tabpanel>
                     <p-tabpanel value="1">
-                        <form [formGroup]="acoForm" (ngSubmit)="onSubmitUpdateAco()" style='margin-bottom: 7.5rem;'>
+                        <form [formGroup]="acoForm" (ngSubmit)="onSubmitUpdateAco()" >
                             <button id="btn_submit_acom" style='display:none;' type="submit"></button>
 
                             <div class='row'>
@@ -643,7 +589,7 @@ interface ExportColumn {
                                             <i class="pi pi-filter"></i>
                                         </p-inputgroup-addon>
 
-                                        <p-autocomplete class="w-full mb-2" formControlName="ComMeanName" placeholder="Procure o tipo" [suggestions]="autoFilteredValue" optionLabel="name" (completeMethod)="filterClassAutocomplete($event)" (onSelect)="setComMeanChoosen($event)" />
+                                        <p-autocomplete class="w-full mb-2" formControlName="ComMeanName" placeholder="Procure o tipo" [suggestions]="autoFilteredValue" optionLabel="name" (completeMethod)="filterClassAutocomplete($event)" (onSelect)="setComMeanChoosenAcom($event)" />
                                     </p-inputgroup>
 
                                     <div class="error-feedback" *ngIf="hasBeenSubmitedAco('ComMeanName')">
@@ -653,6 +599,8 @@ interface ExportColumn {
                             </div>
 
                         </form>
+
+                        <list-negotiation-customer-history #negHistory/>
 
                     </p-tabpanel>
                 </p-tabpanels>  
@@ -691,7 +639,8 @@ export class ListNegotiationsComponent {
 
     @ViewChild('cm') cm!: ContextMenu
     @ViewChild('customerModal') customerModal!: SalesCustomerModal
-    
+    @ViewChild('negHistory') negotiationHistory!: ListCustomerNegotiationHistoryComponent
+
     elementRef = inject(ElementRef)
     pcard_menu: MenuItem[] | undefined
     selectedCard: any
@@ -704,6 +653,8 @@ export class ListNegotiationsComponent {
     stageFive = computed(() => this.negotiations()?.filter(n => n.stage === 5))
 
     _id: string = ""
+    _customer_id: string = ""
+    _stage: string = ""
     totalRecords = 0
     limitPerPage = 20
     submitted: boolean = false
@@ -719,9 +670,9 @@ export class ListNegotiationsComponent {
     negotiationSearch: string = ""
 
     updateNegForm = this.formBuilder.group({
-        Name: ['', [Validators.required]],
-        Email: ['', [Validators.required]],
-        Phone: ['', [Validators.required]],
+        Name: [{value: '', disabled: true}, [Validators.required]],
+        Email: [{value: '', disabled: true}, [Validators.required]],
+        Phone: [{value: '', disabled: true}, [Validators.required]],
         EstimatedValue: ['', [Validators.required]],
         Qualified: ['', [Validators.required]],
         QualifiedType: ['', []],
@@ -733,7 +684,7 @@ export class ListNegotiationsComponent {
         NewUsed: ['', []],
         CabinatedOpen: ['', []],
 
-        ComMeanName: ['', [Validators.required]],
+        ComMeanName: [{value: '', disabled: true}, [Validators.required]],
         ComMeanId: ['', [Validators.required]],
         UserId: ['', []],
     })
@@ -757,6 +708,8 @@ export class ListNegotiationsComponent {
         ComMeanName: ['', [Validators.required]],
         ComMeanId: ['', [Validators.required]],
         UserId: ['', []],
+        CustomerId: ['', []],
+        Stage: ['', []]
     })
 
     ComMeans: any[] = []
@@ -845,14 +798,14 @@ export class ListNegotiationsComponent {
                 label: 'Acompanhamento',
                 icon: 'pi pi-user-edit',
                 command: (e: any) => {
-                    this.openFollowUp(this.selectedCard?.id)
+                    this.openFollowUp(this.selectedCard?.id, this.selectedCard.id_customer, this.selectedCard.stage)
                 }
             },
             {
                 label: 'Editar cliente',
                 icon: 'pi pi-user-edit',
                 command: () => {
-                    console.log(this.selectedCard)
+                    this.openCustomerSales(parseInt(this._customer_id))
                 }
             },
             {
@@ -1017,6 +970,13 @@ export class ListNegotiationsComponent {
 
         return false
     }
+
+    setComMeanChoosenAcom(e: any){
+        //@ts-ignore
+        this.acoForm.get("ComMeanName")?.setValue(e.value.name)
+        //@ts-ignore
+        this.acoForm.get("ComMeanId")?.setValue(e.value.id)
+    }
     
     setComMeanChoosen(e: any){
         //@ts-ignore
@@ -1053,12 +1013,19 @@ export class ListNegotiationsComponent {
 
     onSubmitUpdateAco(){
         this.submitted = true
+        console.log(this.acoForm.value)
 
         if (this.acoForm.valid) {
             this.isLoading = true
 
             // @ts-ignore
             this.acoForm.get("UserId")?.setValue(this.userService?.getUserData()?.id)
+            // @ts-ignore
+            this.acoForm.get("CustomerId")?.setValue(parseInt(this._customer_id))
+            // @ts-ignore
+            this.acoForm.get("Stage")?.setValue(parseInt(this._stage))
+
+            delete this.acoForm.value.ComMeanName
 
             this.salesService.createNegotiationHistory(this._id, this.acoForm.value).subscribe({
                 next: (res: any) => {
@@ -1067,10 +1034,11 @@ export class ListNegotiationsComponent {
                     
                     this.submitted = false
                     this.isLoading = false
-                    this.hideDialog()
+                    //this.hideFollowUp()
                     this.acoForm.reset()
 
-                    window.location.reload()
+                    this.negotiationHistory.loadNegotiationHistory(this._id)
+
                 },
                 error: (err) => {
                     if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
@@ -1109,10 +1077,10 @@ export class ListNegotiationsComponent {
                     
                     this.submitted = false
                     this.isLoading = false
-                    this.hideDialog()
+                    this.hideFollowUp()
                     this.updateNegForm.reset()
 
-                    window.location.reload()
+                    this.loadNegotiations()
                 },
                 error: (err) => {
                     if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
@@ -1153,7 +1121,7 @@ export class ListNegotiationsComponent {
                     this.hideDialog()
                     this.form.reset()
 
-                    window.location.reload()
+                    this.loadNegotiations()
                 },
                 error: (err) => {
                     if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
@@ -1196,13 +1164,15 @@ export class ListNegotiationsComponent {
 
     }
 
-    openFollowUp(id: number) {
+    openFollowUp(id: number, id_customer: number, stage: number) {
         this.submitted = false
         this.followupDialog = true
 
         this.salesService.getNegotiation(id?.toString()).pipe(finalize(() => { })).subscribe({
             next: (res: any) => {
-                this._id = id.toString()
+                this._id = id?.toString()
+                this._customer_id = id_customer?.toString()
+                this._stage = stage?.toString()
 
                 if(res.data['qualified_type']?.trimEnd() == 'A'){
                     //@ts-ignore
@@ -1248,6 +1218,8 @@ export class ListNegotiationsComponent {
                 //@ts-ignore
                 this.updateNegForm.get("Qualified")?.setValue(res.data['qualified'] == "S" ? this.qualified[0] : this.qualified[1])
 
+
+                this.negotiationHistory.loadNegotiationHistory(this._id)
             },
             error: (err) => {
                 if (err.status) {

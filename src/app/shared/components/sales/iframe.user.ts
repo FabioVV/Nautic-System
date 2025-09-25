@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, ViewChild } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
@@ -23,10 +23,10 @@ import { Dialog } from 'primeng/dialog'
 import { showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
 import { SalesService } from '../../services/sales.service';
-import { DomSanitizer } from '@angular/platform-browser';
+import { Route, Router } from '@angular/router';
 
 @Component({
-    selector: 'open-customer-sales',
+    selector: 'open-customer-sales-modal',
     imports: [DialogModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
@@ -34,12 +34,10 @@ import { DomSanitizer } from '@angular/platform-browser';
 
     template: `
     <p-toast></p-toast>
-    <p-dialog #cdialog [header]="title" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" >
-        <iframe id="customer_iframe" [src]="url" frameborder="0" marginwidth="0" marginheight="0" style="width: 100%; height: 99%;"></iframe>
-    </p-dialog>
+        AAAAA
     `,
 })
-export class SalesCustomerModal {
+export class SalesCustomer {
     constructor(
         public formBuilder: FormBuilder,
         private messageService: MessageService,
@@ -48,24 +46,14 @@ export class SalesCustomerModal {
     ) { }
 
     @ViewChild('cdialog') myDialog!: Dialog
-    @Input() title: any
-    private sanitizer = inject(DomSanitizer)
 
     visible: boolean = false
     id: string = ""
-    url: any
+
 
     ngOnInit() {
 
     }
 
-    showCustomer(id: string) {
-        this.visible = true
-        this.id = id
 
-        this.myDialog.maximizable = true
-        this.myDialog.maximize()
-
-        this.url = this.sanitizer.bypassSecurityTrustUrl(`http://localhost:4200/sales/customer/${this.id}`)
-    }
 }
