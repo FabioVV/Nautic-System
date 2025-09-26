@@ -24,6 +24,8 @@ import { showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
 import { AccStatus } from '../../../pages/products/accessories/accessories';
 import { NegotiationHistory, SalesService } from '../../services/sales.service';
+import { formatBRLDate } from '../utils';
+
 
 interface Column {
     field: string;
@@ -74,7 +76,7 @@ interface ExportColumn {
                             <div class="flex flex-col md:flex-row justify-between md:items-center flex-1 gap-6">
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
                                     <div>
-                                        <span class="font-medium text-secondary " style='color:var(--p-emerald-500);'>Via {{ item.com_name }}</span>
+                                        <span class="font-medium text-secondary " style='color:var(--p-emerald-500);'>Via {{ item.com_name }} as {{ _formatBRLDate(item.created_at) }}</span>
                                         <div class="text-lg font-medium text-surface-900 dark:text-surface-0 mt-2">
                                             {{ item.description }}
                                         </div>
@@ -145,15 +147,18 @@ export class ListCustomerNegotiationHistoryComponent {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-
     ngOnInit() {
 
     }
 
-    loadNegotiationHistory(id: string) {
-        const rmLoading = showLoading()
+    _formatBRLDate(date: any){
+        return formatBRLDate(date)
+    }
 
-        this.salesService.GetNegotiationHistory(id).pipe(finalize(() => { rmLoading() })).subscribe({
+    loadNegotiationHistory(id: string) {
+        //const rmLoading = showLoading()
+
+        this.salesService.GetNegotiationHistory(id).pipe(finalize(() => {  })).subscribe({
             next: (res: any) => {
                 this.negotiationsHistories.set(res.data ?? [])
 

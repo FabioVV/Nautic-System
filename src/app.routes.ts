@@ -4,6 +4,7 @@ import { Dashboard } from './app/pages/dashboard/dashboard';
 import { Notfound } from './app/pages/notfound/notfound';
 import { authGuard } from './app/shared/guards/auth.guard';
 import { SalesCustomer } from './app/shared/components/sales/iframe.user';
+import { AppLayoutStripped } from './app/layout/component/app.stripped.layout';
 
 
 export const appRoutes: Routes = [
@@ -40,8 +41,9 @@ export const appRoutes: Routes = [
 
     {
         path: "if-customers",
+        component: AppLayoutStripped,
         children: [
-            { path: ':id', component: SalesCustomer, canActivate: [authGuard], data: { "code": "sales_customer:view" } },
+            { path: 'customer/:id', component: SalesCustomer, canActivate: [authGuard], data: { "code": "sales_customer:view" } },
         ]
     },
 

@@ -100,7 +100,7 @@ interface ExportColumn {
                     draggable="true"
                     [id]="n.id"
                     (dragstart)="dragstart($event, n.id)"
-                    (contextmenu)="onContextMenu($event, n)"
+                    (contextmenu)="onContextMenu($event, n, n.id_customer, n.id)"
                     (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
@@ -126,7 +126,7 @@ interface ExportColumn {
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
-                    (contextmenu)="onContextMenu($event, n)"
+                    (contextmenu)="onContextMenu($event, n, n.id_customer, n.id)"
                     (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
@@ -152,7 +152,7 @@ interface ExportColumn {
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
-                    (contextmenu)="onContextMenu($event, n)"
+                    (contextmenu)="onContextMenu($event, n, n.id_customer, n.id)"
                     (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
@@ -178,7 +178,7 @@ interface ExportColumn {
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
-                    (contextmenu)="onContextMenu($event, n)"
+                    (contextmenu)="onContextMenu($event, n, n.id_customer, n.id)"
                     (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
@@ -204,7 +204,7 @@ interface ExportColumn {
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
-                    (contextmenu)="onContextMenu($event, n)"
+                    (contextmenu)="onContextMenu($event, n, n.id_customer, n.id)"
                     (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
@@ -385,8 +385,6 @@ interface ExportColumn {
 
                 </div>
 
-
-
             </form>
 
 
@@ -494,12 +492,12 @@ interface ExportColumn {
 
                             </div>
 
-                            <div *ngIf="showQualifiedDiv" class='row'>
+                            <div *ngIf="showQualifiedDivUpdate" class='row'>
                                 <div class='col-md-12'>
                                     <label for="" class="block font-bold mb-3">Tipo de qualificação</label>
                                     <p-select [invalid]="isInvalidUpdate('QualifiedType')" [options]="qualifiedType" formControlName="QualifiedType" optionLabel="name" placeholder="Selecione o tipo de qualificação" class="w-full mb-2" />
                                 
-                                    @if (isInvalidUpdate('Qualified') && showQualifiedDiv) {
+                                    @if (isInvalidUpdate('Qualified') && showQualifiedDivUpdate) {
                                         <p-message severity="error" size="small" variant="simple">Por favor, selecione se o tipo de qualificação do lead</p-message>
                                     }
                                 </div>
@@ -553,13 +551,31 @@ interface ExportColumn {
                                     <label for="" class="block font-bold mb-3">Embarcação cabinada/aberta</label>
                                     <p-select [invalid]="isInvalidUpdate('CabinatedOpen')" [options]="CabinatedOpen" formControlName="CabinatedOpen" optionLabel="name" placeholder="Selecione o tipo da embarcação" class="w-full mb-2" />
                                 
-                                    @if (isInvalidUpdate('CabinatedOpen') && showQualifiedDiv) {
+                                    @if (isInvalidUpdate('CabinatedOpen')) {
                                         <p-message severity="error" size="small" variant="simple">Por favor, selecione se o tipo da embarcação</p-message>
                                     }
                                 </div>
 
+                            </div>
+
+                            <div class='row'>
+                                <div class='col-md-4'>
+                                    <label for="" class="block font-bold mb-3">Já possui embarcação?</label>
+                                    <p-select [invalid]="isInvalidUpdate('HasBoat')" [options]="HasBoat" formControlName="HasBoat" optionLabel="name" placeholder="Selecione uma opção" class="w-full mb-2" />
+                                
+                                    @if (isInvalidUpdate('HasBoat')) {
+                                        <p-message severity="error" size="small" variant="simple">Por favor, selecione se o cliente já possui embarcação</p-message>
+                                    }
+                                </div>
+
+                                <div *ngIf="showHasWhichBoat" class='col-md-8'>
+                                    <label for="" class="block font-bold mb-3">Qual</label>
+                                    <input formControlName="WhichBoat" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                                
+                                </div>
 
                             </div>
+
 
                         </form>
 
@@ -684,6 +700,9 @@ export class ListNegotiationsComponent {
         NewUsed: ['', []],
         CabinatedOpen: ['', []],
 
+        HasBoat: ['', []],
+        WhichBoat: ['', []],
+        
         ComMeanName: [{value: '', disabled: true}, [Validators.required]],
         ComMeanId: ['', [Validators.required]],
         UserId: ['', []],
@@ -730,6 +749,7 @@ export class ListNegotiationsComponent {
     qualified: SelectItem[] = [{ name: 'Sim', code: 'Y' }, { name: 'Não', code: 'N' }]
     CabinatedOpen: SelectItem[] = [ { name: 'Aberta', code: 'A' }, { name: 'Cabinada', code: 'C' }]
     NewUsed: SelectItem[] = [{ name: 'Nova', code: 'N' }, { name: 'Usada', code: 'U' }]
+    HasBoat: SelectItem[] = [{ name: 'Sim', code: 'S' }, { name: 'Não', code: 'N' }]
 
     qualifiedType: SelectItem[] = [
         { name: 'Muito decidido. Intenção clara de compra imediata', code: 'A' }, 
@@ -909,48 +929,14 @@ export class ListNegotiationsComponent {
         }
     }
 
-    update(id: string, _name: string) {
-
-    }
-
-    deactivate(id: string, _type: string) {
-        this.confirmationService.confirm({
-            message: 'Confirma desativar o meio de comunicação ' + `<mark>${_type}</mark>` + ' ?',
-            header: 'Confirmação',
-            icon: 'pi pi-exclamation-triangle',
-            closeOnEscape: true,
-            rejectButtonProps: {
-                label: 'Cancelar',
-                severity: 'secondary',
-                outlined: true,
-            },
-            acceptButtonProps: {
-                label: 'Confirmar',
-                severity: 'danger',
-                outlined: true,
-            },
-            accept: () => {
-                const rmLoading = showLoading()
-
-                this.salesService.deactivateComMean(id).pipe(finalize(() => { rmLoading() })).subscribe({
-                    next: (res: any) => {
-                        this.loadNegotiations(true)
-                        this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Tipo desativado com sucesso' });
-                    },
-                    error: (err) => {
-                        this.messageService.add({ severity: 'error', summary: "Erro", detail: "Ocorreu um erro ao tentar desativar o tipo." });
-                    },
-                })
-            }
-        });
-    }
-
-    onContextMenu(event: any, card: any) {
+    onContextMenu(event: any, card: any, id_customer: any, id: any) {
         this.selectedCard = card
+        this._customer_id = id_customer
+        this._id = id
         this.cm.show(event)
     }
 
-   onHide() {
+    onHide() {
         this.selectedCard = null
     }
 
@@ -962,9 +948,27 @@ export class ListNegotiationsComponent {
         return item.id;
     }
 
-        get showQualifiedDiv(): boolean {
+    get showQualifiedDiv(): boolean {
         const c: any = this.form.get('Qualified')
         if(c!['value']!['code'] == 'Y'){
+            return true
+        }
+
+        return false
+    }
+
+    get showQualifiedDivUpdate(): boolean {
+        const c: any = this.updateNegForm.get('Qualified')
+        if(c!['value']!['code'] == 'Y'){
+            return true
+        }
+
+        return false
+    }
+
+    get showHasWhichBoat(): boolean {
+        const c: any = this.updateNegForm.get('HasBoat')
+        if(c!['value']!['code'] == 'S'){
             return true
         }
 

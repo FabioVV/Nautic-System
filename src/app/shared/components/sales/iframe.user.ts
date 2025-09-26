@@ -19,6 +19,7 @@ import { MessageModule } from 'primeng/message';
 import { finalize } from 'rxjs';
 import { ConfirmationService } from 'primeng/api';
 import { Dialog } from 'primeng/dialog'
+import { TabsModule } from 'primeng/tabs';
 
 import { showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
@@ -27,14 +28,32 @@ import { Route, Router } from '@angular/router';
 
 @Component({
     selector: 'open-customer-sales-modal',
-    imports: [DialogModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, TabsModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
     standalone: true,
 
     template: `
     <p-toast></p-toast>
-        AAAAA
+    
+    <p-tabs value="0">
+        <p-tablist>
+            <p-tab value="0"><i class="pi pi-user"></i> Dados</p-tab>
+            <p-tab value="1"><i class="pi pi-list"></i> Acompanhamentos</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+
+            <p-tabpanel value="0">
+
+            </p-tabpanel>
+
+            <p-tabpanel value="1">
+
+            </p-tabpanel>
+            
+        </p-tabpanels>
+    </p-tabs>
+
     `,
 })
 export class SalesCustomer {
