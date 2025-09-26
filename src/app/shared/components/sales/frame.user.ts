@@ -19,6 +19,8 @@ import { MessageModule } from 'primeng/message';
 import { finalize } from 'rxjs';
 import { ConfirmationService } from 'primeng/api';
 import { Dialog } from 'primeng/dialog'
+import { TabsModule } from 'primeng/tabs';
+import { ListCustomerNegotiationHistoryComponent } from './list.customer_negotiation_history';
 
 import { showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
@@ -27,7 +29,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
     selector: 'open-customer-sales',
-    imports: [DialogModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, TabsModule, MessageModule, ListCustomerNegotiationHistoryComponent, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
     standalone: true,
@@ -35,7 +37,23 @@ import { DomSanitizer } from '@angular/platform-browser';
     template: `
     <p-toast></p-toast>
     <p-dialog #cdialog [header]="title" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" >
-        <iframe id="customer_iframe" [src]="url" frameborder="0" marginwidth="0" marginheight="0" style="width: 100%; height: 99%;"></iframe>
+        <p-tabs value="0">
+            <p-tablist>
+                <p-tab value="0"><i class="pi pi-user"></i> Dados</p-tab>
+                <p-tab value="1"><i class="pi pi-list"></i> Acompanhamentos</p-tab>
+            </p-tablist>
+            <p-tabpanels>
+
+                <p-tabpanel value="0">
+
+                </p-tabpanel>
+
+                <p-tabpanel value="1">
+                    <list-negotiation-customer-history #negHistory/>
+                </p-tabpanel>
+                
+            </p-tabpanels>
+        </p-tabs>
     </p-dialog>
     `,
 })
@@ -48,6 +66,8 @@ export class SalesCustomerModal {
     ) { }
 
     @ViewChild('cdialog') myDialog!: Dialog
+    @ViewChild('negHistory') negotiationHistory!: ListCustomerNegotiationHistoryComponent
+
     @Input() title: any
     private sanitizer = inject(DomSanitizer)
 
@@ -65,7 +85,6 @@ export class SalesCustomerModal {
 
         this.myDialog.maximizable = true
         this.myDialog.maximize()
-
-        this.url = this.sanitizer.bypassSecurityTrustResourceUrl(`http://localhost:4200/if-customers/customer/${this.id}`)
+        this.negotiationHistory.loadNegotiationHistory(this.id)
     }
 }

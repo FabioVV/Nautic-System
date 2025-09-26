@@ -40,7 +40,7 @@ import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { SelectItem } from '../utils';
 import { SalesCustomerModal } from './frame.user';
 import { SalesAboutPanel } from './about.sales_panel';
-import { ListCustomerNegotiationHistoryComponent } from './list.customer_bhistory';
+import { ListNegotiationHistoryComponent } from './list.negotiation_history';
 
 interface Column {
     field: string
@@ -55,7 +55,7 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-negotiations',
-    imports: [DialogModule, ListCustomerNegotiationHistoryComponent, SalesCustomerModal, SalesAboutPanel, CardModule, TextareaModule, TabsModule, InputGroupAddonModule, InputNumberModule, InputMaskModule, AutoCompleteModule, InputGroupModule, FontAwesomeModule, ToolbarModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, ListNegotiationHistoryComponent, SalesCustomerModal, SalesAboutPanel, CardModule, TextareaModule, TabsModule, InputGroupAddonModule, InputNumberModule, InputMaskModule, AutoCompleteModule, InputGroupModule, FontAwesomeModule, ToolbarModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrl: "negotiation.css",
     standalone: true,
@@ -92,7 +92,7 @@ interface ExportColumn {
 
     <div class='kb-painel' style='margin-top:1rem;'>
         <div id='stage1' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)">
-            <h5>Lead</h5>
+            <h5 class='card-text' style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); text-align:center;'>Lead</h5>
             <div class='kb-cards'>
                 <p-card *ngFor="let n of stageOne(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
@@ -117,7 +117,7 @@ interface ExportColumn {
         </div>
 
         <div id='stage2' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-            <h5>Inicio de negociação</h5>
+            <h5 style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Inicio de negociação</h5>
             <div class='kb-cards'>
 
                 <p-card *ngFor="let n of stageTwo(); trackBy: trackById"
@@ -143,7 +143,7 @@ interface ExportColumn {
         </div>
 
         <div id='stage3' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-            <h5>Negociando</h5>
+            <h5 style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Negociando</h5>
             <div class='kb-cards'>
 
                 <p-card *ngFor="let n of stageThree(); trackBy: trackById"
@@ -169,7 +169,7 @@ interface ExportColumn {
         </div>
 
         <div id='stage4' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-            <h5>Fechamento</h5>
+            <h5 style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Fechamento</h5>
             <div class='kb-cards'>
 
                 <p-card *ngFor="let n of stageFour(); trackBy: trackById"
@@ -195,7 +195,7 @@ interface ExportColumn {
         </div>
 
         <div id='stage5' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-            <h5>Entrega</h5>
+            <h5 style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Entrega</h5>
             <div class='kb-cards'>
 
                 <p-card *ngFor="let n of stageFive(); trackBy: trackById"
@@ -576,6 +576,18 @@ interface ExportColumn {
 
                             </div>
 
+                            <div class='row'>
+                                <div class='col-md-4'>
+                                    <label for="" class="block font-bold mb-3">Tamanho mínimo embarcação (aproximado, em Pés)</label>
+                                    <p-inputnumber formControlName="MinPesBoat" class="w-full mb-2" locale="pt-BR" />
+
+                                </div>
+                                <div class='col-md-4'>
+                                    <label for="" class="block font-bold mb-3">Tamanho máximo embarcação (aproximado, em Pés)</label>
+                                    <p-inputnumber formControlName="MaxPesBoat" class="w-full mb-2" locale="pt-BR" />
+                                
+                                </div>
+                            </div>
 
                         </form>
 
@@ -616,7 +628,7 @@ interface ExportColumn {
 
                         </form>
 
-                        <list-negotiation-customer-history #negHistory/>
+                        <list-negotiation-history #negHistory/>
 
                     </p-tabpanel>
                 </p-tabpanels>  
@@ -637,7 +649,7 @@ interface ExportColumn {
         [rejectAriaLabel]="rejectLabel"
         [style]="{ width: '550px' }"
     />
-    <button (click)="openCustomerSales(1)">teste</button>
+
     <open-customer-sales #customerModal title="Cliente"/>
     `,
 })
@@ -655,7 +667,7 @@ export class ListNegotiationsComponent {
 
     @ViewChild('cm') cm!: ContextMenu
     @ViewChild('customerModal') customerModal!: SalesCustomerModal
-    @ViewChild('negHistory') negotiationHistory!: ListCustomerNegotiationHistoryComponent
+    @ViewChild('negHistory') negotiationHistory!: ListNegotiationHistoryComponent
 
     elementRef = inject(ElementRef)
     pcard_menu: MenuItem[] | undefined
@@ -702,7 +714,9 @@ export class ListNegotiationsComponent {
 
         HasBoat: ['', []],
         WhichBoat: ['', []],
-        
+        MinPesBoat: ['', []],
+        MaxPesBoat: ['', []],
+
         ComMeanName: [{value: '', disabled: true}, [Validators.required]],
         ComMeanId: ['', [Validators.required]],
         UserId: ['', []],
@@ -759,7 +773,7 @@ export class ListNegotiationsComponent {
 
     openCustomerSales(id: number){
         this.customerModal.showCustomer(id.toString())
-    }
+    }   
 
     onPageChange(e: any) {
         this.loadNegotiations()
@@ -1063,6 +1077,8 @@ export class ListNegotiationsComponent {
             this.isLoading = true
 
             // @ts-ignore
+            this.updateNegForm.get("HasBoat")?.setValue(this.updateNegForm?.value?.HasBoat?.code)
+            // @ts-ignore
             this.updateNegForm.get("NewUsed")?.setValue(this.updateNegForm.value.NewUsed?.code)
             // @ts-ignore
             this.updateNegForm.get("CabinatedOpen")?.setValue(this.updateNegForm.value.CabinatedOpen?.code)
@@ -1071,8 +1087,6 @@ export class ListNegotiationsComponent {
             // @ts-ignore
             this.updateNegForm.get("QualifiedType")?.setValue(this.updateNegForm.value.QualifiedType?.code)
             this.updateNegForm.get("UserId")?.setValue(this.userService?.getUserData()?.id)
-
-            console.log(this.updateNegForm.get("NewUsed")?.value)
 
             this.salesService.updateNegotiation(this._id, this.updateNegForm.value).subscribe({
                 next: (res: any) => {
@@ -1218,6 +1232,16 @@ export class ListNegotiationsComponent {
                 this.updateNegForm.get("ComMeanId")?.setValue(res.data['id_mean_communication'])
                 this.updateNegForm.get("BoatName")?.setValue(res.data['boat_name'])
                 this.updateNegForm.get("EstimatedValue")?.setValue(res.data['estimated_value'])
+
+                //@ts-ignore
+                this.updateNegForm.get("HasBoat")?.setValue(res.data['has_boat'] == "S" ? this.HasBoat[0] : this.HasBoat[1])
+                this.updateNegForm.get("WhichBoat")?.setValue(res.data['has_boat_which'])
+                //@ts-ignore
+                this.updateNegForm.get("MinPesBoat")?.setValue(parseInt(res.data['boat_length_min']) ?? null)
+                //@ts-ignore
+                this.updateNegForm.get("MaxPesBoat")?.setValue(parseInt(res.data['boat_length_max']) ?? null)
+
+
                 this.updateNegForm.get("UserId")?.setValue(this.userService?.getUserData()?.id)
                 //@ts-ignore
                 this.updateNegForm.get("Qualified")?.setValue(res.data['qualified'] == "S" ? this.qualified[0] : this.qualified[1])

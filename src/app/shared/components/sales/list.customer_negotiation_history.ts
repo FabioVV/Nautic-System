@@ -19,6 +19,13 @@ import { ToastModule } from 'primeng/toast';
 import { ButtonGroupModule } from 'primeng/buttongroup';
 import { MessageModule } from 'primeng/message';
 import { finalize } from 'rxjs';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { AutoCompleteCompleteEvent, AutoCompleteModule } from 'primeng/autocomplete';
+import { InputMaskModule } from 'primeng/inputmask';
+import { TooltipModule } from 'primeng/tooltip';
+import { TextareaModule } from 'primeng/textarea';
+
 
 import { showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
@@ -40,13 +47,50 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-negotiation-customer-history',
-    imports: [DialogModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, TextareaModule, MessageModule, TooltipModule, AutoCompleteModule, InputMaskModule, InputGroupAddonModule, InputGroupModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrls: [],
     standalone: true,
 
     template: `
     <p-toast></p-toast>
+
+    <form [formGroup]="acoForm" (ngSubmit)="onSubmitUpdateAco()" >
+        <button id="btn_submit_acom" style='display:none;' type="submit"></button>
+
+        <div class='row'>
+            <div class='col-md-12'>
+                <label for="Description" class="block font-bold mb-3">Acompanhamento</label>
+                <textarea rows="5" cols="30" pTextarea formControlName="Description" fluid></textarea>
+
+                <div class="error-feedback" *ngIf="hasBeenSubmited('Description')">
+                    <p-message styleClass="mb-2" *ngIf="acoForm.controls.Description.hasError('required')" severity="error" variant="simple" size="small">Por favor, digite o acompanhamento</p-message>
+                </div>
+            </div>
+
+        </div>
+
+        <div class='row'>
+            <div class='col-md-6'>
+                <label for="ComMeanName" class="block font-bold mb-3">Meio de comunicação do acompanhamento</label>
+
+                <p-inputgroup>
+                    <p-inputgroup-addon pTooltip="Digite na caixa ao lado para pesquisar um meio e selecione na lista" tooltipPosition="top" [style]="{ cursor:'help' }">
+                        <i class="pi pi-filter"></i>
+                    </p-inputgroup-addon>
+
+                    <p-autocomplete class="w-full mb-2" formControlName="ComMeanName" placeholder="Procure o tipo" [suggestions]="autoFilteredValue" optionLabel="name" (completeMethod)="filterClassAutocomplete($event)" (onSelect)="setComMeanChoosenAcom($event)" />
+                </p-inputgroup>
+
+                <div class="error-feedback" *ngIf="hasBeenSubmited('ComMeanName')">
+                    <p-message styleClass="mb-2" *ngIf="acoForm.controls.ComMeanName.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o nome do cliente</p-message>
+                </div>
+            </div>
+        </div>
+
+        <p-button [style]="{margin:'5px'}" [disabled]="isLoading" (click)="submit()" type="submit" label="Salvar" icon="pi pi-check" />
+
+    </form>
 
     <div class="card" style='padding:0.1rem; padding-left:0px !important; background-color: var(--p-sky-500); margin-top:1rem;'>
         <p-dataview #dv [value]="negotiationsHistories()">
@@ -77,6 +121,9 @@ interface ExportColumn {
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
                                     <div>
                                         <span class="font-medium text-secondary " style='color:var(--p-emerald-500);'>Via {{ item.com_name }} as {{ _formatBRLDate(item.created_at) }}</span>
+
+                                        <span [ngStyle]="{ color: item.id_business == null ? 'var(--p-amber-500)' : 'var(--p-sky-500)' }" class="font-medium text-secondary "> {{ item.id_business == null ? 'Acompanhamento não vinculado a uma negociação.' : '(Cód. Negociação #' + item.id_business + ')' }}</span>
+
                                         <div class="text-lg font-medium text-surface-900 dark:text-surface-0 mt-2">
                                             {{ item.description }}
                                         </div>
@@ -87,7 +134,7 @@ interface ExportColumn {
 
                                     <div class="flex flex-row-reverse md:flex-row gap-2">
 
-                                        <p-button [style]="{ color: 'var(--p-emerald-900)' }"
+                                        <p-button
                                             icon="pi pi-dollar"
                                             class="flex-auto md:flex-initial whitespace-nowrap"
                                             label="Gerar orçamento"
@@ -121,13 +168,19 @@ export class ListCustomerNegotiationHistoryComponent {
 
     id: string = ""
     _name: string = ""
+    ComMeans: any[] = []
 
     submitted: boolean = false
     accDialog: boolean = false
     isLoading: boolean = false
 
-    form = this.formBuilder.group({
-        Name: ['', [Validators.required]],
+    acoForm = this.formBuilder.group({
+        Description: ['', [Validators.required]],
+        ComMeanName: ['', [Validators.required]],
+        ComMeanId: ['', [Validators.required]],
+        UserId: ['', []],
+        CustomerId: ['', []],
+        Stage: [0, []]
     })
 
     selectedUsers!: any[] // does nothing for now
@@ -148,7 +201,14 @@ export class ListCustomerNegotiationHistoryComponent {
     }
 
     ngOnInit() {
-
+        this.salesService.getComs(1, 1000, "", "Y").subscribe({
+            next: (res: any) => {
+                this.ComMeans = res.data
+            }, 
+            error: (err: any) => {
+                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os meios.' });
+            },
+        })
     }
 
     _formatBRLDate(date: any){
@@ -157,8 +217,8 @@ export class ListCustomerNegotiationHistoryComponent {
 
     loadNegotiationHistory(id: string) {
         //const rmLoading = showLoading()
-
-        this.salesService.GetNegotiationHistory(id).pipe(finalize(() => {  })).subscribe({
+        this.id = id
+        this.salesService.GetCustomerNegotiationHistory(id).pipe(finalize(() => {  })).subscribe({
             next: (res: any) => {
                 this.negotiationsHistories.set(res.data ?? [])
 
@@ -177,22 +237,70 @@ export class ListCustomerNegotiationHistoryComponent {
         this.submitted = false;
     }
 
-    onSubmit() {
+    onSubmitUpdateAco(){
         this.submitted = true
+        console.log(this.acoForm.value)
 
-        if (this.form.valid) {
+        if (this.acoForm.valid) {
             this.isLoading = true
 
-            
+            // @ts-ignore
+            this.acoForm.get("UserId")?.setValue(this.userService?.getUserData()?.id)
+            // @ts-ignore
+            this.acoForm.get("CustomerId")?.setValue(parseInt(this.id))
+
+
+            delete this.acoForm.value.ComMeanName
+
+            this.salesService.createNegotiationHistory('0', this.acoForm.value).subscribe({
+                next: (res: any) => {
+                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Negociação de cliente atualizada com sucesso' });
+                    
+                    this.submitted = false
+                    this.isLoading = false
+                    this.acoForm.reset()
+
+                    this.loadNegotiationHistory(this.id)
+                },
+                error: (err) => {
+                    if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
+                    } else {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                    }
+                    this.isLoading = false
+                },
+
+            })
         }
     }
 
+    filterClassAutocomplete(event: AutoCompleteCompleteEvent){
+        const filtered: any[] = []
+        const query = event.query   
+
+        for (let i = 0; i < this.ComMeans.length; i++) {
+            const mc = this.ComMeans[i]
+            if (mc.name.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+                filtered.push(mc)
+            }
+        }
+
+        this.autoFilteredValue = filtered
+    }
+
+    setComMeanChoosenAcom(e: any){
+        //@ts-ignore
+        this.acoForm.get("ComMeanName")?.setValue(e.value.name)
+        //@ts-ignore
+        this.acoForm.get("ComMeanId")?.setValue(e.value.id)
+    }
+
     submit() {
-        document.getElementById(`btn_submit`)?.click()
+        document.getElementById(`btn_submit_acom`)?.click()
     }
 
     hasBeenSubmited(controlName: string): boolean {
-        const control = this.form.get(controlName)
+        const control = this.acoForm.get(controlName)
         return Boolean(control?.invalid)
             && (this.submitted || Boolean(control?.touched))
         //|| Boolean(control?.dirty

@@ -38,7 +38,8 @@ export interface NegotiationHistory {
     com_name: string,
     customer_name: string,
     description: string,
-    created_at: Date
+    created_at: Date,
+    id_business: string,
 }
 
 
@@ -90,6 +91,14 @@ export class SalesService {
 
     GetNegotiationHistory(id: string) {
         return this.http.get(`${environment.apiBaseURL}/sales/negotiations/${id}/history`)
+    }
+
+    GetCustomerNegotiationHistory(id: string) {
+        return this.http.get(`${environment.apiBaseURL}/sales/customers/${id}/negotiations/history`)
+    }
+
+    GetUserNegotiationHistory(id: string, id_customer: string) {
+        return this.http.get(`${environment.apiBaseURL}/sales/customer/${id_customer}/negotiations/${id}/history`)
     }
 
     getNegotiations(search: string){
