@@ -13,7 +13,7 @@ import { ButtonModule } from 'primeng/button';
     standalone: true,
     imports: [ButtonModule, CommonModule, AppTopbar, AppSidebar, RouterModule, AppFooter],
     template: `
-    <div class="layout-wrapper" [ngClass]="containerClass">
+    <div style='background-image: url(/assets/images/boat2.jpg); background-repeat: no-repeat; background-size: cover;  background-position: center;' class="layout-wrapper" [ngClass]="containerClass">
         <app-topbar></app-topbar>
 
         <app-sidebar></app-sidebar>
