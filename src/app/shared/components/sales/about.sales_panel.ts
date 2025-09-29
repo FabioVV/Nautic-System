@@ -14,6 +14,7 @@ import { Component, Input, ViewChild } from '@angular/core';
             1 - Lead:
             <br/>
             - Colher dados de comunicação, tais como: Nome, Telefone, E-mail e meio de comunicação.
+            -* Caso o lead fique mais de 24 horas sem atualização, a borda ficara em vermelho
         </p>
 
         <p class="mb-8">
@@ -37,6 +38,9 @@ import { Component, Input, ViewChild } from '@angular/core';
             - Barco novo ou usado
             <br/>
             - Qual o valor aproximado de investimento?
+
+            -* Caso o lead fique mais de 24 horas sem atualização, a borda ficara em vermelho
+
         </p>
         <p class="mb-8">
             3 - Negociação:

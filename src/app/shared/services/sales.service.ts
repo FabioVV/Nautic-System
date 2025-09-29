@@ -61,6 +61,7 @@ export interface Negotiation {
     cab_open: string,
     stage: number,
     Qualified: string,
+    HasPassed24Hrs: boolean,
 }
 
 @Injectable({

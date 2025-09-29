@@ -102,6 +102,7 @@ interface ExportColumn {
                     (dragstart)="dragstart($event, n.id)"
                     (contextmenu)="onContextMenu($event, n, n.id_customer, n.id)"
                     (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
+                    [ngStyle]="{'border': '1px solid ' + getBorderColor(n)}"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -1298,6 +1299,14 @@ export class ListNegotiationsComponent {
         let btnAction = this.elementRef.nativeElement.querySelector('#action-acom-button')
         if (!btnAction) return
         btnAction.onclick = () => this.submitUpdateAcom()
+    }
+
+    getBorderColor(n: any): string {
+        if (n?.has_passed_24hrs) {
+            return 'red'
+        }
+
+        return 'transparent'
     }
 
     hasBeenSubmited(controlName: string): boolean {
