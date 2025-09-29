@@ -73,9 +73,17 @@ export class SalesService {
     getCustomersBirthday(){
         return this.http.get(`${environment.apiBaseURL}/sales/customers-birthday`)
     }
-
+    
     getCustomers(page = 1, perPage = 10, name: string, email: string, phone: string, boat: string){
         return this.http.get(`${environment.apiBaseURL}/sales/customers?pageNumber=${page}&perPage=${perPage}&name=${name}&email=${email}&phone=${phone}&boat=${boat}`)
+    }
+
+    getCustomer(id: string){
+        return this.http.get(`${environment.apiBaseURL}/sales/customers/${id}`)
+    }
+
+    updateCustomer(id: string, formData: any) {
+        return this.http.patch(`${environment.apiBaseURL}/sales/customers/${id}`, formData)
     }
 
     registerNegotiation(formData: any) {

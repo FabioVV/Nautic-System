@@ -26,6 +26,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { InputMaskModule } from 'primeng/inputmask';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { DatePickerModule } from 'primeng/datepicker';
 
 import { SelectItem, showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
@@ -33,7 +34,7 @@ import { SalesService } from '../../services/sales.service';
 
 @Component({
     selector: 'open-customer-sales',
-    imports: [DialogModule, TabsModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ListCustomerNegotiationHistoryComponent, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, TabsModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ListCustomerNegotiationHistoryComponent, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
     standalone: true,
@@ -72,33 +73,40 @@ import { SalesService } from '../../services/sales.service';
                             </div>
 
                             <div class='col-md-4'>
-                                <label for="Email" class="block font-bold mb-3">Tipo de cliente</label>
+                                <label for="Phone" class="block font-bold mb-3">Telefone</label>
+                                <p-inputmask mask="99-99999-9999" class="w-full md:w-[30rem] mb-2" formControlName="Phone" placeholder="49-99999-9999" fluid />
+                                
+                            </div>
+
+
+                        </div>
+
+                        <div class='row'>
+                            <div class='col-md-2'>
+                                <label for="PfPj" class="block font-bold mb-3">Tipo de cliente</label>
                                 <p-select [invalid]="isInvalid('PfPj')" [options]="TypeClient" formControlName="PfPj" optionLabel="name" placeholder="Selecione o tipo do cliente" class="w-full mb-2" />
                             
                                 @if (isInvalid('PfPj')) {
                                     <p-message severity="error" size="small" variant="simple">Por favor, selecione se o tipo do cliente</p-message>
                                 }
                             </div>
-                        </div>
 
-                        <div class='row'>
                             <div class='col-md-4'>
                                 <label for="Cpf" class="block font-bold mb-3">CPF</label>
-                                <input formControlName="Cpf" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
-                            
+                                <p-inputmask mask="999.999.999-99" class="w-full md:w-[30rem] mb-2" formControlName="Cpf" placeholder="999.999.999-99" fluid  />
 
                             </div>
 
                             <div class='col-md-4'>
                                 <label for="Cnpj" class="block font-bold mb-3">CNPJ</label>
-                                <input formControlName="Cnpj" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
-
+                                <p-inputmask mask="99.999.999/9999-99" class="w-full md:w-[30rem] mb-2" formControlName="Cnpj" placeholder="99.999.999/9999-99" fluid  />
 
                             </div>
 
-                            <div class='col-md-4'>
+                            <div class='col-md-2'>
                                 <label for="Birthday" class="block font-bold mb-3">Aniversário</label>
-                                <input formControlName="Birthday" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                                <p-datepicker formControlName="Birthday" dateFormat="dd/mm/yy" required fluid />
+
                             </div>
 
                         </div>
@@ -326,6 +334,8 @@ export class SalesCustomerModal {
         { name: 'Inicio de pesquisa, médio/longo prazo', code: 'C' }
     ]
 
+
+    isLoading: boolean = false
     submitted: boolean = false
     visible: boolean = false
     id: string = ""
@@ -363,7 +373,6 @@ export class SalesCustomerModal {
         CabinatedOpen: [{value: '', disabled: true}, []],
         EstimatedValue: [{value: '', disabled: true}, []],
 
-
         ComMeanName: ['', [Validators.required]],
         ComMeanId: ['', [Validators.required]],
         UserId: ['', []],
@@ -381,7 +390,106 @@ export class SalesCustomerModal {
     }
 
     onSubmit(){
+        this.submitted = true
 
+        if (this.customerForm.valid) {
+            this.isLoading = true
+
+            // @ts-ignore
+            this.customerForm.get("HasBoat")?.setValue(this.customerForm?.value?.HasBoat?.code)
+            // @ts-ignore
+            this.customerForm.get("NewUsed")?.setValue(this.customerForm.value.NewUsed?.code)
+            // @ts-ignore
+            this.customerForm.get("CabinatedOpen")?.setValue(this.customerForm.value.CabinatedOpen?.code)
+            // @ts-ignore
+            this.customerForm.get("Qualified")?.setValue(this.customerForm.value.Qualified?.code)
+            // @ts-ignore
+            this.customerForm.get("QualifiedType")?.setValue(this.customerForm.value.QualifiedType?.code)
+
+            this.salesService.updateCustomer(this.id, this.customerForm.value).subscribe({
+                next: (res: any) => {
+                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Cliente atualizado(a) com sucesso' });
+                    //this.loadCommunicationMeans()
+                    
+                    this.submitted = false
+                    this.isLoading = false
+
+                },
+                error: (err) => {
+                    if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
+                    } else {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                    }
+                    this.isLoading = false
+                },
+
+            })
+        }
+    }
+
+    loadCustomer(id: string){
+        this.salesService.getCustomer(id).pipe(finalize(() => { this.isLoading = false })).subscribe({
+            next: (res: any) => {
+                if(res.data['qualified_type']?.trimEnd() == 'A'){
+                    //@ts-ignore
+                    this.customerForm.get("QualifiedType")?.setValue(this.qualifiedType[0])
+                } else if(res.data['qualified_type']?.trimEnd() == 'B'){
+                    //@ts-ignore
+                    this.customerForm.get("QualifiedType")?.setValue(this.qualifiedType[1])
+                } else {
+                    //@ts-ignore
+                    this.customerForm.get("QualifiedType")?.setValue(this.qualifiedType[2])
+                }
+
+                if(res.data['cabinated_open']?.trimEnd() == 'A'){
+                    //@ts-ignore
+                    this.customerForm.get("CabinatedOpen")?.setValue(this.CabinatedOpen[0])
+                } else {
+                    //@ts-ignore
+                    this.customerForm.get("CabinatedOpen")?.setValue(this.CabinatedOpen[1])
+                }
+
+                if(res.data['new_used']?.trimEnd() == 'N'){
+                    //@ts-ignore
+                    this.customerForm.get("NewUsed")?.setValue(this.NewUsed[0])
+                } else {
+                    //@ts-ignore
+                    this.customerForm.get("NewUsed")?.setValue(this.NewUsed[1])
+                }
+
+                this.customerForm.get("Name")?.setValue(res.data['customer_name'])
+                this.customerForm.get("Email")?.setValue(res.data['customer_email'])
+                this.customerForm.get("Phone")?.setValue(res.data['customer_phone'])
+
+                this.customerForm.get("City")?.setValue(res.data['city'])
+                this.customerForm.get("NavigationCity")?.setValue(res.data['customer_nav_city'])
+                this.customerForm.get("BoatCapacity")?.setValue(res.data['boat_cap_needed'])
+                this.customerForm.get("CustomerCity")?.setValue(res.data['customer_city'])
+
+                // this.customerForm.get("ComMeanName")?.setValue(res.data['com_name'])
+                // this.customerForm.get("ComMeanId")?.setValue(res.data['id_mean_communication'])
+                this.customerForm.get("EstimatedValue")?.setValue(res.data['estimated_value'])
+
+                //@ts-ignore
+                this.customerForm.get("HasBoat")?.setValue(res.data['has_boat'] == "S" ? this.HasBoat[0] : this.HasBoat[1])
+                this.customerForm.get("WhichBoat")?.setValue(res.data['has_boat_which'])
+                //@ts-ignore
+                this.customerForm.get("MinPesBoat")?.setValue(parseInt(res.data['boat_length_min']) ?? null)
+                //@ts-ignore
+                this.customerForm.get("MaxPesBoat")?.setValue(parseInt(res.data['boat_length_max']) ?? null)
+
+                this.customerForm.get("UserName")?.setValue(res.data['seller_name'])
+
+                this.customerForm.get("UserId")?.setValue(res.data['user_id'])
+                //@ts-ignore
+                this.customerForm.get("Qualified")?.setValue(res.data['qualified'] == "S" ? this.qualified[0] : this.qualified[1])
+            },
+            error: (err) => {
+                if (err.status) {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar dados do cliente.' });
+                }
+            },
+        })
     }
 
     showCustomer(id: string) {
@@ -391,6 +499,7 @@ export class SalesCustomerModal {
         this.myDialog.maximizable = true
         this.myDialog.maximize()
         this.negotiationHistory.loadNegotiationHistory(this.id)
+        this.loadCustomer(this.id)
     }
 
     get showHasWhichBoat(): boolean {

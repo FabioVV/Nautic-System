@@ -869,21 +869,20 @@ export class ListNegotiationsComponent {
             }
         ]
 
-        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
+        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }))
     }
 
     loadNegotiations(isDelete = false) {
         //const rmLoading = showLoading()
 
-        this.salesService.getNegotiations(this.negotiationSearch).pipe(finalize(() => {  })).subscribe({
+        this.salesService.getNegotiations(this.negotiationSearch).pipe(finalize(() => { this.isLoading = false })).subscribe({
             next: (res: any) => {
                 this.negotiations.set(res.data)
             },
             error: (err) => {
                 if (err.status) {
-                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar negociações.' });
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar negociações.' })
                 }
-                this.isLoading = false
             },
         })
     }
@@ -901,7 +900,7 @@ export class ListNegotiationsComponent {
         })
     }
 
-        dragstart(e: any, dragItemId: number) {
+    dragstart(e: any, dragItemId: number) {
         const el = Array.from(this.elementRef.nativeElement.getElementsByClassName('p-card'))
         el.forEach((e: any) => dragItemId?.toString() != e.id ? e.classList.add('hide-card') : "")
 
@@ -949,6 +948,8 @@ export class ListNegotiationsComponent {
             this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Não é permitido pular etapas no atendimento' });
             return
         }
+
+        // Make this followup open a special form dialog, and modifiy the drop, in here we will save the card dragged, and only when the user successfully submits the form, we move the card
 
         this.openFollowUp(parseInt(card_id_business), parseInt(card_id_customer), (parseInt(card_stage)))
 
