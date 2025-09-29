@@ -97,6 +97,8 @@ interface ExportColumn {
                 <p-card *ngFor="let n of stageOne(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
                     [attr.data-customer-id]="n.id_customer"
+                    [attr.data-business-id]="n.id"
+
                     draggable="true"
                     [id]="n.id"
                     (dragstart)="dragstart($event, n.id)"
@@ -124,6 +126,8 @@ interface ExportColumn {
                 <p-card *ngFor="let n of stageTwo(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
                     [attr.data-customer-id]="n.id_customer"
+                    [attr.data-business-id]="n.id"
+
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
@@ -150,6 +154,8 @@ interface ExportColumn {
                 <p-card *ngFor="let n of stageThree(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
                     [attr.data-customer-id]="n.id_customer"
+                    [attr.data-business-id]="n.id"
+
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
@@ -176,6 +182,8 @@ interface ExportColumn {
                 <p-card *ngFor="let n of stageFour(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
                     [attr.data-customer-id]="n.id_customer"
+                    [attr.data-business-id]="n.id"
+
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
@@ -202,6 +210,8 @@ interface ExportColumn {
                 <p-card *ngFor="let n of stageFive(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
                     [attr.data-customer-id]="n.id_customer"
+                    [attr.data-business-id]="n.id"
+
                     draggable="true"
                     (dragstart)="dragstart($event, n.id)"
                     [id]="n.id"
@@ -403,7 +413,7 @@ interface ExportColumn {
             <p-tabs value="0">
                 <p-tablist>
                     <p-tab (click)="setNegFn()" value="0">Negociação</p-tab>
-                    <p-tab (click)="setAcomFn()" value="1">Acompanhamento</p-tab>
+                    <p-tab id="acomp_tab" (click)="setAcomFn()" value="1">Acompanhamento</p-tab>
                 </p-tablist>
                 <p-tabpanels>
                     <p-tabpanel value="0">
@@ -923,6 +933,11 @@ export class ListNegotiationsComponent {
         const card_el = document.getElementById(card)!
         const dropzone = e.target.querySelector('.kb-cards')
         const card_stage = card_el.getAttribute('data-stage')!
+        const card_id_customer = card_el.getAttribute('data-customer-id')!
+        const card_id_business = card_el.getAttribute('data-business-id')!
+
+
+
         const dropzone_stage = target.id[target.id.length - 1]
 
         if (dropzone_stage < card_stage) {
@@ -934,6 +949,9 @@ export class ListNegotiationsComponent {
             this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Não é permitido pular etapas no atendimento' });
             return
         }
+
+        this.openFollowUp(parseInt(card_id_business), parseInt(card_id_customer), (parseInt(card_stage)))
+
 
         card_el.setAttribute("data-stage", dropzone_stage)
 
@@ -1249,6 +1267,7 @@ export class ListNegotiationsComponent {
 
 
                 this.negotiationHistory.loadNegotiationHistory(this._id)
+
             },
             error: (err) => {
                 if (err.status) {
