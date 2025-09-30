@@ -493,7 +493,11 @@ export class SalesCustomerModal {
                 this.customerForm.get("Street")?.setValue(res.data['street'])
                 this.customerForm.get("Complement")?.setValue(res.data['complement'])
                 this.customerForm.get("City")?.setValue(res.data['city'])
-                this.customerForm.get("Birthday")?.setValue(res.data['birthdate'])
+
+                if(res.data['birthdate']){
+                    //@ts-ignore
+                    this.customerForm.get("Birthday")?.setValue(new Date(Date.parse(res.data['birthdate'])))
+                }
 
 
                 // this.customerForm.get("ComMeanName")?.setValue(res.data['com_name'])
