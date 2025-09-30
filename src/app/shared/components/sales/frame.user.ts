@@ -470,7 +470,7 @@ export class SalesCustomerModal {
                     this.customerForm.get("PfPj")?.setValue('')
                 }
 
-                if(res.data['State']?.trimEnd() == 'PF'){
+                if(res.data['state'] !== null){
                     BrStates.forEach(element => {
                         if(element.code == res.data['state']?.trimEnd()){
                             //@ts-ignore
@@ -493,6 +493,7 @@ export class SalesCustomerModal {
                 this.customerForm.get("Street")?.setValue(res.data['street'])
                 this.customerForm.get("Complement")?.setValue(res.data['complement'])
                 this.customerForm.get("City")?.setValue(res.data['city'])
+                this.customerForm.get("Birthday")?.setValue(res.data['birthdate'])
 
 
                 // this.customerForm.get("ComMeanName")?.setValue(res.data['com_name'])
