@@ -1323,7 +1323,7 @@ export class ListNegotiationsComponent {
 
     getBorderColor(n: any): string {
         if (n?.has_passed_24hrs) {
-            return 'red'
+            return 'yellow'
         }
 
         return 'transparent'

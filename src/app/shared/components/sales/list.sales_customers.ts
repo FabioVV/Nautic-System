@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
@@ -18,6 +18,9 @@ import { ButtonGroupModule } from 'primeng/buttongroup';
 import { MessageModule } from 'primeng/message';
 import { finalize } from 'rxjs';
 import { ConfirmationService } from 'primeng/api';
+
+
+import { SalesCustomerModal } from './frame.user';
 import { showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
 import { SalesService } from '../../services/sales.service';
@@ -35,7 +38,7 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-customers-sales',
-    imports: [DialogModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, MessageModule, SalesCustomerModal, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
     standalone: true,
@@ -125,7 +128,7 @@ interface ExportColumn {
 
                 <td>
                     <p-buttongroup>
-                        <p-button icon="pi pi-pencil" severity="contrast" rounded/>
+                        <p-button (click)="openCustomerSales(user.id)" icon="pi pi-pencil" severity="contrast" rounded/>
                     </p-buttongroup>
                 </td>
             </tr>
@@ -148,6 +151,8 @@ interface ExportColumn {
         [rejectAriaLabel]="rejectLabel"
         [style]="{ width: '550px' }"
     />
+
+    <open-customer-sales #customerModal title="Cliente"/>
     `,
 })
 export class ListSalesCustomersComponent {
@@ -161,6 +166,7 @@ export class ListSalesCustomersComponent {
     @Input() customers: any
     @Input() totalRecords: any
     @Input() limitPerPage: any
+    @ViewChild('customerModal') customerModal!: SalesCustomerModal
 
     id: string = ""
     _name: string = ""
@@ -218,6 +224,10 @@ export class ListSalesCustomersComponent {
             },
         })
     }
+
+    openCustomerSales(id: number){
+        this.customerModal.showCustomer(id.toString())
+    } 
 
     onGlobalFilter(event: any) {
         if (this.typingTimeout) {

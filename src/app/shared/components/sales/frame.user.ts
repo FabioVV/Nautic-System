@@ -28,6 +28,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { DatePickerModule } from 'primeng/datepicker';
 
+import { BrStates } from '../utils';
 import { SelectItem, showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
 import { SalesService } from '../../services/sales.service';
@@ -51,7 +52,7 @@ import { SalesService } from '../../services/sales.service';
 
                 <p-tabpanel value="0">
                     <form [formGroup]="customerForm" (ngSubmit)="onSubmit()">
-                        <button id="btn_submit_up" style='display:none;' type="submit"></button>
+                        <button id="btn_submit" style='display:none;' type="submit"></button>
 
                         <div class='row'>
                             <div class='col-md-4'>
@@ -76,6 +77,9 @@ import { SalesService } from '../../services/sales.service';
                                 <label for="Phone" class="block font-bold mb-3">Telefone</label>
                                 <p-inputmask mask="99-99999-9999" class="w-full md:w-[30rem] mb-2" formControlName="Phone" placeholder="49-99999-9999" fluid />
                                 
+                                <div class="error-feedback" *ngIf="hasBeenSubmited('Phone')">
+                                    <p-message styleClass="mb-2" *ngIf="customerForm.controls.Phone.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o telefone do cliente</p-message>
+                                </div>
                             </div>
 
 
@@ -114,8 +118,8 @@ import { SalesService } from '../../services/sales.service';
                         <div class='row'>
                             <div class='col-md-6'>
                                 <label for="Cep" class="block font-bold mb-3">Cep</label>
-                                <input formControlName="Cep" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
-                            
+                                <p-inputmask mask="99999-999" class="w-full md:w-[30rem] mb-2" formControlName="Cep" placeholder="99999-999" fluid  />
+
                                 <div class="error-feedback" *ngIf="hasBeenSubmited('Cep')">
                                     <p-message styleClass="mb-2" *ngIf="customerForm.controls.Cep.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o CEP do cliente</p-message>
                                 </div>
@@ -168,11 +172,11 @@ import { SalesService } from '../../services/sales.service';
 
                             <div class='col-md-2'>
                                 <label for="State" class="block font-bold mb-3">Estado</label>
-                                <input formControlName="State" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                                <p-select [invalid]="isInvalid('State')" [options]="BrStates" formControlName="State" optionLabel="name" placeholder="Selecione o estado do cliente" class="w-full mb-2" />
                             
-                                <div class="error-feedback" *ngIf="hasBeenSubmited('State')">
-                                    <p-message styleClass="mb-2" *ngIf="customerForm.controls.State.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o estado do cliente</p-message>
-                                </div>
+                                @if (isInvalid('State')) {
+                                    <p-message severity="error" size="small" variant="simple">Por favor, selecione o estado do cliente</p-message>
+                                }
                             </div>
 
                         </div>
@@ -197,24 +201,18 @@ import { SalesService } from '../../services/sales.service';
 
                         </div>
 
-                        <p-fieldset legend="Detalhes de Interesse do Cliente - Informações da última negociação" [toggleable]="true" [collapsed]="true">
+                        <p-fieldset legend="Detalhes de Interesse do Cliente - Informações da última negociação" [toggleable]="true">
                             <div class='row'>
                                 <div class='col-md-4'>
                                     <label for="" class="block font-bold mb-3">Qualificado?</label>
 
-                                    <p-select [invalid]="isInvalid('Qualified')" [options]="qualified" formControlName="Qualified" optionLabel="name" placeholder="Selecione se o lead é qualificado ou não" class="w-full mb-2" />
-                                    @if (isInvalid('Qualified')) {
-                                        <p-message severity="error" size="small" variant="simple">Por favor, selecione se o lead é qualificado ou não</p-message>
-                                    }
+                                    <p-select  [options]="qualified" formControlName="Qualified" optionLabel="name" placeholder="Selecione se o lead é qualificado ou não" class="w-full mb-2" />
                                 </div>
 
                                 <div *ngIf="showQualifiedDiv" class='col-md-8'>
                                     <label for="" class="block font-bold mb-3">Tipo de qualificação</label>
-                                    <p-select [invalid]="isInvalid('QualifiedType')" [options]="qualifiedType" formControlName="QualifiedType" optionLabel="name" placeholder="Selecione o tipo de qualificação" class="w-full mb-2" />
+                                    <p-select  [options]="qualifiedType" formControlName="QualifiedType" optionLabel="name" placeholder="Selecione o tipo de qualificação" class="w-full mb-2" />
                                 
-                                    @if (isInvalid('Qualified') && showQualifiedDiv) {
-                                        <p-message severity="error" size="small" variant="simple">Por favor, selecione se o tipo de qualificação do lead</p-message>
-                                    }
                                 </div>
 
                             </div>
@@ -234,18 +232,14 @@ import { SalesService } from '../../services/sales.service';
                                     <label for="NavigationCity" class="block font-bold mb-3">Cidade que o cliente ira navegar</label>
                                     <input formControlName="NavigationCity" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
                                     
-                                    <div class="error-feedback" *ngIf="hasBeenSubmited('NavigationCity')">
-                                        <p-message styleClass="mb-2" *ngIf="customerForm.controls.NavigationCity.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar a cidade de navegação do cliente</p-message>
-                                    </div>
+
                                 </div>
 
                                 <div class='col-md-4'>
                                     <label for="BoatCapacity" class="block font-bold mb-3">Capacidade da embarcação</label>
                                     <p-inputnumber  [useGrouping]="false" class="w-full mb-2" formControlName="BoatCapacity" placeholder="*" />
                                     
-                                    <div class="error-feedback" *ngIf="hasBeenSubmited('BoatCapacity')">
-                                        <p-message styleClass="mb-2" *ngIf="customerForm.controls.BoatCapacity.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar a capacidade da embarcação</p-message>
-                                    </div>
+
                                 </div>
 
                             </div>
@@ -255,18 +249,13 @@ import { SalesService } from '../../services/sales.service';
                                     <label for="" class="block font-bold mb-3">Embarcação nova/usada</label>
                                     <p-select [invalid]="isInvalid('NewUsed')" [options]="NewUsed" formControlName="NewUsed" optionLabel="name" placeholder="Selecione o tipo da embarcação" class="w-full mb-2" />
                                 
-                                    @if (isInvalid('NewUsed')) {
-                                        <p-message severity="error" size="small" variant="simple">Por favor, selecione o tipo da embarcação</p-message>
-                                    }
+
                                 </div>
 
                                 <div class='col-md-2'>
                                     <label for="" class="block font-bold mb-3">Embarcação cabinada/aberta</label>
                                     <p-select [invalid]="isInvalid('CabinatedOpen')" [options]="CabinatedOpen" formControlName="CabinatedOpen" optionLabel="name" placeholder="Selecione o tipo da embarcação" class="w-full mb-2" />
                                 
-                                    @if (isInvalid('CabinatedOpen')) {
-                                        <p-message severity="error" size="small" variant="simple">Por favor, selecione se o tipo da embarcação</p-message>
-                                    }
                                 </div>
 
                                 <div class='col-md-4'>
@@ -333,7 +322,7 @@ export class SalesCustomerModal {
         { name: 'Interesse real, mas precisa de mais informação', code: 'B' }, 
         { name: 'Inicio de pesquisa, médio/longo prazo', code: 'C' }
     ]
-
+    BrStates = BrStates
 
     isLoading: boolean = false
     submitted: boolean = false
@@ -358,7 +347,7 @@ export class SalesCustomerModal {
         Cnpj: ['', []],
         Birthday: ['', []],
 
-        Qualified: [{value: '', disabled: true}, [Validators.required]],
+        Qualified: [{value: '', disabled: true}, []],
         QualifiedType: [{value: '', disabled: true}, []],
 
         HasBoat: ['', []],
@@ -373,8 +362,8 @@ export class SalesCustomerModal {
         CabinatedOpen: [{value: '', disabled: true}, []],
         EstimatedValue: [{value: '', disabled: true}, []],
 
-        ComMeanName: ['', [Validators.required]],
-        ComMeanId: ['', [Validators.required]],
+        // ComMeanName: ['', [Validators.required]],
+        // ComMeanId: ['', [Validators.required]],
         UserId: ['', []],
         UserName: [{value: '', disabled: true}, []],
 
@@ -392,27 +381,40 @@ export class SalesCustomerModal {
     onSubmit(){
         this.submitted = true
 
+        const ctrl = this.customerForm.get('Birthday')
+        ctrl?.clearValidators()
+        ctrl?.updateValueAndValidity()
+        
         if (this.customerForm.valid) {
             this.isLoading = true
 
+            const save_state = this.customerForm?.value?.State
+            const save_pfpj = this.customerForm?.value?.PfPj
+            const save_hasboat = this.customerForm?.value?.HasBoat
+            // @ts-ignore
+            this.customerForm.get("State")?.setValue(this.customerForm?.value?.State?.code)
+            // @ts-ignore
+            this.customerForm.get("PfPj")?.setValue(this.customerForm?.value?.PfPj?.code)
             // @ts-ignore
             this.customerForm.get("HasBoat")?.setValue(this.customerForm?.value?.HasBoat?.code)
-            // @ts-ignore
-            this.customerForm.get("NewUsed")?.setValue(this.customerForm.value.NewUsed?.code)
-            // @ts-ignore
-            this.customerForm.get("CabinatedOpen")?.setValue(this.customerForm.value.CabinatedOpen?.code)
-            // @ts-ignore
-            this.customerForm.get("Qualified")?.setValue(this.customerForm.value.Qualified?.code)
-            // @ts-ignore
-            this.customerForm.get("QualifiedType")?.setValue(this.customerForm.value.QualifiedType?.code)
 
-            this.salesService.updateCustomer(this.id, this.customerForm.value).subscribe({
+
+            this.salesService.updateCustomer(this.id, this.customerForm.value).pipe(finalize(() => { 
+                // @ts-ignore
+                this.customerForm.get("State")?.setValue(save_state)
+                // @ts-ignore
+                this.customerForm.get("PfPj")?.setValue(save_pfpj)
+                // @ts-ignore
+                this.customerForm.get("HasBoat")?.setValue(save_hasboat)
+             })).subscribe({
                 next: (res: any) => {
                     this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Cliente atualizado(a) com sucesso' });
                     //this.loadCommunicationMeans()
                     
                     this.submitted = false
                     this.isLoading = false
+
+                    
 
                 },
                 error: (err) => {
@@ -457,14 +459,41 @@ export class SalesCustomerModal {
                     this.customerForm.get("NewUsed")?.setValue(this.NewUsed[1])
                 }
 
+                if(res.data['pf_pj']?.trimEnd() == 'PF'){
+                    //@ts-ignore
+                    this.customerForm.get("PfPj")?.setValue(this.TypeClient[0])
+                } else if(res.data['pf_pj']?.trimEnd() == 'PJ'){
+                    //@ts-ignore
+                    this.customerForm.get("PfPj")?.setValue(this.TypeClient[1])
+                } else {
+                    //@ts-ignore
+                    this.customerForm.get("PfPj")?.setValue('')
+                }
+
+                if(res.data['State']?.trimEnd() == 'PF'){
+                    BrStates.forEach(element => {
+                        if(element.code == res.data['state']?.trimEnd()){
+                            //@ts-ignore
+                            this.customerForm.get("State")?.setValue(element)
+                        }
+                    })
+                } 
+
                 this.customerForm.get("Name")?.setValue(res.data['customer_name'])
                 this.customerForm.get("Email")?.setValue(res.data['customer_email'])
                 this.customerForm.get("Phone")?.setValue(res.data['customer_phone'])
 
-                this.customerForm.get("City")?.setValue(res.data['city'])
                 this.customerForm.get("NavigationCity")?.setValue(res.data['customer_nav_city'])
                 this.customerForm.get("BoatCapacity")?.setValue(res.data['boat_cap_needed'])
                 this.customerForm.get("CustomerCity")?.setValue(res.data['customer_city'])
+
+
+                this.customerForm.get("Cep")?.setValue(res.data['cep'])
+                this.customerForm.get("Neighborhood")?.setValue(res.data['neighborhood'])
+                this.customerForm.get("Street")?.setValue(res.data['street'])
+                this.customerForm.get("Complement")?.setValue(res.data['complement'])
+                this.customerForm.get("City")?.setValue(res.data['city'])
+
 
                 // this.customerForm.get("ComMeanName")?.setValue(res.data['com_name'])
                 // this.customerForm.get("ComMeanId")?.setValue(res.data['id_mean_communication'])
@@ -504,7 +533,7 @@ export class SalesCustomerModal {
 
     get showHasWhichBoat(): boolean {
         const c: any = this.customerForm.get('HasBoat')
-        if(c!['value']!['code'] == 'S'){
+        if(c?.value?.code == 'S'){
             return true
         }
         return false
