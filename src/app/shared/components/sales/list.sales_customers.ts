@@ -21,7 +21,7 @@ import { ConfirmationService } from 'primeng/api';
 
 
 import { SalesCustomerModal } from './frame.user';
-import { showLoading } from '../utils';
+import { openWpp, showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
 import { SalesService } from '../../services/sales.service';
 
@@ -128,7 +128,9 @@ interface ExportColumn {
 
                 <td>
                     <p-buttongroup>
-                        <p-button (click)="openCustomerSales(user.id)" icon="pi pi-pencil" severity="contrast" rounded/>
+                        <p-button  (click)="openCustomerSales(user.id)" icon="pi pi-pencil" severity="contrast" rounded/>
+                        <p-button [style]="{color: 'green'}" (click)="_openWpp(user.customer_phone)" icon="pi pi-whatsapp" severity="contrast" rounded/>
+
                     </p-buttongroup>
                 </td>
             </tr>
@@ -228,6 +230,10 @@ export class ListSalesCustomersComponent {
     openCustomerSales(id: number){
         this.customerModal.showCustomer(id.toString())
     } 
+
+    _openWpp(phone: string){ // alias
+        openWpp(phone)
+    }
 
     onGlobalFilter(event: any) {
         if (this.typingTimeout) {

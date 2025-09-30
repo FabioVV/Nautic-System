@@ -31,7 +31,11 @@ export const BrStates: SelectItem[] = [
   { name: 'São Paulo', code: 'SP' },
   { name: 'Sergipe', code: 'SE' },
   { name: 'Tocantins', code: 'TO' }
-];
+]
+
+export function openWpp(phone: string){
+    window.open(`https://api.whatsapp.com/send?phone=+55${phone}&text=Olá`, "_blank")
+}
 
 export function showLoading() {
 

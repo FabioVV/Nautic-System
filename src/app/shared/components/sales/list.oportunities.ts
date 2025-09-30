@@ -18,7 +18,9 @@ import { ButtonGroupModule } from 'primeng/buttongroup';
 import { MessageModule } from 'primeng/message';
 import { finalize } from 'rxjs';
 import { ConfirmationService } from 'primeng/api';
-import { showLoading } from '../utils';
+
+
+import { showLoading, openWpp } from '../utils';
 import { UserService } from '../../services/user.service';
 import { SalesCustomer, SalesService } from '../../services/sales.service';
 import { Boat, BoatService } from '../../services/boats.service';
@@ -65,7 +67,6 @@ export interface BoatSel {
                 <p-iconfield>
                     <p-select [(ngModel)]="selectedBoat" [options]="boats()" (onChange)="onGlobalFilter($event)" optionLabel="model" placeholder="Selecione a embarcação" class="w-full mb-2" />
                 </p-iconfield>
-
 
             </div>
 
@@ -121,8 +122,7 @@ export interface BoatSel {
                 <td>
                     <p-buttongroup>
                         <p-button icon="pi pi-pencil" severity="contrast" rounded/>
-                        <p-button (click)="openWpp(user.customer_phone)" icon="pi pi-whatsapp" severity="contrast" rounded/>
-
+                        <p-button [style]="{color: 'green'}" (click)="_openWpp(user.customer_phone)" icon="pi pi-whatsapp" severity="contrast" rounded/>
                     </p-buttongroup>
                 </td>
             </tr>
@@ -238,8 +238,8 @@ export class ListOportunitiesComponent {
         })
     }
 
-    openWpp(phone: string){
-        window.open(`https://api.whatsapp.com/send?phone=+55${phone}&text=Ola`, "_blank")
+    _openWpp(phone: string){ // alias
+        openWpp(phone)
     }
 
     onGlobalFilter(event: any) {
