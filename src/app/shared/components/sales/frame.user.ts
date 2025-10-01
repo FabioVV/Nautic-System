@@ -181,6 +181,17 @@ import { SalesService } from '../../services/sales.service';
 
                         </div>
 
+                        <div class='row'>
+                            <div class='col-md-4'>
+                                <label class="block font-bold mb-3">Cliente com suspeita de fraude?</label>
+                                <p-select [invalid]="isInvalid('FraudSuspect')" [options]="fraudSuspect" formControlName="FraudSuspect" optionLabel="name" placeholder="Selecione o estado do cliente" class="w-full mb-2" />
+                            
+                                @if (isInvalid('FraudSuspect')) {
+                                    <p-message severity="error" size="small" variant="simple">Por favor, selecione o estado do cliente</p-message>
+                                }
+                            </div>
+                        </div>
+
                         <hr/>
 
                         <div class='row'>
@@ -315,6 +326,8 @@ export class SalesCustomerModal {
     TypeClient: SelectItem[] = [{ name: 'Pessia física', code: 'PF' }, { name: 'Pessoa juridica', code: 'PJ' }]
     HasBoat: SelectItem[] = [{ name: 'Sim', code: 'S' }, { name: 'Não', code: 'N' }]
     qualified: SelectItem[] = [{ name: 'Sim', code: 'Y' }, { name: 'Não', code: 'N' }]
+    fraudSuspect: SelectItem[] = [{ name: 'Sim', code: 'Y' }, { name: 'Não', code: 'N' }]
+
     CabinatedOpen: SelectItem[] = [ { name: 'Aberta', code: 'A' }, { name: 'Cabinada', code: 'C' }]
     NewUsed: SelectItem[] = [{ name: 'Nova', code: 'N' }, { name: 'Usada', code: 'U' }]
     qualifiedType: SelectItem[] = [
@@ -349,6 +362,9 @@ export class SalesCustomerModal {
 
         Qualified: [{value: '', disabled: true}, []],
         QualifiedType: [{value: '', disabled: true}, []],
+
+        FraudSuspect: ['', [Validators.required]],
+
 
         HasBoat: ['', []],
         WhichBoat: ['', []],
@@ -517,6 +533,9 @@ export class SalesCustomerModal {
                 this.customerForm.get("UserId")?.setValue(res.data['user_id'])
                 //@ts-ignore
                 this.customerForm.get("Qualified")?.setValue(res.data['qualified'] == "S" ? this.qualified[0] : this.qualified[1])
+                //@ts-ignore
+                this.customerForm.get("FraudSuspect")?.setValue(res.data['suspect_of_fraud'] == "Y" ? this.fraudSuspect[0] : this.fraudSuspect[1])
+                
             },
             error: (err) => {
                 if (err.status) {

@@ -45,6 +45,30 @@ export class BoatService {
         return this.http.get(`${environment.apiBaseURL}/boats?pageNumber=${page}&perPage=${perPage}&model=${model}&price=${price}&id=${id}&active=${active}`)
     }
 
+    registerBoatAccessory(id: string, id_accessory: string | null | undefined) {
+        return this.http.post(`${environment.apiBaseURL}/boats/${id}/accessories/${id_accessory ?? ''}`, null)
+    }
+
+    registerBoatEngine(id: string, id_engine: string | null | undefined) {
+        return this.http.post(`${environment.apiBaseURL}/boats/${id}/engines/${id_engine ?? ''}`, null)
+    }
+
+    removeBoatAccessory(id: string, id_accessory: string) {
+        return this.http.delete(`${environment.apiBaseURL}/boats/${id}/accessories/${id_accessory}`)
+    }
+
+    removeBoatEngine(id: string, id_engine: string) {
+        return this.http.delete(`${environment.apiBaseURL}/boats/${id}/engines/${id_engine}`)
+    }
+
+    getBoatAccessories(id: string) {
+        return this.http.get(`${environment.apiBaseURL}/boats/${id}/accessories`)
+    }
+
+    getBoatEngines(id: string) {
+        return this.http.get(`${environment.apiBaseURL}/boats/${id}/engines`)
+    }
+
     getBoat(id: string) {
         return this.http.get(`${environment.apiBaseURL}/boats/${id}`)
     }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, ViewChild } from '@angular/core';
+import { Component, inject, Input, signal, ViewChild } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
@@ -26,16 +26,22 @@ import { InputMaskModule } from 'primeng/inputmask';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { DatePickerModule } from 'primeng/datepicker';
+import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
+import { InputGroupModule } from 'primeng/inputgroup';
 
+import { ListEnginesBoatComponent } from './list.engines_boat';
+import { ListAccessoriesBoatComponent } from './list.accessories_boat';
 import { BrStates } from '../utils';
 import { SelectItem, showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
 import { SalesService } from '../../services/sales.service';
 import { BoatService } from '../../services/boats.service';
+import { AccessoryService } from '../../services/accessories.service';
+import { EngineService } from '../../services/engine.service';
 
 @Component({
     selector: 'open-boat',
-    imports: [DialogModule, TabsModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, TabsModule, DatePickerModule, ListAccessoriesBoatComponent, ListEnginesBoatComponent, InputGroupModule, AutoCompleteModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
     standalone: true,
@@ -185,10 +191,69 @@ import { BoatService } from '../../services/boats.service';
                 </p-tabpanel>
 
                 <p-tabpanel value="1">
+
+                    <form [formGroup]="formAcc" style='margin-bottom: 4rem;'>
+                        <button id="btn_submit_acc" style='display:none;' type="submit"></button>
+                        
+                        <div class='row'>
+                            <div style='margin-bottom:1rem;' class='col-md-12'>
+                                <label for="AccessoryModel" class="block font-bold mb-3">Acessório</label>
+
+                                <p-inputgroup>
+                                    <p-inputgroup-addon pTooltip="Digite na caixa ao lado para pesquisar" tooltipPosition="top" [style]="{ cursor:'help' }">
+                                        <i class="pi pi-filter"></i>
+                                    </p-inputgroup-addon>
+
+                                    <p-autocomplete class="w-full mb-2" formControlName="AccessoryModel" placeholder="Procure o acessório desejado" [suggestions]="autoFilteredValueAccessory" optionLabel="model" (completeMethod)="filterClassAutocompleteAcc($event)" (onSelect)="setAccessoryChoosen($event)" />
+                                </p-inputgroup>
+
+                                
+                                <div class="error-feedback" *ngIf="hasBeenSubmited('AccessoryModel')">
+                                    <p-message styleClass="mb-2" *ngIf="formAcc.controls.AccessoryModel.hasError('required')" severity="error" variant="simple" size="small">Por favor, escolher um acessório</p-message>
+                                </div>
+                            </div>
+
+                            <p-button type="submit" label="Adicionar acessório" (click)="onSubmitAcc()" icon="pi pi-check" />
+                        </div>
+
+                        <hr />
+                        <list-accessories-boat #accessoryList [id]="id" ></list-accessories-boat>
+                    </form>
+
                 </p-tabpanel>
 
                 
                 <p-tabpanel value="2">
+
+                    <form [formGroup]="formEng" style='margin-bottom: 4rem;'>
+                        <button id="btn_submit_eng" style='display:none;' type="submit"></button>
+                        
+                        <div class='row'>
+                            <div style='margin-bottom:1rem;' class='col-md-12'>
+                                <label class="block font-bold mb-3">Motor</label>
+
+                                <p-inputgroup>
+                                    <p-inputgroup-addon pTooltip="Digite na caixa ao lado para pesquisar" tooltipPosition="top" [style]="{ cursor:'help' }">
+                                        <i class="pi pi-filter"></i>
+                                    </p-inputgroup-addon>
+
+                                    <p-autocomplete class="w-full mb-2" formControlName="EngineModel" placeholder="Procure o motor desejado" [suggestions]="autoFilteredValueEng" optionLabel="model" (completeMethod)="filterClassAutocompleteEng($event)" (onSelect)="setEngineChoosen($event)" />
+                                </p-inputgroup>
+
+                                
+                                <div class="error-feedback" *ngIf="hasBeenSubmited('EngineModel')">
+                                    <p-message styleClass="mb-2" *ngIf="formEng.controls.EngineModel.hasError('required')" severity="error" variant="simple" size="small">Por favor, escolher um motor</p-message>
+                                </div>
+                            </div>
+
+                            <p-button type="submit" label="Adicionar motor" (click)="onSubmitEng()" icon="pi pi-check" />
+                        </div>
+
+                        <hr />
+                        <list-engines-boat #engineList [id]="id" ></list-engines-boat>
+
+                    </form>
+
                 </p-tabpanel>
 
                 
@@ -211,7 +276,13 @@ export class BoatModal {
         private userService: UserService,
         private salesService: SalesService,
         private boatService: BoatService,
+        private accessoryService: AccessoryService,
+        private engineService: EngineService,
     ) { }
+
+
+    @ViewChild('engineList') engineListComponent!: ListEnginesBoatComponent
+    @ViewChild('accessoryList') accListComponent!: ListAccessoriesBoatComponent
 
     @ViewChild('cdialog') myDialog!: Dialog
     @Input() title: any
@@ -219,11 +290,26 @@ export class BoatModal {
     CabinatedOpen: SelectItem[] = [ { name: 'Aberta', code: 'A' }, { name: 'Cabinada', code: 'C' }]
     NewUsed: SelectItem[] = [{ name: 'Nova', code: 'N' }, { name: 'Usada', code: 'U' }]
 
+    autoFilteredValueEng: any[] = []
+    autoFilteredValueAccessory: any[] = []
+
+
     isLoading: boolean = false
     submitted: boolean = false
     visible: boolean = false
     id: string = ""
     url: any
+
+
+    formEng= this.formBuilder.group({     
+        EngineId: ['', []],
+        EngineModel: ['', []],
+    })
+
+    formAcc= this.formBuilder.group({     
+        AccessoryId: ['', []],
+        AccessoryModel: ['', []],
+    })
 
     boatForm = this.formBuilder.group({       
         Cod: [{value: "", disabled: true}, []],
@@ -252,9 +338,52 @@ export class BoatModal {
     }
 
     ngOnInit() {
-
     }
 
+    onSubmitEng(){
+        this.submitted = true
+        
+        if (this.formEng.valid) {
+            this.isLoading = true
+
+            this.boatService.registerBoatEngine(this.id, this.formEng?.value?.EngineId).subscribe({
+                next: (res: any) => {
+                    this.engineListComponent.loadBoatEngines()
+                }, 
+                error: (err) => {
+                    if(err?.error?.message == 'engine already linked with the boat'){
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Motor já está vinculado ao casco' })
+                    } else {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar adicionar motor' })
+                    }
+                },
+            })
+        }
+    }
+
+    onSubmitAcc(){
+        this.submitted = true
+
+        if (this.formAcc.valid) {
+            this.isLoading = true
+
+            this.boatService.registerBoatAccessory(this.id, this.formAcc?.value?.AccessoryId).subscribe({
+                next: (res: any) => {
+                    this.accListComponent.loadBoatAccessories()
+                }, 
+                error: (err) => {
+                    if(err?.error?.message == 'accessory already linked with the boat'){
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Acessório já está vinculado ao casco' })
+                    } else {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar adicionar o acessório' })
+
+                    }
+                },
+            })
+            
+        }
+    }
+    
     onSubmit(){
         this.submitted = true
 
@@ -334,6 +463,8 @@ export class BoatModal {
                 this.boatForm.get("Hours")?.setValue(res.data['hours'])
                 this.boatForm.get("Itens")?.setValue(res.data['itens'])
 
+                this.accListComponent.loadBoatAccessories()
+                this.engineListComponent.loadBoatEngines()
             },
             error: (err) => {
                 if (err.status) {
@@ -341,6 +472,67 @@ export class BoatModal {
                 }
             },
         })
+    }
+
+    filterClassAutocompleteAcc(event: AutoCompleteCompleteEvent){
+        const filtered: any[] = []
+        const query = event.query   
+
+        this.accessoryService.getAccessories(1, 1000, query, "Y").subscribe({
+            next: (res: any) => {
+               // this.accessories.set(res.data)
+
+                for (let i = 0; i < res?.data?.length; i++) {
+                    const acc = res?.data[i]
+                    if (acc?.model?.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+                        filtered.push(acc)
+                    }
+                }
+
+                this.autoFilteredValueAccessory = filtered
+            }, 
+            error: (err) => {
+                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os acessórios.' });
+            },
+        })
+    }
+
+    filterClassAutocompleteEng(event: AutoCompleteCompleteEvent){
+        const filtered: any[] = []
+        const query = event.query   
+
+        this.engineService.getEngines(1, 1000, query, "Y").subscribe({
+            next: (res: any) => {
+                //this.engines.set(res.data)
+
+                for (let i = 0; i < res?.data?.length; i++) {
+                    const eng = res?.data[i]
+                    if (eng?.model?.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+                        filtered.push(eng)
+                    }
+                }
+
+                this.autoFilteredValueEng = filtered
+
+            }, 
+            error: (err) => {
+                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os acessórios.' });
+            },
+        })
+    }
+
+    setAccessoryChoosen(e: any){
+        //@ts-ignore
+        this.formAcc.get("AccessoryModel")?.setValue(e.value.model)
+        //@ts-ignore
+        this.formAcc.get("AccessoryId")?.setValue(e.value.id)
+    }
+
+    setEngineChoosen(e: any){
+        //@ts-ignore
+        this.formEng.get("EngineModel")?.setValue(e.value.model)
+        //@ts-ignore
+        this.formEng.get("EngineId")?.setValue(e.value.id)
     }
 
     showBoat(id: string) {
