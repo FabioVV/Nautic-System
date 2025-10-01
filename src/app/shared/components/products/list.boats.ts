@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
@@ -20,7 +20,8 @@ import { ToastModule } from 'primeng/toast';
 import { ButtonGroupModule } from 'primeng/buttongroup';
 import { finalize } from 'rxjs';
 
-import { showLoading } from '../utils';
+import { BoatModal } from './frame.boat';
+import { formatBRLMoney, showLoading } from '../utils';
 import { UserStatus } from '../../../pages/users/users';
 import { UserService } from '../../services/user.service';
 import { BoatService } from '../../services/boats.service';
@@ -39,7 +40,7 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-boats',
-    imports: [DialogModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, BoatModal, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrls: [],
     standalone: true,
@@ -59,7 +60,6 @@ interface ExportColumn {
         </div>
 
         <div class="flex flex-wrap items-center justify-end gap-2">
-
         
             <p-iconfield>
                 <p-inputicon styleClass="pi pi-search" />
@@ -145,7 +145,7 @@ interface ExportColumn {
             </td>
 
             <td>
-                {{ boat.selling_price }}
+                {{ this._formatBRLMoney(boat.selling_price) }}
             </td>
 
 
@@ -159,7 +159,7 @@ interface ExportColumn {
 
             <td>
                 <p-buttongroup>
-                    <p-button icon="pi pi-pencil" severity="contrast" rounded/>
+                    <p-button (click)="openBoatModal(boat.id)" icon="pi pi-pencil" severity="contrast" rounded/>
                     <p-button (click)="deactivateBoat(boat.id, boat.model)" icon="pi pi-trash" severity="contrast" rounded/>
                 </p-buttongroup>
             </td>
@@ -182,6 +182,8 @@ interface ExportColumn {
     [rejectAriaLabel]="rejectLabel"
     [style]="{ width: '450px' }"
     />
+
+    <open-boat #boatModal />
     `,
 })
 export class ListBoatsComponent {
@@ -196,6 +198,7 @@ export class ListBoatsComponent {
     @Input() boats: any
     @Input() totalRecords: any
     @Input() limitPerPage: any
+    @ViewChild('boatModal') boatModal!: BoatModal
 
     isLoading: boolean = false
     typingTimeout: any
@@ -295,6 +298,14 @@ export class ListBoatsComponent {
                 })
             }
         });
+    }
+
+    openBoatModal(id: number){
+        this.boatModal.showBoat(id.toString())
+    } 
+
+    _formatBRLMoney(amount: string) { // alias
+        return formatBRLMoney(amount)
     }
 
     onGlobalFilter(event: any) {
