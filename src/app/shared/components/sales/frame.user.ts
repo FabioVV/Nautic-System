@@ -42,7 +42,11 @@ import { SalesService } from '../../services/sales.service';
 
     template: `
     <p-toast></p-toast>
+
     <p-dialog #cdialog [header]="title" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" >
+        <div *ngIf="true" style='margin-top:5px; margin-bottom:5px; background: var(--p-message-warn-background); outline-color: var(--p-message-warn-border-color); color: var(--p-message-warn-color); box-shadow: var(--p-message-warn-shadow);'>
+            <div class='p-message-content'>Cliente suspeito de fraude</div>
+        </div>
         <p-tabs value="0">
             <p-tablist>
                 <p-tab value="0"><i class="pi pi-user"></i> Dados</p-tab>
@@ -407,13 +411,15 @@ export class SalesCustomerModal {
             const save_state = this.customerForm?.value?.State
             const save_pfpj = this.customerForm?.value?.PfPj
             const save_hasboat = this.customerForm?.value?.HasBoat
+            const save_fraudsuspect = this.customerForm?.value?.FraudSuspect   
             // @ts-ignore
             this.customerForm.get("State")?.setValue(this.customerForm?.value?.State?.code)
             // @ts-ignore
             this.customerForm.get("PfPj")?.setValue(this.customerForm?.value?.PfPj?.code)
             // @ts-ignore
             this.customerForm.get("HasBoat")?.setValue(this.customerForm?.value?.HasBoat?.code)
-
+            // @ts-ignore
+            this.customerForm.get("FraudSuspect")?.setValue(this.customerForm?.value?.FraudSuspect?.code)
 
             this.salesService.updateCustomer(this.id, this.customerForm.value).pipe(finalize(() => { 
                 // @ts-ignore
@@ -422,6 +428,8 @@ export class SalesCustomerModal {
                 this.customerForm.get("PfPj")?.setValue(save_pfpj)
                 // @ts-ignore
                 this.customerForm.get("HasBoat")?.setValue(save_hasboat)
+                // @ts-ignore
+                this.customerForm.get("FraudSuspect")?.setValue(save_fraudsuspect)
              })).subscribe({
                 next: (res: any) => {
                     this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Cliente atualizado(a) com sucesso' });
