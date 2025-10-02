@@ -33,9 +33,9 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { TabsModule } from 'primeng/tabs';
 import { TextareaModule } from 'primeng/textarea';
 
-import { formatBRLMoney, showLoading } from '../utils';
+import { formatBRLMoney } from '../utils';
 import { User, UserService } from '../../services/user.service';
-import { Negotiation, NegotiationHistory, SalesCustomer, SalesService } from '../../services/sales.service';
+import { Negotiation, SalesCustomer, SalesService } from '../../services/sales.service';
 import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { SelectItem } from '../utils';
 import { SalesCustomerModal } from './frame.user';

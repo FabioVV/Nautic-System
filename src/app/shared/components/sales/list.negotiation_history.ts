@@ -48,6 +48,12 @@ interface ExportColumn {
     template: `
     <p-toast></p-toast>
 
+    <div *ngIf="negotiationActive == 'N'" style='margin-top:5px; margin-bottom:5px; background: var(--p-message-warn-background); outline-color: var(--p-message-warn-border-color); color: var(--p-message-warn-color); box-shadow: var(--p-message-warn-shadow);'>
+        <div class='p-message-content' style='justify-content: center;'>
+            Cliente não possui negociação ativa
+        </div>
+    </div>
+
     <div class="card" style='padding:0.1rem; padding-left:0px !important; background-color: var(--p-sky-500); margin-top:1rem;'>
         <p-dataview #dv [value]="negotiationsHistories()">
             <ng-template #list let-items>
@@ -77,6 +83,10 @@ interface ExportColumn {
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
                                     <div>
                                         <span class="font-medium text-secondary " style='color:var(--p-emerald-500);'>Via {{ item.com_name }} as {{ _formatBRLDate(item.created_at) }}</span>
+                                        
+                                        <span [ngStyle]="{ color: item.id_business == null ? 'var(--p-amber-500)' : 'var(--p-sky-500)' }" class="font-medium text-secondary "> {{ item.id_business == null ? 'Acompanhamento não vinculado a uma negociação.' : '(Cód. Negociação #' + item.id_business + ')' }}</span>
+
+                                        
                                         <div class="text-lg font-medium text-surface-900 dark:text-surface-0 mt-2">
                                             {{ item.description }}
                                         </div>
@@ -87,11 +97,28 @@ interface ExportColumn {
 
                                     <div class="flex flex-row-reverse md:flex-row gap-2">
 
-                                        <p-button
-                                            icon="pi pi-dollar"
-                                            class="flex-auto md:flex-initial whitespace-nowrap"
-                                            label="Gerar orçamento"
-                                        ></p-button>
+                                        <div *ngIf="item.has_sales_order; else noOrder">
+                                            <button
+                                                pButton
+                                                label=""
+                                                (click)="generateSalesOrder(item.id)"
+                                            >
+                                                <i class="pi pi-dollar" pButtonIcon></i>
+                                                <span pButtonLabel>Abrir orçamento Cód. {{item.id}}</span>
+
+                                            </button>
+                                        </div>
+
+                                        <ng-template #noOrder>
+                                            <p-button
+                                                *ngIf="item.id_business !== null && item.negotiation_active == 'Y'"
+                                                icon="pi pi-dollar"
+                                                class="flex-auto md:flex-initial whitespace-nowrap"
+                                                label="Gerar orçamento"
+                                                (click)="generateSalesOrder(item.id)"
+                                            ></p-button>
+
+                                        </ng-template>
 
                                     </div>
 
@@ -105,6 +132,13 @@ interface ExportColumn {
         </p-dataview>
     </div>
 
+    <p-confirmdialog
+        [rejectLabel]="rejectLabel"
+        [acceptLabel]="confirmLabel"
+        [acceptAriaLabel]="confirmLabel"
+        [rejectAriaLabel]="rejectLabel"
+        [style]="{ width: '450px' }"
+    />
     `,
 })
 export class ListNegotiationHistoryComponent {
@@ -121,6 +155,7 @@ export class ListNegotiationHistoryComponent {
 
     id: string = ""
     _name: string = ""
+    negotiationActive: string = ""
 
     submitted: boolean = false
     accDialog: boolean = false
@@ -156,12 +191,11 @@ export class ListNegotiationHistoryComponent {
     }
 
     loadNegotiationHistory(id: string) {
-        //const rmLoading = showLoading()
-
         this.salesService.GetNegotiationHistory(id).pipe(finalize(() => {  })).subscribe({
             next: (res: any) => {
                 this.negotiationsHistories.set(res.data ?? [])
-
+                this.negotiationActive = res?.data[0]['negotiation_active']
+                this.id = id
             },
             error: (err) => {
                 if (err.status) {
@@ -169,6 +203,45 @@ export class ListNegotiationHistoryComponent {
                 }
                 this.isLoading = false
             },
+        })
+    }
+
+    generateSalesOrder(id_business_history: number){
+        this.confirmationService.confirm({
+            message: 'Confirma gerar orçamento' + `` + ' ?',
+            header: 'Confirmação',
+            icon: 'pi pi-exclamation-triangle',
+            closeOnEscape: true,
+            rejectButtonProps: {
+                label: 'Cancelar',
+                severity: 'secondary',
+                outlined: true,
+            },
+            acceptButtonProps: {
+                label: 'Confirmar',
+                severity: 'success',
+                outlined: true,
+            },
+            accept: () => {
+                this.salesService.registerSalesOrderUsingBusinnesHistory(id_business_history.toString()).subscribe({
+                    next: (res: any) => {
+                        this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Orçamento gerado com sucesso' });
+                        
+                        this.submitted = false
+                        this.isLoading = false
+
+                        this.loadNegotiationHistory(this.id)
+                    },
+                    error: (err) => {
+                        if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
+                        } else {
+                            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                        }
+                        this.isLoading = false
+                    },
+
+                })
+            }
         })
     }
 

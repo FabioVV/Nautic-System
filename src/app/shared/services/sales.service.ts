@@ -71,7 +71,7 @@ export class SalesService {
     constructor(private http: HttpClient) { }
 
     getCustomersBirthday(){
-        return this.http.get(`${environment.apiBaseURL}/sales/customers-birthday`)
+        return this.http.get(`${environment.apiBaseURL}/sales/customers/birthdays`)
     }
     
     getCustomers(page = 1, perPage = 10, name: string, email: string, phone: string, boat: string){
@@ -116,6 +116,10 @@ export class SalesService {
 
     getNegotiation(id: string) {
         return this.http.get(`${environment.apiBaseURL}/sales/negotiations/${id}`)
+    }
+
+    registerSalesOrderUsingBusinnesHistory(id: string) {
+        return this.http.post(`${environment.apiBaseURL}/sales/orders/negotiations/history/${id}`, null)
     }
 
     registerComMean(formData: any) {

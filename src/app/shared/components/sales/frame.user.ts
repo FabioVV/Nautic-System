@@ -42,11 +42,18 @@ import { SalesService } from '../../services/sales.service';
 
     template: `
     <p-toast></p-toast>
+    <div style='display:none;'>
+        <p-message severity="warn"></p-message>
+    </div>
 
     <p-dialog #cdialog [header]="title" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" >
-        <div *ngIf="true" style='margin-top:5px; margin-bottom:5px; background: var(--p-message-warn-background); outline-color: var(--p-message-warn-border-color); color: var(--p-message-warn-color); box-shadow: var(--p-message-warn-shadow);'>
-            <div class='p-message-content'>Cliente suspeito de fraude</div>
+      
+        <div *ngIf="showFraudDiv" style='margin-top:5px; margin-bottom:5px; background: var(--p-message-warn-background); outline-color: var(--p-message-warn-border-color); color: var(--p-message-warn-color); box-shadow: var(--p-message-warn-shadow);'>
+            <div class='p-message-content' style='justify-content: center;'>
+                Cliente suspeito de fraude
+            </div>
         </div>
+
         <p-tabs value="0">
             <p-tablist>
                 <p-tab value="0"><i class="pi pi-user"></i> Dados</p-tab>
@@ -287,7 +294,6 @@ import { SalesService } from '../../services/sales.service';
                             </div>
 
                             <div class='row'>
-
                             </div>
 
                         </p-fieldset>
@@ -573,6 +579,14 @@ export class SalesCustomerModal {
 
     get showQualifiedDiv(): boolean {
         const c: any = this.customerForm.get('Qualified')
+        if(c!['value']!['code'] == 'Y'){
+            return true
+        }
+        return false
+    }
+
+    get showFraudDiv(): boolean {
+        const c: any = this.customerForm.get('FraudSuspect')
         if(c!['value']!['code'] == 'Y'){
             return true
         }

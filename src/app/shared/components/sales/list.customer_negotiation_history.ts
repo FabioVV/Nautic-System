@@ -27,22 +27,20 @@ import { TooltipModule } from 'primeng/tooltip';
 import { TextareaModule } from 'primeng/textarea';
 
 
-import { showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
-import { AccStatus } from '../../../pages/products/accessories/accessories';
 import { NegotiationHistory, SalesService } from '../../services/sales.service';
 import { formatBRLDate } from '../utils';
 
 
 interface Column {
-    field: string;
-    header: string;
-    customExportHeader?: string;
+    field: string
+    header: string
+    customExportHeader?: string
 }
 
 interface ExportColumn {
-    title: string;
-    dataKey: string;
+    title: string
+    dataKey: string
 }
 
 @Component({
@@ -54,6 +52,15 @@ interface ExportColumn {
 
     template: `
     <p-toast></p-toast>
+    <div style='display:none;'>
+        <p-message severity="warn"></p-message>
+    </div>
+
+    <div *ngIf="negotiationActive == 'N'" style='margin-top:5px; margin-bottom:5px; background: var(--p-message-warn-background); outline-color: var(--p-message-warn-border-color); color: var(--p-message-warn-color); box-shadow: var(--p-message-warn-shadow);'>
+        <div class='p-message-content' style='justify-content: center;'>
+            Cliente não possui negociação ativa
+        </div>
+    </div>
 
     <form [formGroup]="acoForm" (ngSubmit)="onSubmitUpdateAco()" >
         <button id="btn_submit_acom" style='display:none;' type="submit"></button>
@@ -134,11 +141,28 @@ interface ExportColumn {
 
                                     <div class="flex flex-row-reverse md:flex-row gap-2">
 
-                                        <p-button
-                                            icon="pi pi-dollar"
-                                            class="flex-auto md:flex-initial whitespace-nowrap"
-                                            label="Gerar orçamento"
-                                        ></p-button>
+                                        <div *ngIf="item.has_sales_order; else noOrder">
+                                            <button
+                                                pButton
+                                                label=""
+                                                (click)="generateSalesOrder(item.id)"
+                                            >
+                                                <i class="pi pi-dollar" pButtonIcon></i>
+                                                <span pButtonLabel>Abrir orçamento Cód. {{item.id}}</span>
+
+                                            </button>
+                                        </div>
+
+                                        <ng-template #noOrder>
+                                            <p-button
+                                                *ngIf="item.id_business !== null && item.negotiation_active == 'Y'"
+                                                icon="pi pi-dollar"
+                                                class="flex-auto md:flex-initial whitespace-nowrap"
+                                                label="Gerar orçamento"
+                                                (click)="generateSalesOrder(item.id)"
+                                            ></p-button>
+
+                                        </ng-template>
 
                                     </div>
 
@@ -151,6 +175,14 @@ interface ExportColumn {
             </ng-template>
         </p-dataview>
     </div>
+
+    <p-confirmdialog
+        [rejectLabel]="rejectLabel"
+        [acceptLabel]="confirmLabel"
+        [acceptAriaLabel]="confirmLabel"
+        [rejectAriaLabel]="rejectLabel"
+        [style]="{ width: '450px' }"
+    />
 
     `,
 })
@@ -166,6 +198,7 @@ export class ListCustomerNegotiationHistoryComponent {
 
     negotiationsHistories = signal<NegotiationHistory[]>([])
 
+    negotiationActive: string = ""
     id: string = ""
     _name: string = ""
     ComMeans: any[] = []
@@ -221,6 +254,8 @@ export class ListCustomerNegotiationHistoryComponent {
         this.salesService.GetCustomerNegotiationHistory(id).pipe(finalize(() => {  })).subscribe({
             next: (res: any) => {
                 this.negotiationsHistories.set(res.data ?? [])
+                this.id = id
+                this.negotiationActive = res?.data[0]['negotiation_active']
 
             },
             error: (err) => {
@@ -233,8 +268,8 @@ export class ListCustomerNegotiationHistoryComponent {
     }
 
     hideDialog() {
-        this.accDialog = false;
-        this.submitted = false;
+        this.accDialog = false
+        this.submitted = false
     }
 
     onSubmitUpdateAco(){
@@ -272,6 +307,45 @@ export class ListCustomerNegotiationHistoryComponent {
 
             })
         }
+    }
+
+    generateSalesOrder(id_business_history: number){
+        this.confirmationService.confirm({
+            message: 'Confirma gerar orçamento' + `` + ' ?',
+            header: 'Confirmação',
+            icon: 'pi pi-exclamation-triangle',
+            closeOnEscape: true,
+            rejectButtonProps: {
+                label: 'Cancelar',
+                severity: 'secondary',
+                outlined: true,
+            },
+            acceptButtonProps: {
+                label: 'Confirmar',
+                severity: 'success',
+                outlined: true,
+            },
+            accept: () => {
+                this.salesService.registerSalesOrderUsingBusinnesHistory(id_business_history.toString()).subscribe({
+                    next: (res: any) => {
+                        this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Orçamento gerado com sucesso' });
+                        
+                        this.submitted = false
+                        this.isLoading = false
+
+                        this.loadNegotiationHistory(this.id)
+                    },
+                    error: (err) => {
+                        if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
+                        } else {
+                            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                        }
+                        this.isLoading = false
+                    },
+
+                })
+            }
+        })
     }
 
     filterClassAutocomplete(event: AutoCompleteCompleteEvent){

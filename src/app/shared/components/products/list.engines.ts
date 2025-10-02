@@ -382,9 +382,9 @@ export class ListEnginesComponent {
             { field: 'email', header: 'E-mail' },
             { field: 'phone', header: 'Telefone' },
             { field: 'active', header: 'Ativo' }
-        ];
+        ]
 
-        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
+        this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }))
     }
 
     loadEngines(page: number, isDelete = false) {
@@ -435,7 +435,7 @@ export class ListEnginesComponent {
                     },
                 })
             }
-        });
+        })
     }
 
     openNew(id: string) {
