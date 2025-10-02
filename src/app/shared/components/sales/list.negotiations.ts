@@ -683,6 +683,7 @@ export class ListNegotiationsComponent {
     elementRef = inject(ElementRef)
     pcard_menu: MenuItem[] | undefined
     selectedCard: any
+    MovingCard: any
 
     negotiations = signal<Negotiation[]>([])
     stageOne = computed(() => this.negotiations()?.filter(n => n.stage === 1))
@@ -815,30 +816,6 @@ export class ListNegotiationsComponent {
         ];
 
         this.pcard_menu = [
-            // {
-            //     label: 'Roles',
-            //     icon: 'pi pi-users',
-            //     items: [
-            //         {
-            //             label: 'Admin',
-            //             command: () => {
-                            
-            //             }
-            //         },
-            //         {
-            //             label: 'Member',
-            //             command: () => {
-                            
-            //             }
-            //         },
-            //         {
-            //             label: 'Guest',
-            //             command: () => {
-                            
-            //             }
-            //         }
-            //     ]
-            // },
             {
                 label: 'Acompanhamento',
                 icon: 'pi pi-user-edit',
@@ -949,18 +926,54 @@ export class ListNegotiationsComponent {
             return
         }
 
-        // Make this followup open a special form dialog, and modifiy the drop, in here we will save the card dragged, and only when the user successfully submits the form, we move the card
+        this.confirmationService.confirm({
+            message: 'Confirma avançar a negociação do estagio ' + `<mark>${card_stage}</mark> ao <mark>${dropzone_stage}</mark>` + '?',
+            header: 'Confirmação',
+            icon: 'pi pi-exclamation-triangle',
+            closeOnEscape: true,
+            rejectButtonProps: {
+                label: 'Cancelar',
+                severity: 'secondary',
+                outlined: true,
+            },
+            acceptButtonProps: {
+                label: 'Confirmar',
+                severity: 'success',
+                outlined: true,
+            },
+            accept: () => {
+                const formDataJson = {
+                    current_stage: parseInt(card_stage),
+                    new_stage: parseInt(dropzone_stage),
+                }
 
-        this.openFollowUp(parseInt(card_id_business), parseInt(card_id_customer), (parseInt(card_stage)))
+                this.salesService.advanceNegotiation(card_id_business, formDataJson).pipe(finalize(() => { this.loadNegotiations() })).subscribe({
+                    next: (res: any) => {
+                        this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Orçamento gerado com sucesso' });
+                        
+                        this.submitted = false
+                        this.isLoading = false
 
+                        card_el.setAttribute("data-stage", dropzone_stage)
 
-        card_el.setAttribute("data-stage", dropzone_stage)
+                        if (!dropzone) {
+                            e.target.closest('.kb-cards').appendChild(card_el)
+                        } else {
+                            e.target.querySelector('.kb-cards').appendChild(card_el)
+                        }
+                    },
+                    error: (err) => {
+                        if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
+                        } else {
+                            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                        }
+                 
+                    },
 
-        if (!dropzone) {
-            e.target.closest('.kb-cards').appendChild(card_el)
-        } else {
-            e.target.querySelector('.kb-cards').appendChild(card_el)
-        }
+                })
+            }
+        })
+
     }
 
     onContextMenu(event: any, card: any, id_customer: any, id: any) {

@@ -94,6 +94,10 @@ export class SalesService {
         return this.http.patch(`${environment.apiBaseURL}/sales/negotiations/${id}`, formData)
     }
 
+    advanceNegotiation(id: string, formData: any) {
+        return this.http.patch(`${environment.apiBaseURL}/sales/negotiations/${id}/advance`, formData)
+    }
+
     createNegotiationHistory(id: string, formData: any) {
         return this.http.post(`${environment.apiBaseURL}/sales/negotiations/${id}/history`, formData)
     }
