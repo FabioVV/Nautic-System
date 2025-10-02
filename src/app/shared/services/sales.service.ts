@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { USER_DATA } from '../constants';
 import { environment } from '../../../environments/environment';
 
 
@@ -141,6 +140,4 @@ export class SalesService {
     getComs(page = 1, perPage = 10, name: string, active: string) {
         return this.http.get(`${environment.apiBaseURL}/sales/communication-means?pageNumber=${page}&perPage=${perPage}&name=${name}&active=${active}`)
     }
-
-
 }

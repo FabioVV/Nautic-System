@@ -19,7 +19,9 @@ import { ToastModule } from 'primeng/toast';
 import { ButtonGroupModule } from 'primeng/buttongroup';
 import { finalize } from 'rxjs';
 import { UserService } from '../../shared/services/user.service';
+import { SalesReportsService } from '../../shared/services/sales.reports.service';
 
+import { formatBRLDate } from '../../shared/components/utils';
 
 interface Column {
     field: string;
@@ -57,19 +59,15 @@ interface ExportColumn {
         
             <p-iconfield>
                 <p-inputicon styleClass="pi pi-search" />
-                <input [(ngModel)]="idSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Código..." />
+                <input [(ngModel)]="nameSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Nome cliente..." />
             </p-iconfield>
 
 
             <p-iconfield>
                 <p-inputicon styleClass="pi pi-search" />
-                <input [(ngModel)]="modelSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Modelo..." />
+                <input [(ngModel)]="modelSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Modelo barco..." />
             </p-iconfield>
 
-            <p-iconfield>
-                <p-inputicon styleClass="pi pi-search" />
-                <input [(ngModel)]="priceSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Preço aproximado..." />
-            </p-iconfield>
 
         </div>
         <div class="text-end pb-4 mt-2">
@@ -80,88 +78,111 @@ interface ExportColumn {
 
     <ng-template #header>
         <tr>
-            <th>Cód. casco</th>
+            <th>Cód. negociação</th>
 
-            <th pSortableColumn="model">
-                Modelo
-                <p-sortIcon field="model" />
-            </th>
-
-            <th pSortableColumn="new_used">
-                Novo/Usado
-                <p-sortIcon field="new_used" />
-            </th>
-            <th pSortableColumn="year">
-                Ano
-                <p-sortIcon field="year" />
-            </th>
-            <th pSortableColumn="hours">
-                Horas
-                <p-sortIcon field="hours" />
-
-            </th>
-            <th pSortableColumn="selling_price">
-                Valor
-                <p-sortIcon field="selling_price" />
+            <th pSortableColumn="customer_name">
+                Cliente
+                <p-sortIcon field="customer_name" />
             </th>
 
-            <th pSortableColumn="active">
-                Ativo
-                <p-sortIcon field="active" />
+            <th pSortableColumn="customer_email">
+                E-mail cliente
+                <p-sortIcon field="customer_email" />
+            </th>
+
+            <th pSortableColumn="customer_phone">
+                Telefone cliente
+                <p-sortIcon field="customer_phone" />
+            </th>
+
+            <th pSortableColumn="com_name">
+                Meio de contato
+                <p-sortIcon field="com_name" />
+            </th>
+
+            <th pSortableColumn="days_since_stage_change">
+                Dias desde a última mudança de etapa
+                <p-sortIcon field="days_since_stage_change" />
+            </th>
+
+            <th pSortableColumn="days_since_last_history">
+                Dias desde o último acompanhamento
+                <p-sortIcon field="days_since_last_history" />
+            </th>
+            
+            <th pSortableColumn="last_history_at">
+                Último acompanhamento
+                <p-sortIcon field="last_history_at" />
             </th>
 
             <th></th>
         </tr>
     </ng-template>
-    <ng-template #body let-boat>
-        <tr [pSelectableRow]="boat">
+    <ng-template #body let-report>
+        <tr [pSelectableRow]="report">
             <td>
-                {{ boat.id }}
+                {{ report.id }}
             </td>
 
             <td>
-                {{ boat.model }}
+                {{ report.customer_name }}
             </td>
 
             <td>
-                {{ boat.new_used == 'N' ? "Novo" : "Usado" }}
+                {{ report.customer_email }}
             </td>
 
             <td>
-                {{ boat.year }}
+                {{ report.customer_phone }}
             </td>
 
             <td>
-                {{ boat.hours }}
+                {{ report.com_name }}
             </td>
-
 
             <td>
                 <p-tag
-                [value]="getActiveState(boat)"
-                [severity]="getSeverity(boat)"
-                styleClass="dark:!bg-surface-900"
+                    [value]="report.days_since_stage_change"
+                    [severity]="getSeverity(report.days_since_stage_change)"
+                    styleClass="dark:!bg-surface-900"
                 />
             </td>
 
+            <td>
+                <p-tag
+                    [value]="report.days_since_last_history == null ? 'Sem acompanhamento' : report.days_since_last_history"
+                    [severity]="getSeverity(report.days_since_last_history)"
+                    styleClass="dark:!bg-surface-900"
+                />
+            </td>
+
+            <td>
+                <p-tag
+                    [value]="getDate(report.last_history_at)"
+                    [severity]="getSeverityDate(report.last_history_at)"
+                    styleClass="dark:!bg-surface-900"
+                />
+            </td>
+
+            <td></td>
         </tr>
     </ng-template>
     </p-table>
 
     <p-paginator (onPageChange)="onPageChange($event)"
-    [first]="first"
-    [showCurrentPageReport]="true"
-    currentPageReportTemplate="Total: {totalRecords} | Mostrando {first} de {last}"
-    [rows]="limitPerPage"
-    [totalRecords]="totalRecords"
+        [first]="first"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Total: {totalRecords} | Mostrando {first} de {last}"
+        [rows]="limitPerPage"
+        [totalRecords]="totalRecords"
     />
 
     <p-confirmdialog
-    [rejectLabel]="rejectLabel"
-    [acceptLabel]="confirmLabel"
-    [acceptAriaLabel]="confirmLabel"
-    [rejectAriaLabel]="rejectLabel"
-    [style]="{ width: '450px' }"
+        [rejectLabel]="rejectLabel"
+        [acceptLabel]="confirmLabel"
+        [acceptAriaLabel]="confirmLabel"
+        [rejectAriaLabel]="rejectLabel"
+        [style]="{ width: '450px' }"
     />
 
     `,
@@ -172,6 +193,7 @@ export class ListReportNegotiationsComponent {
         private messageService: MessageService,
         private userService: UserService,
         private confirmationService: ConfirmationService,
+        private reportsService: SalesReportsService
     ) { }
 
 
@@ -189,9 +211,7 @@ export class ListReportNegotiationsComponent {
     autoFilteredValue: any[] = []
 
     modelSearch: string = ""
-    priceSearch: string = ""
-    statusSearch: string = ""
-    idSearch: string= ""
+    nameSearch: string = ""
 
     cols!: Column[]
     exportColumns!: ExportColumn[]
@@ -211,10 +231,28 @@ export class ListReportNegotiationsComponent {
         ]
 
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }))
+
+        this.loadReportNegotiations(1)
     }
 
     loadReportNegotiations(page: number) {
-       
+        // const rmLoading = showLoading()
+
+        this.reportsService.getNegotiationsReport(page, this.limitPerPage, this.nameSearch, this.modelSearch).pipe(finalize(() => { })).subscribe({
+            next: (res: any) => {
+                this.list.set(res.data ?? [])
+
+                this.totalRecords = res.totalRecords
+                this.first = 1
+
+            },
+            error: (err) => {
+                if (err.status) {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar dados.' });
+                }
+                this.isLoading = false
+            },
+        })
     }
 
     onGlobalFilter(event: any) {
@@ -225,24 +263,37 @@ export class ListReportNegotiationsComponent {
         this.typingTimeout = setTimeout(() => {
             this.first = 0;
             this.curPage = 1;
-            this.loadReportNegotiations(0)
+            this.loadReportNegotiations(1)
         }, 500)
     }
 
-    getSeverity(_boat: any) {
-        if (_boat.active == `Y`) {
+    getSeverity(days: string) {
+        if(!days){
+            return "danger"
+        }
+        const _days = parseInt(days)
+
+        if (_days <= 7) {
             return "success"
-        } else {
+        } else if (_days > 7 && _days <= 15) {
+            return "warn"
+        } else {  
             return "danger"
         }
     }
 
-    getActiveState(_boat: any) {
-        if (_boat.active == `Y`) {
-            return "Ativo"
-        } else {
-            return "Inativo"
+    getSeverityDate(date: Date) {
+        if(!date){
+            return "danger"
         }
+
+        return "info"
     }
 
+    getDate(date: Date){
+        if(!date){
+            return "Sem acompanhamento"
+        }
+        return formatBRLDate(date)
+    }
 }
