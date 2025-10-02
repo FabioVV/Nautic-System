@@ -245,11 +245,6 @@ interface ExportColumn {
             [rowHover]="true"
             dataKey="id"
         >
-            <ng-template #caption>
-                <div class="text-end pb-4 mt-2">
-                    <p-button icon="pi pi-external-link" label="Exportar CSV" (click)="dt.exportCSV()" />
-                </div>
-            </ng-template>
 
             <ng-template #header>
                 <tr>
