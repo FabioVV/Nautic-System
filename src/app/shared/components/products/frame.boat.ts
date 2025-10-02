@@ -285,7 +285,7 @@ export class BoatModal {
     @ViewChild('accessoryList') accListComponent!: ListAccessoriesBoatComponent
 
     @ViewChild('cdialog') myDialog!: Dialog
-    @Input() title: any
+    @Input() title: any = "Casco"
 
     CabinatedOpen: SelectItem[] = [ { name: 'Aberta', code: 'A' }, { name: 'Cabinada', code: 'C' }]
     NewUsed: SelectItem[] = [{ name: 'Nova', code: 'N' }, { name: 'Usada', code: 'U' }]

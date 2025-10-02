@@ -111,6 +111,12 @@ export class AppMenu {
                     routerLink: ['/reports/negotiations'],
                     code: "reports_negotiations:view"
                 },
+                {
+                    label: 'Orçamentos/Pedidos',
+                    icon: 'pi pi-filter',
+                    routerLink: ['/reports/sales-orders'],
+                    code: "reports_sales_orders:view"
+                },
             ]
         }
 

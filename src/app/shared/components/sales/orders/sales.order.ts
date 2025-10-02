@@ -32,7 +32,7 @@ import { UserService } from '../../../services/user.service';
 
 
 @Component({
-    selector: 'open-customer-sales',
+    selector: 'open-sales-order',
     imports: [DialogModule, TabsModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
@@ -122,6 +122,15 @@ export class SalesOrderModal {
 
     loadSalesOrder(id: string){
 
+    }
+
+    showSalesOrder(id: string) {
+        this.visible = true
+        this.id = id
+
+        this.myDialog.maximizable = true
+        this.myDialog.maximize()
+        this.loadSalesOrder(this.id)
     }
 
     isInvalid(controlName: string) {

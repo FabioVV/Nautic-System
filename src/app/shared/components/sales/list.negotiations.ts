@@ -32,6 +32,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { TabsModule } from 'primeng/tabs';
 import { TextareaModule } from 'primeng/textarea';
+import { Tag } from 'primeng/tag';
 
 import { formatBRLMoney } from '../utils';
 import { User, UserService } from '../../services/user.service';
@@ -55,7 +56,7 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-negotiations',
-    imports: [DialogModule, ListNegotiationHistoryComponent, SalesCustomerModal, SalesAboutPanel, CardModule, TextareaModule, TabsModule, InputGroupAddonModule, InputNumberModule, InputMaskModule, AutoCompleteModule, InputGroupModule, FontAwesomeModule, ToolbarModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, ListNegotiationHistoryComponent, SalesCustomerModal, SalesAboutPanel, CardModule, Tag, TextareaModule, TabsModule, InputGroupAddonModule, InputNumberModule, InputMaskModule, AutoCompleteModule, InputGroupModule, FontAwesomeModule, ToolbarModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrl: "negotiation.css",
     standalone: true,
@@ -114,6 +115,12 @@ interface ExportColumn {
                     <small class="m-0 card-money">
                         {{ this._formatBRLMoney(n.estimated_value) }}
                     </small>
+                    <br/>
+                    <p-tag
+                        [value]="getCustomerScoreTypeDescription(getCustomerScoreType(n.customer_score))"
+                        [severity]="getCustomerScoreType(n.customer_score)"
+                        styleClass="dark:!bg-surface-900"
+                    />
                 </p-card>
 
             </div>
@@ -143,6 +150,12 @@ interface ExportColumn {
                     <small class="m-0 card-money">
                         {{ this._formatBRLMoney(n.estimated_value) }}
                     </small>
+                    <br/>
+                    <p-tag
+                        [value]="getCustomerScoreTypeDescription(getCustomerScoreType(n.customer_score))"
+                        [severity]="getCustomerScoreType(n.customer_score)"
+                        styleClass="dark:!bg-surface-900"
+                    />
                 </p-card>
 
             </div>
@@ -162,7 +175,6 @@ interface ExportColumn {
                     [id]="n.id"
                     (contextmenu)="onContextMenu($event, n, n.id_customer, n.id)"
                     (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
-                    [ngStyle]="{'border': '1px solid ' + getBorderColor(n)}"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -172,6 +184,12 @@ interface ExportColumn {
                     <small class="m-0 card-money">
                         {{ this._formatBRLMoney(n.estimated_value) }}
                     </small>
+                    <br/>
+                    <p-tag
+                        [value]="getCustomerScoreTypeDescription(getCustomerScoreType(n.customer_score))"
+                        [severity]="getCustomerScoreType(n.customer_score)"
+                        styleClass="dark:!bg-surface-900"
+                    />
                 </p-card>
 
             </div>
@@ -191,7 +209,6 @@ interface ExportColumn {
                     [id]="n.id"
                     (contextmenu)="onContextMenu($event, n, n.id_customer, n.id)"
                     (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
-                    [ngStyle]="{'border': '1px solid ' + getBorderColor(n)}"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -201,6 +218,12 @@ interface ExportColumn {
                     <small class="m-0 card-money">
                         {{ this._formatBRLMoney(n.estimated_value) }}
                     </small>
+                    <br/>
+                    <p-tag
+                        [value]="getCustomerScoreTypeDescription(getCustomerScoreType(n.customer_score))"
+                        [severity]="getCustomerScoreType(n.customer_score)"
+                        styleClass="dark:!bg-surface-900"
+                    />
                 </p-card>
 
             </div>
@@ -220,7 +243,6 @@ interface ExportColumn {
                     [id]="n.id"
                     (contextmenu)="onContextMenu($event, n, n.id_customer, n.id)"
                     (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
-                    [ngStyle]="{'border': '1px solid ' + getBorderColor(n)}"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -230,6 +252,12 @@ interface ExportColumn {
                     <small class="m-0 card-money">
                         {{ this._formatBRLMoney(n.estimated_value) }}
                     </small>
+                    <br/>
+                    <p-tag
+                        [value]="getCustomerScoreTypeDescription(getCustomerScoreType(n.customer_score))"
+                        [severity]="getCustomerScoreType(n.customer_score)"
+                        styleClass="dark:!bg-surface-900"
+                    />
                 </p-card>
 
             </div>
@@ -1340,6 +1368,31 @@ export class ListNegotiationsComponent {
 
         return 'transparent'
     }
+
+    getCustomerScoreTypeDescription(type: string) {
+        if (type == "success") {
+            return "Possui uma grande chance de comprar"
+        } else if (type == "info") {
+            return "Possui uma boa chance de comprar"
+        } else if (type == "warn") {
+            return "Não possui uma boa chance de comprar"
+        } else {  
+            return "Possui uma grande chance de não comprar"
+        }
+    }
+
+    getCustomerScoreType(score: number) {
+        if (score >= 400) {
+            return "success"
+        } else if (score >= 200 && score < 400) {
+            return "info"
+        } else if (score >= 100 && score < 200) {
+            return "warn"
+        } else {  
+            return "danger"
+        }
+    }
+
 
     hasBeenSubmited(controlName: string): boolean {
         const control = this.form.get(controlName)
