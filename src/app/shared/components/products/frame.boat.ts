@@ -55,6 +55,8 @@ import { EngineService } from '../../services/engine.service';
                 <p-tab value="1"><i class="pi pi-list"></i> Acessórios</p-tab>
                 <p-tab value="2"><i class="pi pi-list"></i> Motores</p-tab>
                 <p-tab value="3"><i class="pi pi-images"></i> Imagens</p-tab>
+                <p-tab value="4"><i class="pi pi-external-link"></i> Anuncios</p-tab>
+
             </p-tablist>
             <p-tabpanels>
 
@@ -260,6 +262,48 @@ import { EngineService } from '../../services/engine.service';
                 <p-tabpanel value="3">
                 </p-tabpanel>
                 
+                <p-tabpanel value="4">
+                    <form [formGroup]="formAds" style='margin-bottom: 4rem;'>
+                        <button id="btn_submit_ads" style='display:none;' type="submit"></button>
+                        
+                        <div class='row'>
+                            <div style='margin-bottom:1rem;' class='col-md-8'>
+                                <label class="block font-bold mb-3">Meio de comunicação em que o casco esta anunciado</label>
+
+                                <p-inputgroup>
+                                    <p-inputgroup-addon pTooltip="Digite na caixa ao lado para pesquisar" tooltipPosition="top" [style]="{ cursor:'help' }">
+                                        <i class="pi pi-filter"></i>
+                                    </p-inputgroup-addon>
+
+                                    <p-autocomplete class="w-full mb-2" formControlName="ComMean" placeholder="Procure o meio de comunicação desejado" [suggestions]="autoFilteredValueEng" optionLabel="model" (completeMethod)="filterClassAutocompleteEng($event)" (onSelect)="setEngineChoosen($event)" />
+                                </p-inputgroup>
+
+                                
+                                <div class="error-feedback" *ngIf="hasBeenSubmited('ComMean')">
+                                    <p-message styleClass="mb-2" *ngIf="formAds.controls.ComMean.hasError('required')" severity="error" variant="simple" size="small">Por favor, escolher um meio</p-message>
+                                </div>
+                            </div>
+
+                            <div style='margin-bottom:1rem;' class='col-md-4'>
+                                <label class="block font-bold mb-3">Link</label>
+                                <input formControlName="Link" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+
+
+                                
+                                <div class="error-feedback" *ngIf="hasBeenSubmited('Link')">
+                                    <p-message styleClass="mb-2" *ngIf="formAds.controls.Link.hasError('required')" severity="error" variant="simple" size="small">Por favor, inserir o link do anuncio</p-message>
+                                </div>
+                            </div>
+
+                            <p-button type="submit" label="Adicionar anuncio" (click)="onSubmitAds()" icon="pi pi-check" />
+                        </div>
+
+                        <hr />
+
+
+                    </form>
+                </p-tabpanel>
+
             </p-tabpanels>
         </p-tabs>
 
@@ -311,6 +355,12 @@ export class BoatModal {
         AccessoryModel: ['', []],
     })
 
+    formAds= this.formBuilder.group({     
+        ComMeanId: ['', []],
+        ComMean: ['', []],
+        Link: ['', []],
+    })
+
     boatForm = this.formBuilder.group({       
         Cod: [{value: "", disabled: true}, []],
         Model: ['', []],
@@ -338,6 +388,14 @@ export class BoatModal {
     }
 
     ngOnInit() {
+    }
+
+    onSubmitAds(){
+        this.submitted = true
+        
+        if (this.formAds.valid) {
+            this.isLoading = true
+        }
     }
 
     onSubmitEng(){

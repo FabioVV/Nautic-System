@@ -114,6 +114,15 @@ interface ExportColumn {
                 Último acompanhamento
                 <p-sortIcon field="last_history_at" />
             </th>
+            
+            <th pSortableColumn="">
+                Negócio perdido?
+                <p-sortIcon field="" />
+            </th>
+
+            <th>
+                Motivo
+            </th>
 
             <th></th>
         </tr>
@@ -163,6 +172,9 @@ interface ExportColumn {
                     styleClass="dark:!bg-surface-900"
                 />
             </td>
+
+            <td>-TODO</td>
+            <td>-TODO</td>
 
             <td></td>
         </tr>

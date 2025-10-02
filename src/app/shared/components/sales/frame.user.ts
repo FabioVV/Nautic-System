@@ -57,7 +57,7 @@ import { SalesService } from '../../services/sales.service';
         <p-tabs value="0">
             <p-tablist>
                 <p-tab value="0"><i class="pi pi-user"></i> Dados</p-tab>
-                <p-tab value="1"><i class="pi pi-list"></i> Histórico de compras</p-tab>
+                <p-tab value="1"><i class="pi pi-list"></i> Histórico de acompanhamentos</p-tab>
             </p-tablist>
             <p-tabpanels>
 
