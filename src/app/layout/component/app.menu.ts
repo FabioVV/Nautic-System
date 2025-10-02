@@ -108,7 +108,7 @@ export class AppMenu {
                 {
                     label: 'Negociações',
                     icon: 'pi pi-filter',
-                    routerLink: ['/products/accessories-types'],
+                    routerLink: ['/reports/negotiations'],
                     code: "reports_negotiations:view"
                 },
             ]

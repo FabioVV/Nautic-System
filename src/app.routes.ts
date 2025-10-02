@@ -46,6 +46,13 @@ export const appRoutes: Routes = [
         ]
     },
 
+    {
+        path: "reports",
+        component: AppLayout,
+        children: [
+            { path: '', loadChildren: () => import('./app/pages/reports.routes') },
+        ]
+    },
 
     { path: 'notfound', component: Notfound },
     { path: '**', redirectTo: '/notfound' }
