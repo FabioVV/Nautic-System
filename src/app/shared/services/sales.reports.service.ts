@@ -15,4 +15,8 @@ export class SalesReportsService {
         return this.http.get(`${environment.apiBaseURL}/sales/reports/negotiations?pageNumber=${page}&perPage=${perPage}&name=${name}&boat=${boat}`)
     }
 
+    getSalesOrdersReport(page = 1, perPage = 10, name: string, boat: string){
+        return this.http.get(`${environment.apiBaseURL}/sales/reports/sales-orders?pageNumber=${page}&perPage=${perPage}&name=${name}&boat=${boat}`)
+    }
+
 }

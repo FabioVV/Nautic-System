@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, signal, ViewChild } from '@angular/core';
+import { Component, computed, Input, signal, ViewChild } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
@@ -20,8 +20,9 @@ import { ButtonGroupModule } from 'primeng/buttongroup';
 import { finalize } from 'rxjs';
 import { UserService } from '../../shared/services/user.service';
 import { SalesReportsService } from '../../shared/services/sales.reports.service';
+import { SalesOrderModal } from '../../shared/components/sales/orders/sales.order';
 
-import { formatBRLDate } from '../../shared/components/utils';
+import { formatBRLDate, formatBRLMoney } from '../../shared/components/utils';
 
 interface Column {
     field: string;
@@ -36,7 +37,7 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-report-sales-orders',
-    imports: [DialogModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, ButtonGroupModule, SalesOrderModal, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrls: [],
     standalone: true,
@@ -52,7 +53,8 @@ interface ExportColumn {
     >
     <ng-template #caption>
         <div class="flex items-center justify-between mb-4">
-            <span class="text-xl font-bold">Relatório de orçamentos e pedidos</span>
+            <span class="text-xl font-bold">Relatório de orçamentos e pedidos - Total da listagem: {{ this._formatBRLMoney(TotalValueFromListedOrders()) }}</span>
+
         </div>
 
         <div class="flex flex-wrap items-center justify-end gap-2">
@@ -78,41 +80,31 @@ interface ExportColumn {
 
     <ng-template #header>
         <tr>
-            <th>Cód. negociação</th>
+            <th>Cód. Orçamento/pedido</th>
+
+            <th pSortableColumn="total_value">
+                Valor pedido
+                <p-sortIcon field="total_value" />
+            </th>
+
+            <th pSortableColumn="created_at">
+                Data de emissão
+                <p-sortIcon field="created_at" />
+            </th>
 
             <th pSortableColumn="customer_name">
                 Cliente
                 <p-sortIcon field="customer_name" />
             </th>
 
-            <th pSortableColumn="customer_email">
-                E-mail cliente
-                <p-sortIcon field="customer_email" />
+            <th pSortableColumn="seller_name">
+                Vendedor
+                <p-sortIcon field="seller_name" />
             </th>
 
-            <th pSortableColumn="customer_phone">
-                Telefone cliente
-                <p-sortIcon field="customer_phone" />
-            </th>
-
-            <th pSortableColumn="com_name">
-                Meio de contato
-                <p-sortIcon field="com_name" />
-            </th>
-
-            <th pSortableColumn="days_since_stage_change">
-                Dias desde a última mudança de etapa
-                <p-sortIcon field="days_since_stage_change" />
-            </th>
-
-            <th pSortableColumn="days_since_last_history">
-                Dias desde o último acompanhamento
-                <p-sortIcon field="days_since_last_history" />
-            </th>
-            
-            <th pSortableColumn="last_history_at">
-                Último acompanhamento
-                <p-sortIcon field="last_history_at" />
+            <th pSortableColumn="status">
+                Status
+                <p-sortIcon field="status" />
             </th>
 
             <th></th>
@@ -125,48 +117,39 @@ interface ExportColumn {
             </td>
 
             <td>
+                <span>{{ this._formatBRLMoney(report.total_value) }}</span>
+            </td>
+
+            <td>
+                {{ this.getDate(report.created_at) }}
+            </td>
+
+            <td>
                 {{ report.customer_name }}
             </td>
 
             <td>
-                {{ report.customer_email }}
-            </td>
-
-            <td>
-                {{ report.customer_phone }}
-            </td>
-
-            <td>
-                {{ report.com_name }}
+                {{ report.seller_name }}
             </td>
 
             <td>
                 <p-tag
-                    [value]="report.days_since_stage_change"
-                    [severity]="getSeverity(report.days_since_stage_change)"
+                    [value]="getStatus(report.status)"
+                    [severity]="getSeverityStatus(report.status)"
                     styleClass="dark:!bg-surface-900"
                 />
             </td>
 
             <td>
-                <p-tag
-                    [value]="report.days_since_last_history == null ? 'Sem acompanhamento' : report.days_since_last_history"
-                    [severity]="getSeverity(report.days_since_last_history)"
-                    styleClass="dark:!bg-surface-900"
-                />
+                <p-buttongroup>
+                    <p-button (click)="openSalesOrder(report.id)" icon="pi pi-pencil" severity="contrast" rounded/>
+                </p-buttongroup>
             </td>
-
-            <td>
-                <p-tag
-                    [value]="getDate(report.last_history_at)"
-                    [severity]="getSeverityDate(report.last_history_at)"
-                    styleClass="dark:!bg-surface-900"
-                />
-            </td>
-
-            <td></td>
         </tr>
+
+
     </ng-template>
+
     </p-table>
 
     <p-paginator (onPageChange)="onPageChange($event)"
@@ -185,6 +168,7 @@ interface ExportColumn {
         [style]="{ width: '450px' }"
     />
 
+    <open-sales-order #salesOrder />
     `,
 })
 export class ListReportSalesOrdersComponent {
@@ -196,8 +180,11 @@ export class ListReportSalesOrdersComponent {
         private reportsService: SalesReportsService
     ) { }
 
+    @ViewChild('salesOrder') salesOrder!: SalesOrderModal
+    @ViewChild('tr') trBody!: any
 
-    
+
+    TotalValueFromListedOrders = computed(() => this.list()?.filter(n => n.total_value).reduce((sum, v) => sum + v.total_value, 0))
     list = signal<any[]>([])   
     totalRecords = 0
     limitPerPage = 20
@@ -238,12 +225,13 @@ export class ListReportSalesOrdersComponent {
     loadReportNegotiations(page: number) {
         // const rmLoading = showLoading()
 
-        this.reportsService.getNegotiationsReport(page, this.limitPerPage, this.nameSearch, this.modelSearch).pipe(finalize(() => { })).subscribe({
+        this.reportsService.getSalesOrdersReport(page, this.limitPerPage, this.nameSearch, this.modelSearch).pipe(finalize(() => { })).subscribe({
             next: (res: any) => {
                 this.list.set(res.data ?? [])
 
                 this.totalRecords = res.totalRecords
                 this.first = 1
+                console.log(this.TotalValueFromListedOrders())
 
             },
             error: (err) => {
@@ -254,6 +242,10 @@ export class ListReportSalesOrdersComponent {
             },
         })
     }
+
+    openSalesOrder(id: number){
+        this.salesOrder.showSalesOrder(id.toString())
+    } 
 
     onGlobalFilter(event: any) {
         if (this.typingTimeout) {
@@ -267,33 +259,46 @@ export class ListReportSalesOrdersComponent {
         }, 500)
     }
 
-    getSeverity(days: string) {
-        if(!days){
-            return "danger"
+    _formatBRLMoney(amount: string){ // alias
+        if(!amount){
+            return "Sem valor"
         }
-        const _days = parseInt(days)
+        return formatBRLMoney(amount)
+    }
 
-        if (_days <= 7) {
-            return "success"
-        } else if (_days > 7 && _days <= 15) {
+    getSeverityStatus(status: string) {
+        if(status == "NQ"){ // new quote
+            return "info"
+        } else if(status == "NO"){ // new order
+            return "info"
+        } else if(status == "QC"){ // quote canceled
             return "warn"
-        } else {  
+        } else if(status == "OC"){ // order canceled
+            return "warn"
+        } else if(status == "OD"){ // order done
+            return "success"
+        } else {
             return "danger"
         }
     }
 
-    getSeverityDate(date: Date) {
-        if(!date){
-            return "danger"
+    getStatus(status: string) {
+        if(status == "NQ"){ // new quote
+            return "Novo orçamento"
+        } else if(status == "NO"){ // new order
+            return "Novo pedido"
+        } else if(status == "QC"){ // quote canceled
+            return "Orçamento cancelado"
+        } else if(status == "OC"){ // order canceled
+            return "Pedido cancelado"
+        } else if(status == "OD"){ // order done
+            return "Pedido concluído"
+        } else {
+            return "Não reconhecido"
         }
-
-        return "info"
     }
 
     getDate(date: Date){
-        if(!date){
-            return "Sem acompanhamento"
-        }
         return formatBRLDate(date)
     }
 }

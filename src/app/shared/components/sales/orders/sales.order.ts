@@ -41,14 +41,14 @@ import { UserService } from '../../../services/user.service';
     template: `
     <p-toast></p-toast>
     <div style='display:none;'>
-        <p-message severity="warn"></p-message>
+        <p-message severity="error"></p-message>
     </div>
 
     <p-dialog #cdialog [header]="title" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" >
       
-        <div *ngIf="showFraudDiv" style='margin-top:5px; margin-bottom:5px; background: var(--p-message-warn-background); outline-color: var(--p-message-warn-border-color); color: var(--p-message-warn-color); box-shadow: var(--p-message-warn-shadow);'>
+        <div *ngIf="true" style='margin-top:5px; margin-bottom:5px; background: var(--p-message-error-background); outline-color: var(--p-message-error-border-color); color: var(--p-message-error-color); box-shadow: var(--p-message-error-shadow);'>
             <div class='p-message-content' style='justify-content: center;'>
-                Cliente suspeito de fraude
+                <p-button type="submit" label="Clique aqui para ver avisos sobre este pedido" (click)="orderProblems()" icon="pi pi-exclamation-triangle" />
             </div>
         </div>
 
@@ -121,6 +121,10 @@ export class SalesOrderModal {
     }
 
     loadSalesOrder(id: string){
+
+    }
+
+    orderProblems(){
 
     }
 
