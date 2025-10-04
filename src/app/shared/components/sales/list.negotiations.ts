@@ -679,6 +679,10 @@ interface ExportColumn {
 
         </ng-template>
     </p-dialog>
+    
+    <p-dialog header="Perdeu negociação" [modal]="true" [(visible)]="lostNegotiation" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }">
+
+    </p-dialog>
 
     <p-confirmdialog
         [rejectLabel]="rejectLabel"
@@ -729,6 +733,7 @@ export class ListNegotiationsComponent {
     negotiationDialog: boolean = false
     followupDialog: boolean = false
 
+    lostNegotiation: boolean = false
     birthdaysDialog: boolean = false
     panelExpVisible: boolean = false
     typingTimeout: any
@@ -782,6 +787,17 @@ export class ListNegotiationsComponent {
         UserId: ['', []],
         CustomerId: ['', []],
         Stage: ['', []]
+    })
+    
+    lostNegotiationForm = this.formBuilder.group({
+        motive: ['', [Validators.required]],
+        dateAlert: ['', []],
+        dateAlertMotive: ['', []],
+
+        customerGotAnotherBoat: ['', []],
+        whichBoat: ['', []],
+
+        OurBoatOffered: ['', []],
     })
 
     ComMeans: any[] = []
@@ -861,7 +877,7 @@ export class ListNegotiationsComponent {
                 label: 'Perdeu negociação',
                 icon: 'pi pi-user-minus',
                 command: () => {
-                    console.log(this.selectedCard)
+                    this.openLostNegotiation()
                 }
             },
             {
@@ -1239,6 +1255,11 @@ export class ListNegotiationsComponent {
                 this.isLoading = false
             },
         })
+
+    }
+
+    openLostNegotiation(){
+        this.lostNegotiation = true
 
     }
 

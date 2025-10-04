@@ -29,6 +29,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { InputGroupModule } from 'primeng/inputgroup';
 
+
 import { ListEnginesBoatComponent } from './list.engines_boat';
 import { ListAccessoriesBoatComponent } from './list.accessories_boat';
 import { BrStates } from '../utils';
@@ -38,10 +39,11 @@ import { SalesService } from '../../services/sales.service';
 import { BoatService } from '../../services/boats.service';
 import { AccessoryService } from '../../services/accessories.service';
 import { EngineService } from '../../services/engine.service';
+import { ListAdsBoatComponent } from './list.ads_boat';
 
 @Component({
     selector: 'open-boat',
-    imports: [DialogModule, TabsModule, DatePickerModule, ListAccessoriesBoatComponent, ListEnginesBoatComponent, InputGroupModule, AutoCompleteModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, TabsModule, DatePickerModule, ListAdsBoatComponent, ListAccessoriesBoatComponent, ListEnginesBoatComponent, InputGroupModule, AutoCompleteModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
     standalone: true,
@@ -55,7 +57,7 @@ import { EngineService } from '../../services/engine.service';
                 <p-tab value="1"><i class="pi pi-list"></i> Acessórios</p-tab>
                 <p-tab value="2"><i class="pi pi-list"></i> Motores</p-tab>
                 <p-tab value="3"><i class="pi pi-images"></i> Imagens</p-tab>
-                <p-tab value="4"><i class="pi pi-external-link"></i> Anuncios</p-tab>
+                <p-tab value="4"><i class="pi pi-external-link"></i> Onde está anunciado</p-tab>
 
             </p-tablist>
             <p-tabpanels>
@@ -275,7 +277,7 @@ import { EngineService } from '../../services/engine.service';
                                         <i class="pi pi-filter"></i>
                                     </p-inputgroup-addon>
 
-                                    <p-autocomplete class="w-full mb-2" formControlName="ComMean" placeholder="Procure o meio de comunicação desejado" [suggestions]="autoFilteredValueEng" optionLabel="model" (completeMethod)="filterClassAutocompleteEng($event)" (onSelect)="setEngineChoosen($event)" />
+                                    <p-autocomplete class="w-full mb-2" formControlName="ComMean" placeholder="Procure o meio de comunicação desejado" [suggestions]="autoFilteredValueAds" optionLabel="name" (completeMethod)="filterClassAutocompleteAds($event)" (onSelect)="setComMeanChoosen($event)" />
                                 </p-inputgroup>
 
                                 
@@ -300,7 +302,7 @@ import { EngineService } from '../../services/engine.service';
 
                         <hr />
 
-
+                        <list-ads-boat #adsList [id]="id" />
                     </form>
                 </p-tabpanel>
 
@@ -327,6 +329,7 @@ export class BoatModal {
 
     @ViewChild('engineList') engineListComponent!: ListEnginesBoatComponent
     @ViewChild('accessoryList') accListComponent!: ListAccessoriesBoatComponent
+    @ViewChild('adsList') adListComponent!: ListAdsBoatComponent
 
     @ViewChild('cdialog') myDialog!: Dialog
     @Input() title: any = "Casco"
@@ -336,6 +339,7 @@ export class BoatModal {
 
     autoFilteredValueEng: any[] = []
     autoFilteredValueAccessory: any[] = []
+    autoFilteredValueAds: any[] = []
 
 
     isLoading: boolean = false
@@ -395,6 +399,23 @@ export class BoatModal {
         
         if (this.formAds.valid) {
             this.isLoading = true
+
+            const formData = {
+                link: this.formAds?.value?.Link
+            }
+            
+            this.boatService.registerBoatAd(this.id, this.formAds?.value?.ComMeanId, formData).subscribe({
+                next: (res: any) => {
+                    this.adListComponent.loadBoatAds()
+                }, 
+                error: (err) => {
+                    if(err?.error?.message == 'ad already linked with the boat'){
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Anúncio já está vinculado ao casco' })
+                    } else {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar adicionar anuncio' })
+                    }
+                },
+            })
         }
     }
 
@@ -523,6 +544,7 @@ export class BoatModal {
 
                 this.accListComponent.loadBoatAccessories()
                 this.engineListComponent.loadBoatEngines()
+                this.adListComponent.loadBoatAds()
             },
             error: (err) => {
                 if (err.status) {
@@ -579,6 +601,27 @@ export class BoatModal {
         })
     }
 
+    filterClassAutocompleteAds(event: AutoCompleteCompleteEvent){
+        const filtered: any[] = []
+        const query = event.query   
+
+        this.salesService.getComs(1, 1000, "", "Y").subscribe({
+            next: (res: any) => {
+                for (let i = 0; i < res?.data?.length; i++) {
+                    const eng = res?.data[i]
+                    if (eng?.name?.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+                        filtered.push(eng)
+                    }
+                }
+
+                this.autoFilteredValueAds = filtered            
+            }, 
+            error: (err: any) => {
+                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os meios.' });
+            },
+        })
+    }
+
     setAccessoryChoosen(e: any){
         //@ts-ignore
         this.formAcc.get("AccessoryModel")?.setValue(e.value.model)
@@ -591,6 +634,13 @@ export class BoatModal {
         this.formEng.get("EngineModel")?.setValue(e.value.model)
         //@ts-ignore
         this.formEng.get("EngineId")?.setValue(e.value.id)
+    }
+
+    setComMeanChoosen(e: any){
+        //@ts-ignore
+        this.formAds.get("ComMean")?.setValue(e.value.name)
+        //@ts-ignore
+        this.formAds.get("ComMeanId")?.setValue(e.value.id)
     }
 
     showBoat(id: string) {

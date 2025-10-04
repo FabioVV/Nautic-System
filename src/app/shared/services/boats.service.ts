@@ -45,12 +45,16 @@ export class BoatService {
         return this.http.get(`${environment.apiBaseURL}/boats?pageNumber=${page}&perPage=${perPage}&model=${model}&price=${price}&id=${id}&active=${active}`)
     }
 
+    registerBoatAd(id: string, id_mean_communication: string | null | undefined, formData: any) {
+        return this.http.post(`${environment.apiBaseURL}/boats/${id}/ads/${id_mean_communication}`, formData)
+    }
+
     registerBoatAccessory(id: string, id_accessory: string | null | undefined) {
-        return this.http.post(`${environment.apiBaseURL}/boats/${id}/accessories/${id_accessory ?? ''}`, null)
+        return this.http.post(`${environment.apiBaseURL}/boats/${id}/accessories/${id_accessory}`, null)
     }
 
     registerBoatEngine(id: string, id_engine: string | null | undefined) {
-        return this.http.post(`${environment.apiBaseURL}/boats/${id}/engines/${id_engine ?? ''}`, null)
+        return this.http.post(`${environment.apiBaseURL}/boats/${id}/engines/${id_engine}`, null)
     }
 
     removeBoatAccessory(id: string, id_accessory: string) {
@@ -61,12 +65,20 @@ export class BoatService {
         return this.http.delete(`${environment.apiBaseURL}/boats/${id}/engines/${id_engine}`)
     }
 
+    removeBoatAd(id: string, id_mean_communication: string) {
+        return this.http.delete(`${environment.apiBaseURL}/boats/${id}/ads/${id_mean_communication}`)
+    }
+
     getBoatAccessories(id: string) {
         return this.http.get(`${environment.apiBaseURL}/boats/${id}/accessories`)
     }
 
     getBoatEngines(id: string) {
         return this.http.get(`${environment.apiBaseURL}/boats/${id}/engines`)
+    }
+
+    getBoatAds(id: string) {
+        return this.http.get(`${environment.apiBaseURL}/boats/${id}/ads`)
     }
 
     getBoat(id: string) {
