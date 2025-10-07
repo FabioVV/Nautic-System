@@ -39,6 +39,7 @@ export interface NegotiationHistory {
     description: string,
     created_at: Date,
     id_business: string,
+    id_sales_order:string,
 }
 
 

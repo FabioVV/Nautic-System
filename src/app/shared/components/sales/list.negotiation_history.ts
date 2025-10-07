@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, signal } from '@angular/core';
+import { Component, input, Input, OnInit, signal, ViewChild } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
@@ -25,7 +25,7 @@ import { UserService } from '../../services/user.service';
 import { AccStatus } from '../../../pages/products/accessories/accessories';
 import { NegotiationHistory, SalesService } from '../../services/sales.service';
 import { formatBRLDate } from '../utils';
-
+import { SalesOrderModal } from './orders/sales.order';
 
 interface Column {
     field: string;
@@ -40,7 +40,7 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-negotiation-history',
-    imports: [DialogModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, MessageModule, SalesOrderModal, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrls: [],
     standalone: true,
@@ -101,7 +101,7 @@ interface ExportColumn {
                                             <button
                                                 pButton
                                                 label=""
-                                                (click)="generateSalesOrder(item.id)"
+                                                (click)="_openSalesOrder(item?.id_sales_order)"
                                             >
                                                 <i class="pi pi-dollar" pButtonIcon></i>
                                                 <span pButtonLabel>Abrir orçamento Cód. {{item.id}}</span>
@@ -152,6 +152,8 @@ export class ListNegotiationHistoryComponent {
     ) { }
 
     negotiationsHistories = signal<NegotiationHistory[]>([])
+    @ViewChild('salesOrder') salesOrder!: SalesOrderModal
+    @Input() openSalesOrder: any
 
     id: string = ""
     _name: string = ""
@@ -166,7 +168,6 @@ export class ListNegotiationHistoryComponent {
     })
 
     selectedUsers!: any[] // does nothing for now
-
     autoFilteredValue: any[] = []
 
     nameSearch: string = ""
@@ -184,6 +185,10 @@ export class ListNegotiationHistoryComponent {
 
     ngOnInit() {
 
+    }
+
+    _openSalesOrder(id: number){
+        this.openSalesOrder(id)
     }
 
     _formatBRLDate(date: any){
@@ -246,8 +251,8 @@ export class ListNegotiationHistoryComponent {
     }
 
     hideDialog() {
-        this.accDialog = false;
-        this.submitted = false;
+        this.accDialog = false
+        this.submitted = false
     }
 
     onSubmit() {

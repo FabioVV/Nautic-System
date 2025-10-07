@@ -42,6 +42,7 @@ import { SelectItem } from '../utils';
 import { SalesCustomerModal } from './frame.user';
 import { SalesAboutPanel } from './about.sales_panel';
 import { ListNegotiationHistoryComponent } from './list.negotiation_history';
+import { SalesOrderModal } from './orders/sales.order';
 
 interface Column {
     field: string
@@ -56,7 +57,7 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-negotiations',
-    imports: [DialogModule, ListNegotiationHistoryComponent, SalesCustomerModal, SalesAboutPanel, CardModule, Tag, TextareaModule, TabsModule, InputGroupAddonModule, InputNumberModule, InputMaskModule, AutoCompleteModule, InputGroupModule, FontAwesomeModule, ToolbarModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, SalesOrderModal, ListNegotiationHistoryComponent, SalesCustomerModal, SalesAboutPanel, CardModule, Tag, TextareaModule, TabsModule, InputGroupAddonModule, InputNumberModule, InputMaskModule, AutoCompleteModule, InputGroupModule, FontAwesomeModule, ToolbarModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrl: "negotiation.css",
     standalone: true,
@@ -666,7 +667,7 @@ interface ExportColumn {
 
                         </form>
 
-                        <list-negotiation-history #negHistory/>
+                        <list-negotiation-history #negHistory [openSalesOrder]="this.openSalesOrder" />
 
                     </p-tabpanel>
                 </p-tabpanels>  
@@ -693,6 +694,7 @@ interface ExportColumn {
     />
 
     <open-customer-sales #customerModal title="Cliente"/>
+    <open-sales-order #salesOrder />
     `,
 })
 export class ListNegotiationsComponent {
@@ -710,6 +712,7 @@ export class ListNegotiationsComponent {
     @ViewChild('cm') cm!: ContextMenu
     @ViewChild('customerModal') customerModal!: SalesCustomerModal
     @ViewChild('negHistory') negotiationHistory!: ListNegotiationHistoryComponent
+    @ViewChild('salesOrder') salesOrder!: SalesOrderModal
 
     elementRef = inject(ElementRef)
     pcard_menu: MenuItem[] | undefined
@@ -1019,6 +1022,10 @@ export class ListNegotiationsComponent {
 
     }
 
+    openSalesOrder = (id: number) => {
+        this.salesOrder.showSalesOrder(id.toString())
+    } 
+
     onContextMenu(event: any, card: any, id_customer: any, id: any) {
         this.selectedCard = card
         this._customer_id = id_customer
@@ -1260,7 +1267,6 @@ export class ListNegotiationsComponent {
 
     openLostNegotiation(){
         this.lostNegotiation = true
-
     }
 
     openFollowUp(id: number, id_customer: number, stage: number) {

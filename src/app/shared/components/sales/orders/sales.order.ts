@@ -26,6 +26,10 @@ import { InputMaskModule } from 'primeng/inputmask';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { DatePickerModule } from 'primeng/datepicker';
+import { CardModule } from 'primeng/card';
+import { TagModule } from 'primeng/tag';
+
+import { BrStates, SelectItem } from '../../utils';
 import { SalesService } from '../../../services/sales.service';
 import { UserService } from '../../../services/user.service';
 
@@ -33,7 +37,7 @@ import { UserService } from '../../../services/user.service';
 
 @Component({
     selector: 'open-sales-order',
-    imports: [DialogModule, TabsModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, TagModule, TabsModule, CardModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
     standalone: true,
@@ -52,6 +56,13 @@ import { UserService } from '../../../services/user.service';
             </div>
         </div>
 
+        <div class='ped-total'>
+            <div>
+                <h5>Total do pedido</h5>
+                <p-tag severity="success" value="R$ 1.000.000,00" />
+            </div>
+        </div>
+
         <p-tabs value="0">
             <p-tablist>
                 <p-tab value="0"><i class="pi pi-user"></i> Dados</p-tab>
@@ -64,7 +75,85 @@ import { UserService } from '../../../services/user.service';
                 <p-tabpanel value="0">
                     <form [formGroup]="salesOrderForm" (ngSubmit)="onSubmit()">
                         <button id="btn_submit" style='display:none;' type="submit"></button>
+       
+                        <div class='row'>
 
+                            <div class='col-md-4'>
+                                <label class="block font-bold mb-3">Nome do cliente</label>
+                                <input formControlName="CustomerName" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                            </div>
+
+                            <div class='col-md-4'>
+                                <label class="block font-bold mb-3">Vendedor</label>
+                                <input formControlName="SellerName" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                            </div>
+
+                            <div class='col-md-4'>
+                                <label class="block font-bold mb-3">Cód. (?)</label>
+                                <input formControlName="Id" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                            </div>
+
+                        </div>
+
+                        <p-fieldset legend="Dados complementares do cliente">
+
+                            <div class='row'>
+                                <div class='col-md-6'>
+                                    <label for="Cep" class="block font-bold mb-3">Cep</label>
+                                    <p-inputmask mask="99999-999" class="w-full md:w-[30rem] mb-2" formControlName="Cep" placeholder="99999-999" fluid  />
+                                </div>
+
+                                <div class='col-md-4'>
+                                <label for="PfPj" class="block font-bold mb-3">Tipo de cliente</label>
+                                <p-select [invalid]="isInvalid('PfPj')" [options]="TypeClient" formControlName="PfPj" optionLabel="name" placeholder="Selecione o tipo do cliente" class="w-full mb-2" />
+                            
+                            </div>
+
+                            </div>
+
+                            <div class='row'>
+                                <div class='col-md-4'>
+                                    <label for="Street" class="block font-bold mb-3">Endereço</label>
+                                    <input formControlName="Street" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+
+                                </div>
+
+                                <div class='col-md-2'>
+                                    <label for="Neighborhood" class="block font-bold mb-3">Bairro</label>
+                                    <input formControlName="Neighborhood" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                                
+
+                                </div>
+
+                                <div class='col-md-2'>
+                                    <label for="City" class="block font-bold mb-3">Cidade</label>
+                                    <input formControlName="City" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                                
+
+                                </div>
+
+                                <div class='col-md-2'>
+                                    <label for="Complement" class="block font-bold mb-3">Complemento</label>
+                                    <input formControlName="Complement" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+
+                                </div>
+
+                                <div class='col-md-2'>
+                                    <label for="State" class="block font-bold mb-3">Estado</label>
+                                    <p-select [invalid]="isInvalid('State')" [options]="BrStates" formControlName="State" optionLabel="name" placeholder="Selecione o estado do cliente" class="w-full mb-2" />
+
+                                </div>
+
+                            </div>
+
+                        </p-fieldset>
+
+                        <div class='row'>
+                            <div class='col-md-12'>
+                                <label for="Details" class="block font-bold mb-3">Detalhes do pedido</label>
+                                <textarea  class="w-full mb-2" rows="5" cols="30" pTextarea formControlName="Details"></textarea>
+                            </div>
+                        </div>
 
                     </form>
                 </p-tabpanel>
@@ -94,17 +183,33 @@ export class SalesOrderModal {
         private salesService: SalesService,
     ) { }
 
-    @ViewChild('cdialog') myDialog!: Dialog
+    BrStates = BrStates
 
+    @ViewChild('cdialog') myDialog!: Dialog
     @Input() title: any
+
 
     isLoading: boolean = false
     submitted: boolean = false
     visible: boolean = false
     id: string = ""
+    TypeClient: SelectItem[] = [{ name: 'Pessia física', code: 'PF' }, { name: 'Pessoa juridica', code: 'PJ' }]
 
     salesOrderForm = this.formBuilder.group({
+        Id: [{value: '', disabled: true}, []],
+        SellerName: [{value: '', disabled: true}, []],
+        CustomerName: [{value: '', disabled: true}, []],
+        PfPj: [{value: '', disabled: true}, []],
+        Cep: [{value: '', disabled: true}, []],
+        Street: [{value: '', disabled: true}, []],
+        Neighborhood: [{value: '', disabled: true}, []],
+        City: [{value: '', disabled: true}, []],
+        Complement: [{value: '', disabled: true}, []],
+        State: [{value: '', disabled: true}, []],
+        Cpf: [{value: '', disabled: true}, []],
+        Cnpj: [{value: '', disabled: true}, []],
 
+        Details: ['', []],
     })
 
     submit() {
