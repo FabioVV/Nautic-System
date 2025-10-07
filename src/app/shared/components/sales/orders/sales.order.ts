@@ -28,45 +28,52 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { DatePickerModule } from 'primeng/datepicker';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
+import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
+import { InputGroupModule } from 'primeng/inputgroup';
 
 import { BrStates, SelectItem } from '../../utils';
 import { SalesService } from '../../../services/sales.service';
 import { UserService } from '../../../services/user.service';
+import { EngineService } from '../../../services/engine.service';
+import { BoatService } from '../../../services/boats.service';
 
 
 
 @Component({
     selector: 'open-sales-order',
-    imports: [DialogModule, TagModule, TabsModule, CardModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, TagModule, AutoCompleteModule, InputGroupModule, TabsModule, CardModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
     standalone: true,
 
     template: `
     <p-toast></p-toast>
-    <div style='display:none;'>
-        <p-message severity="error"></p-message>
-    </div>
 
     <p-dialog #cdialog [header]="title" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" >
-      
-        <div *ngIf="true" style='margin-top:5px; margin-bottom:5px; background: var(--p-message-error-background); outline-color: var(--p-message-error-border-color); color: var(--p-message-error-color); box-shadow: var(--p-message-error-shadow);'>
-            <div class='p-message-content' style='justify-content: center;'>
-                <p-button type="submit" label="Clique aqui para ver avisos sobre este pedido" (click)="orderProblems()" icon="pi pi-exclamation-triangle" />
-            </div>
-        </div>
 
         <div class='ped-total'>
             <div>
-                <h5>Total do pedido</h5>
+                <h4>Avisos</h4>
+                <div class='p-message-content' style='justify-content: center;'>
+                    <p-button severity="warn" type="submit" label="Clique aqui para ver avisos sobre este pedido" (click)="orderProblems()" icon="pi pi-exclamation-triangle" />
+                </div>
+            </div>
+
+            <div>
+                <h4>Status</h4>
+                <p-tag severity="success" value="Orçamento novo" />
+            </div>
+
+            <div>
+                <h4>Total do pedido</h4>
                 <p-tag severity="success" value="R$ 1.000.000,00" />
             </div>
         </div>
 
         <p-tabs value="0">
             <p-tablist>
-                <p-tab value="0"><i class="pi pi-user"></i> Dados</p-tab>
-                <p-tab value="1"><i class="pi pi-list"></i> itens</p-tab>
+                <p-tab value="0"><i class="pi pi-user"></i> Cliente</p-tab>
+                <p-tab value="1"><i class="pi pi-list"></i> Pedido</p-tab>
                 <p-tab value="2"><i class="pi pi-list"></i> Arquivos</p-tab>
 
             </p-tablist>
@@ -89,7 +96,7 @@ import { UserService } from '../../../services/user.service';
                             </div>
 
                             <div class='col-md-4'>
-                                <label class="block font-bold mb-3">Cód. (?)</label>
+                                <label class="block font-bold mb-3">Código</label>
                                 <input formControlName="Id" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
                             </div>
 
@@ -148,17 +155,89 @@ import { UserService } from '../../../services/user.service';
 
                         </p-fieldset>
 
-                        <div class='row'>
-                            <div class='col-md-12'>
-                                <label for="Details" class="block font-bold mb-3">Detalhes do pedido</label>
-                                <textarea  class="w-full mb-2" rows="5" cols="30" pTextarea formControlName="Details"></textarea>
-                            </div>
-                        </div>
 
                     </form>
                 </p-tabpanel>
 
                 <p-tabpanel value="1">
+
+                    <div class='row'>
+                        <div class='col-md-12'>
+                            <label for="Details" class="block font-bold mb-3">Total do Pedido</label>
+                            <p style='font-size:3em; color:green;'>R$ 1.000.000,00</p>
+                        </div>
+                    </div>
+
+                    <div class='row'>
+
+                        <div class='col-md-6'>
+                            <form [formGroup]="formBoat" style='margin-bottom: 4rem;'>
+                                <button id="btn_submit_casc" style='display:none;' type="submit"></button>
+                                
+                                <div class='row'>
+                                    <div style='margin-bottom:1rem;' class='col-md-12'>
+                                        <label for="AccessoryModel" class="block font-bold mb-3">Casco do pedido</label>
+
+                                        <p-inputgroup>
+                                            <p-inputgroup-addon pTooltip="Digite na caixa ao lado para pesquisar" tooltipPosition="top" [style]="{ cursor:'help' }">
+                                                <i class="pi pi-filter"></i>
+                                            </p-inputgroup-addon>
+
+                                            <p-autocomplete class="w-full mb-2" formControlName="BoatModel" placeholder="Procure pelo casco" [suggestions]="autoFilteredValueBoat" optionLabel="model" (completeMethod)="filterClassAutocompleteBoat($event)" (onSelect)="setBoatChoosen($event)" />
+                                        </p-inputgroup>
+
+                                        
+                                        <div class="error-feedback" *ngIf="hasBeenSubmited('BoatModel')">
+                                            <p-message styleClass="mb-2" *ngIf="formBoat.controls.BoatModel.hasError('required')" severity="error" variant="simple" size="small">Por favor, escolher um casco</p-message>
+                                        </div>
+                                    </div>
+
+                                    <p-button type="submit" label="Salvar casco" (click)="onSubmitBoat()" icon="pi pi-check" />
+                                </div>
+
+                                <hr />
+                            </form>
+                        </div>
+
+                        <div class='col-md-6'>
+                            <form [formGroup]="formEng" style='margin-bottom: 4rem;'>
+                                <button id="btn_submit_eng" style='display:none;' type="submit"></button>
+                                
+                                <div class='row'>
+                                    <div style='margin-bottom:1rem;' class='col-md-12'>
+                                        <label for="AccessoryModel" class="block font-bold mb-3">Motor do casco</label>
+
+                                        <p-inputgroup>
+                                            <p-inputgroup-addon pTooltip="Digite na caixa ao lado para pesquisar" tooltipPosition="top" [style]="{ cursor:'help' }">
+                                                <i class="pi pi-filter"></i>
+                                            </p-inputgroup-addon>
+
+                                            <p-autocomplete class="w-full mb-2" formControlName="EngineModel" placeholder="Procure pelo motor" [suggestions]="autoFilteredValueEng" optionLabel="model" (completeMethod)="filterClassAutocompleteEng($event)" (onSelect)="setEngineChoosen($event)" />
+                                        </p-inputgroup>
+
+                                        
+                                        <div class="error-feedback" *ngIf="hasBeenSubmitedEngine('EngineModel')">
+                                            <p-message styleClass="mb-2" *ngIf="formEng.controls.EngineModel.hasError('required')" severity="error" variant="simple" size="small">Por favor, escolher um motor</p-message>
+                                        </div>
+                                    </div>
+
+                                    <p-button type="submit" label="Salvar motor" (click)="onSubmitEngine()" icon="pi pi-check" />
+                                </div>
+
+                                <hr />
+                            </form>
+                        </div>
+                    
+                    </div>
+
+
+                    <div class='row'>
+                        <div class='col-md-12'>
+                            <label for="Details" class="block font-bold mb-3">Detalhes do pedido</label>
+                            <textarea  class="w-full mb-2" rows="5" cols="30" pTextarea formControlName="Details"></textarea>
+                        </div>
+                    </div>
+
 
                 </p-tabpanel>
 
@@ -181,6 +260,8 @@ export class SalesOrderModal {
         private messageService: MessageService,
         private userService: UserService,
         private salesService: SalesService,
+        private engineService: EngineService,
+        private boatService: BoatService,
     ) { }
 
     BrStates = BrStates
@@ -194,6 +275,9 @@ export class SalesOrderModal {
     visible: boolean = false
     id: string = ""
     TypeClient: SelectItem[] = [{ name: 'Pessia física', code: 'PF' }, { name: 'Pessoa juridica', code: 'PJ' }]
+
+    autoFilteredValueEng: any[] = []
+    autoFilteredValueBoat: any[] = []
 
     salesOrderForm = this.formBuilder.group({
         Id: [{value: '', disabled: true}, []],
@@ -212,6 +296,16 @@ export class SalesOrderModal {
         Details: ['', []],
     })
 
+    formBoat = this.formBuilder.group({
+        BoatModel: ['', []],
+        BoatId: ['', []],
+    })
+
+    formEng = this.formBuilder.group({
+        EngineModel: ['', []],
+        EngineId: ['', []],
+    })
+
     submit() {
         document.getElementById(`btn_submit`)?.click()
     }
@@ -225,6 +319,52 @@ export class SalesOrderModal {
 
     }
 
+    onSubmitBoat(){
+        this.submitted = true
+
+        if (this.formBoat.valid) {
+            this.isLoading = true
+
+            // this.boatService.registerBoatAccessory(this.id, this.formAcc?.value?.AccessoryId).subscribe({
+            //     next: (res: any) => {
+            //         this.accListComponent.loadBoatAccessories()
+            //     }, 
+            //     error: (err) => {
+            //         if(err?.error?.message == 'accessory already linked with the boat'){
+            //             this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Acessório já está vinculado ao casco' })
+            //         } else {
+            //             this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar adicionar o acessório' })
+
+            //         }
+            //     },
+            // })
+            
+        }
+    }
+
+    onSubmitEngine(){
+        this.submitted = true
+
+        if (this.formBoat.valid) {
+            this.isLoading = true
+
+            // this.boatService.registerBoatAccessory(this.id, this.formAcc?.value?.AccessoryId).subscribe({
+            //     next: (res: any) => {
+            //         this.accListComponent.loadBoatAccessories()
+            //     }, 
+            //     error: (err) => {
+            //         if(err?.error?.message == 'accessory already linked with the boat'){
+            //             this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Acessório já está vinculado ao casco' })
+            //         } else {
+            //             this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar adicionar o acessório' })
+
+            //         }
+            //     },
+            // })
+            
+        }
+    }
+
     loadSalesOrder(id: string){
 
     }
@@ -233,18 +373,94 @@ export class SalesOrderModal {
 
     }
 
-    showSalesOrder(id: string) {
+    showSalesOrder(id: string, title: string) {
         this.visible = true
         this.id = id
 
         this.myDialog.maximizable = true
         this.myDialog.maximize()
         this.loadSalesOrder(this.id)
+        this.title = title
+    }
+
+    filterClassAutocompleteBoat(event: AutoCompleteCompleteEvent){
+        const filtered: any[] = []
+        const query = event.query   
+
+        // this.accessoryService.getAccessories(1, 1000, query, "Y").subscribe({
+        //     next: (res: any) => {
+        //        // this.accessories.set(res.data)
+
+        //         for (let i = 0; i < res?.data?.length; i++) {
+        //             const acc = res?.data[i]
+        //             if (acc?.model?.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+        //                 filtered.push(acc)
+        //             }
+        //         }
+
+        //         this.autoFilteredValueAccessory = filtered
+        //     }, 
+        //     error: (err) => {
+        //         this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os acessórios.' });
+        //     },
+        // })
+    }
+
+    filterClassAutocompleteEng(event: AutoCompleteCompleteEvent){
+        const filtered: any[] = []
+        const query = event.query   
+
+        this.engineService.getEngines(1, 1000, query, "Y").subscribe({
+            next: (res: any) => {
+                //this.engines.set(res.data)
+
+                for (let i = 0; i < res?.data?.length; i++) {
+                    const eng = res?.data[i]
+                    if (eng?.model?.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+                        filtered.push(eng)
+                    }
+                }
+
+                this.autoFilteredValueEng = filtered
+
+            }, 
+            error: (err) => {
+                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os acessórios.' });
+            },
+        })
+    }
+
+    setBoatChoosen(e: any){
+        //@ts-ignore
+        this.formBoat.get("AccessoryModel")?.setValue(e.value.model)
+        //@ts-ignore
+        this.formBoat.get("AccessoryId")?.setValue(e.value.id)
+    }
+
+    setEngineChoosen(e: any){
+        //@ts-ignore
+        this.formEng.get("EngineModel")?.setValue(e.value.model)
+        //@ts-ignore
+        this.formEng.get("EngineId")?.setValue(e.value.id)
     }
 
     isInvalid(controlName: string) {
         const control = this.salesOrderForm.get(controlName)
         return control?.invalid && (control.touched || this.submitted)
+    }
+
+    hasBeenSubmitedEngine(controlName: string): boolean {
+        const control = this.formEng.get(controlName)
+        return Boolean(control?.invalid)
+            && (this.submitted || Boolean(control?.touched))
+        //|| Boolean(control?.dirty
+    }
+
+    hasBeenSubmitedBoat(controlName: string): boolean {
+        const control = this.salesOrderForm.get(controlName)
+        return Boolean(control?.invalid)
+            && (this.submitted || Boolean(control?.touched))
+        //|| Boolean(control?.dirty
     }
 
     hasBeenSubmited(controlName: string): boolean {

@@ -1,10 +1,9 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
 import { AuthService } from '../../shared/services/auth.service';
-import { updatePreset } from '@primeng/themes';
 import { faPeopleArrows } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
@@ -16,9 +15,7 @@ import { faPeopleArrows } from '@fortawesome/free-solid-svg-icons';
             <li app-menuitem *ngIf="!item.separator" [item]="item" [index]="i" [root]="true"></li>
             <li *ngIf="item.separator" class="menu-separator"></li>
         </ng-container>
-
     </ul> 
-    
     `
 })
 
@@ -106,17 +103,26 @@ export class AppMenu {
             label: 'Relatórios',
             items: [
                 {
-                    label: 'Negociações',
-                    icon: 'pi pi-filter',
-                    routerLink: ['/reports/negotiations'],
-                    code: "reports_negotiations:view"
+                    label: 'Vendas',
+                    icon: 'pi pi-fw pi-dollar',
+                    items: [
+                        {
+                            label: 'Negociações',
+                            icon: 'pi pi-filter',
+                            routerLink: ['/reports/negotiations'],
+                            code: "reports_negotiations:view"
+                        },
+                        {
+                            label: 'Orçamentos/Pedidos',
+                            icon: 'pi pi-filter',
+                            routerLink: ['/reports/sales-orders'],
+                            code: "reports_sales_orders:view"
+                        },
+
+                    ]
                 },
-                {
-                    label: 'Orçamentos/Pedidos',
-                    icon: 'pi pi-filter',
-                    routerLink: ['/reports/sales-orders'],
-                    code: "reports_sales_orders:view"
-                },
+
+
             ]
         }
 
@@ -169,9 +175,23 @@ export class AppMenu {
                 this.model = [salesMenuItem, ...this.model]
                 this.model = [adminMenuItem, ...this.model]
             } else {
+
+                
+
                 for (const menui of menuItems) {
-                    menui.items = menui.items.filter((i) => userjwt?.permissions.includes(i.code))
-                    this.model = [menui, ...this.model]
+
+                    if('code' in menui.items){
+                        //@ts-ignore
+                        menui.items = menui.items.filter((i) => userjwt?.permissions.includes(i.code))
+                        this.model = [menui, ...this.model]
+                    } else {
+                        //@ts-ignore
+                        menui.items.items = menui.items?.items?.filter((i) => userjwt?.permissions.includes(i.code))
+                        this.model = [menui, ...this.model]
+
+                    }
+
+
                 }
 
             }
