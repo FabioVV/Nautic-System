@@ -244,7 +244,7 @@ export class ListReportSalesOrdersComponent {
     }
 
     openSalesOrder(id: number){
-        this.salesOrder.showSalesOrder(id.toString(), `Pedido/orçamento Cód. ${id}`)
+        this.salesOrder.showSalesOrder(id.toString(), `Pedido/Orçamento Cód. ${id}`)
     } 
 
     onGlobalFilter(event: any) {

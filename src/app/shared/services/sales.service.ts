@@ -131,8 +131,16 @@ export class SalesService {
         return this.http.patch(`${environment.apiBaseURL}/sales/orders/${id}/engine/${id_engine}`, null)
     }
 
+    insertAccessorySalesOrder(id: string, id_accessory: string) {
+        return this.http.patch(`${environment.apiBaseURL}/sales/orders/${id}/accessory/${id_accessory}`, null)
+    }
+
     getSalesOrder(id: string) {
         return this.http.get(`${environment.apiBaseURL}/sales/orders/${id}`)
+    }
+
+    getSalesOrderItens(id: string) {
+        return this.http.get(`${environment.apiBaseURL}/sales/orders/${id}/itens`)
     }
 
     registerSalesOrderUsingBusinnesHistory(id: string) {

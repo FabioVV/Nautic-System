@@ -1023,7 +1023,7 @@ export class ListNegotiationsComponent {
     }
 
     openSalesOrder = (id: number) => {// arrow function so that when i reference this function somewhere, it maintains the correct 'this' internal reference
-        this.salesOrder.showSalesOrder(id.toString(), `Pedido/orçamento Cód. ${id}`)
+        this.salesOrder.showSalesOrder(id.toString(), `Pedido/Orçamento Cód. ${id}`)
     } 
 
     onContextMenu(event: any, card: any, id_customer: any, id: any) {

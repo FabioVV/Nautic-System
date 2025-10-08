@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, ViewChild } from '@angular/core';
+import { Component, computed, inject, Input, ViewChild } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
@@ -37,11 +37,11 @@ import { UserService } from '../../../services/user.service';
 import { EngineService } from '../../../services/engine.service';
 import { BoatService } from '../../../services/boats.service';
 import { formatBRLMoney } from '../../utils';
-
+import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
 
 @Component({
     selector: 'open-sales-order',
-    imports: [DialogModule, TagModule, AutoCompleteModule, InputGroupModule, TabsModule, CardModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, TagModule, AutoCompleteModule, ListSalesOrderBoatItensComponent, InputGroupModule, TabsModule, CardModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
     standalone: true,
@@ -66,7 +66,7 @@ import { formatBRLMoney } from '../../utils';
 
             <div>
                 <h4>Total do pedido</h4>
-                <p-tag severity="success" value="R$ 1.000.000,00" />
+                <p-tag severity="success" [value]="TotalOrder" />
             </div>
         </div>
 
@@ -105,16 +105,38 @@ import { formatBRLMoney } from '../../utils';
                         <p-fieldset legend="Dados complementares do cliente">
 
                             <div class='row'>
+                                <div class='col-md-4'>
+                                    <label class="block font-bold mb-3">Tipo de pessoa</label>
+                                    <p-select  [options]="TypeClient" formControlName="PfPj" optionLabel="name" placeholder="Selecione o tipo do cliente" class="w-full mb-2" />
+
+                                </div>
+
+                                <div class='col-md-4'>
+                                    <label class="block font-bold mb-3">CPF</label>
+                                    <input formControlName="Cpf" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+
+                                </div>
+
+                                
+                                <div class='col-md-4'>
+                                    <label class="block font-bold mb-3">CNPJ</label>
+                                    <input formControlName="Cnpj" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+
+                                </div>
+                            </div>
+
+
+                            <div class='row'>
                                 <div class='col-md-6'>
                                     <label for="Cep" class="block font-bold mb-3">Cep</label>
                                     <p-inputmask mask="99999-999" class="w-full md:w-[30rem] mb-2" formControlName="Cep" placeholder="99999-999" fluid  />
                                 </div>
 
                                 <div class='col-md-4'>
-                                <label for="PfPj" class="block font-bold mb-3">Tipo de cliente</label>
-                                <p-select [invalid]="isInvalid('PfPj')" [options]="TypeClient" formControlName="PfPj" optionLabel="name" placeholder="Selecione o tipo do cliente" class="w-full mb-2" />
-                            
-                            </div>
+                                    <label for="PfPj" class="block font-bold mb-3">Tipo de cliente</label>
+                                    <p-select [invalid]="isInvalid('PfPj')" [options]="TypeClient" formControlName="PfPj" optionLabel="name" placeholder="Selecione o tipo do cliente" class="w-full mb-2" />
+                                
+                                </div>
 
                             </div>
 
@@ -164,7 +186,7 @@ import { formatBRLMoney } from '../../utils';
                     <div class='row'>
                         <div class='col-md-12'>
                             <label for="Details" class="block font-bold mb-3">Total do Pedido</label>
-                            <p style='font-size:3em; color:green;'>R$ 1.000.000,00</p>
+                            <p style='font-size:3em; color:green;'>{{ TotalOrder }}</p>
                         </div>
                     </div>
 
@@ -199,7 +221,7 @@ import { formatBRLMoney } from '../../utils';
                                 <div *ngIf="salesOrderForm.get('BoatModel')?.value" class='card-cs'>
                                     <div>
                                         <h4>{{ formBoat.get('BoatModel')?.value }}</h4>
-                                        <p-tag severity="success" [value]="_formatBRLMoney(formBoat.get('BoatPrice')?.value)" />
+                                        <p-tag severity="success" [value]="TotalPriceBoat" />
 
                                     </div>
                                 </div>
@@ -208,7 +230,7 @@ import { formatBRLMoney } from '../../utils';
                             </form>
                         </div>
 
-                        <div class='col-md-6'>
+                        <div *ngIf="salesOrderForm.get('BoatModel')?.value" class='col-md-6'>
                             <form [formGroup]="formEng" style='margin-bottom: 4rem;'>
                                 
                                 <div class='row'>
@@ -237,7 +259,7 @@ import { formatBRLMoney } from '../../utils';
                                 <div *ngIf="salesOrderForm.get('EngineModel')?.value" class='card-cs'>
                                     <div>
                                         <h4>{{ formEng.get('EngineModel')?.value }}</h4>
-                                        <p-tag severity="success" [value]="_formatBRLMoney(formEng.get('EnginePrice')?.value)" />
+                                        <p-tag severity="success" [value]="TotalPriceEngine" />
                                     </div>
                                 </div>
 
@@ -246,6 +268,36 @@ import { formatBRLMoney } from '../../utils';
                         </div>
                     
                     </div>
+
+                    <div class='row'>
+                        <div *ngIf="salesOrderForm.get('BoatModel')?.value" class='col-md-12'>
+                            <form [formGroup]="formAcc" style='margin-bottom: 4rem;'>
+                                
+                                <div class='row'>
+                                    <div style='margin-bottom:1rem;' class='col-md-12'>
+                                        <label for="AccessoryModel" class="block font-bold mb-3">Acessórios da embarcação</label>
+
+                                        <p-inputgroup>
+                                            <p-inputgroup-addon pTooltip="Digite na caixa ao lado para pesquisar" tooltipPosition="top" [style]="{ cursor:'help' }">
+                                                <i class="pi pi-filter"></i>
+                                            </p-inputgroup-addon>
+
+                                            <p-autocomplete class="w-full mb-2" formControlName="AccessoryModel" placeholder="Procure pelo acessório" [suggestions]="autoFilteredValueAcc" optionLabel="model" (completeMethod)="filterClassAutocompleteAcc($event)" (onSelect)="setAccessoryChoosen($event)" />
+                                        </p-inputgroup>
+
+                                        <div class="error-feedback" *ngIf="hasBeenSubmitedAccessory('AccessoryModel')">
+                                            <p-message styleClass="mb-2" *ngIf="formAcc.controls.AccessoryModel.hasError('required')" severity="error" variant="simple" size="small">Por favor, escolher um acessório</p-message>
+                                        </div>
+                                    </div>
+
+                                    <p-button type="submit" label="Salvar acessório" (click)="onSubmitAccessory()" icon="pi pi-check" />
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+
+                    <list-sales-orders-boat-itens #listSalesOrderBoatItens></list-sales-orders-boat-itens>
 
                     <form [formGroup]="salesOrderFormExtra" (ngSubmit)="onSubmit()">
                         <div class='row'>
@@ -268,7 +320,17 @@ import { formatBRLMoney } from '../../utils';
         </p-tabs>
 
         <ng-template #footer>
-            <p-button type="submit" label="Salvar" (click)="submit()" icon="pi pi-check" id="action-acom-button"/>
+            <!-- <p-button type="submit" label="Salvar" (click)="submit()" icon="pi pi-check" id="action-acom-button"/> -->
+            <p-button severity="danger" label="Cancelar pedido/Orçamento" (click)="visible=false" />
+
+
+            <p-button severity="success" label="Transformar em pedido" (click)="visible=false" />
+
+
+            <p-button severity="success" label="Gerar PDF" icon="pi pi-file-pdf" (click)="visible=false" />
+            <p-button severity="success" label="Compartilhar via E-mail" icon="pi pi-send" (click)="visible=false" />
+            <p-button severity="success" label="Compartilhar Via WhatsApp" icon="pi pi-send" (click)="visible=false" />
+
         </ng-template>
     </p-dialog>
     `,
@@ -281,22 +343,32 @@ export class SalesOrderModal {
         private salesService: SalesService,
         private engineService: EngineService,
         private boatService: BoatService,
-    ) { }
+    ) {}
 
     BrStates = BrStates
+    @Input() title: any
 
     @ViewChild('cdialog') myDialog!: Dialog
-    @Input() title: any
+    @ViewChild('listSalesOrderBoatItens') listSalesOrderBoatItens!: ListSalesOrderBoatItensComponent
+
+
+    // @ts-ignore
+    get TotalPriceEngine() { return `${this._formatBRLMoney(this.formEng.get('EnginePrice')?.value)}` }
+    // @ts-ignore
+    get TotalPriceBoat() { return `${this._formatBRLMoney(this.formBoat.get('BoatPrice')?.value)}` }
+    // @ts-ignore
+    get TotalOrder() { return `${this._formatBRLMoney(this.formEng?.get('EnginePrice')?.value + this.formBoat.get('BoatPrice')?.value)}` }
 
 
     isLoading: boolean = false
     submitted: boolean = false
     visible: boolean = false
     id: string = ""
-    TypeClient: SelectItem[] = [{ name: 'Pessia física', code: 'PF' }, { name: 'Pessoa juridica', code: 'PJ' }]
+    TypeClient: SelectItem[] = [{ name: 'Pessoa física', code: 'PF' }, { name: 'Pessoa juridica', code: 'PJ' }]
 
     autoFilteredValueEng: any[] = []
     autoFilteredValueBoat: any[] = []
+    autoFilteredValueAcc: any[] = []
 
     _statusType: string = ""
 
@@ -343,6 +415,12 @@ export class SalesOrderModal {
         EnginePrice: [0.0, []],
     })
 
+    formAcc = this.formBuilder.group({
+        AccessoryModel: ['', []],
+        AccessoryId: ['', []],
+        AccessoryPrice: [0.0, []],
+    })
+
     submit() {
         document.getElementById(`btn_submit`)?.click()
     }
@@ -354,6 +432,27 @@ export class SalesOrderModal {
     onSubmit(){
         this.submitted = true
 
+    }
+
+    onSubmitAccessory(){
+        this.submitted = true
+
+        if (this.formAcc.valid) {
+            this.isLoading = true
+
+            // @ts-ignore
+            this.salesService.insertAccessorySalesOrder(this.id, this.formAcc?.value.AccessoryId).subscribe({
+                next: (res: any) => {
+                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Acessório vinculado com sucesso' })
+                    this.loadSalesOrder(this.id)
+
+                }, 
+                error: (err) => {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar adicionar o acessório' })
+                },
+            })
+            
+        }
     }
 
     onSubmitBoat(){
@@ -451,6 +550,8 @@ export class SalesOrderModal {
                 this.salesOrderForm.get("EngineId")?.setValue(res.data['OrderEngineId'])
                 this.salesOrderForm.get("EnginePrice")?.setValue(res.data['OrderEnginePrice'])
 
+                //@ts-ignore
+                this.listSalesOrderBoatItens.loadSalesOrderBoatItens(this.id)
             }, 
             error: (err) => {
                 this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar buscar pedido de venda' })
@@ -499,7 +600,7 @@ export class SalesOrderModal {
         const filtered: any[] = []
         const query = event.query   
 
-        this.engineService.getEngines(1, 1000, query, "Y").subscribe({
+        this.boatService.getBoatEngines(this.formBoat.get("BoatId")?.value).subscribe({
             next: (res: any) => {
                 //this.engines.set(res.data)
 
@@ -511,6 +612,30 @@ export class SalesOrderModal {
                 }
 
                 this.autoFilteredValueEng = filtered
+
+            }, 
+            error: (err) => {
+                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os motores.' });
+            },
+        })
+    }
+
+    filterClassAutocompleteAcc(event: AutoCompleteCompleteEvent){
+        const filtered: any[] = []
+        const query = event.query
+
+        this.boatService.getBoatAccessories(this.formBoat.get("BoatId")?.value).subscribe({
+            next: (res: any) => {
+                //this.engines.set(res.data)
+
+                for (let i = 0; i < res?.data?.length; i++) {
+                    const eng = res?.data[i]
+                    if (eng?.model?.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+                        filtered.push(eng)
+                    }
+                }
+
+                this.autoFilteredValueAcc = filtered
 
             }, 
             error: (err) => {
@@ -533,6 +658,13 @@ export class SalesOrderModal {
         this.formEng.get("EngineId")?.setValue(e.value.id)
     }
 
+    setAccessoryChoosen(e: any){
+        //@ts-ignore
+        this.formAcc.get("AccessoryModel")?.setValue(e.value.model)
+        //@ts-ignore
+        this.formAcc.get("AccessoryId")?.setValue(e.value.id)
+    }
+
     _formatBRLMoney(amount: number){
         return formatBRLMoney(amount.toString())
     }
@@ -540,6 +672,13 @@ export class SalesOrderModal {
     isInvalid(controlName: string) {
         const control = this.salesOrderForm.get(controlName)
         return control?.invalid && (control.touched || this.submitted)
+    }
+
+    hasBeenSubmitedAccessory(controlName: string): boolean {
+        const control = this.formAcc.get(controlName)
+        return Boolean(control?.invalid)
+            && (this.submitted || Boolean(control?.touched))
+        //|| Boolean(control?.dirty
     }
 
     hasBeenSubmitedEngine(controlName: string): boolean {

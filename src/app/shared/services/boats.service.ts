@@ -69,11 +69,11 @@ export class BoatService {
         return this.http.delete(`${environment.apiBaseURL}/boats/${id}/ads/${id_mean_communication}`)
     }
 
-    getBoatAccessories(id: string) {
+    getBoatAccessories(id: string | null | undefined) {
         return this.http.get(`${environment.apiBaseURL}/boats/${id}/accessories`)
     }
 
-    getBoatEngines(id: string) {
+    getBoatEngines(id: string | null | undefined) {
         return this.http.get(`${environment.apiBaseURL}/boats/${id}/engines`)
     }
 
