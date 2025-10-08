@@ -36,7 +36,7 @@ import { SalesService } from '../../../services/sales.service';
 import { UserService } from '../../../services/user.service';
 import { EngineService } from '../../../services/engine.service';
 import { BoatService } from '../../../services/boats.service';
-
+import { formatBRLMoney } from '../../utils';
 
 
 @Component({
@@ -61,7 +61,7 @@ import { BoatService } from '../../../services/boats.service';
 
             <div>
                 <h4>Status</h4>
-                <p-tag severity="success" value="Orçamento novo" />
+                <p-tag severity="success" [value]="_statusType" />
             </div>
 
             <div>
@@ -80,7 +80,7 @@ import { BoatService } from '../../../services/boats.service';
             <p-tabpanels>
 
                 <p-tabpanel value="0">
-                    <form [formGroup]="salesOrderForm" (ngSubmit)="onSubmit()">
+                    <form [formGroup]="salesOrderForm" >
                         <button id="btn_submit" style='display:none;' type="submit"></button>
        
                         <div class='row'>
@@ -172,8 +172,7 @@ import { BoatService } from '../../../services/boats.service';
 
                         <div class='col-md-6'>
                             <form [formGroup]="formBoat" style='margin-bottom: 4rem;'>
-                                <button id="btn_submit_casc" style='display:none;' type="submit"></button>
-                                
+
                                 <div class='row'>
                                     <div style='margin-bottom:1rem;' class='col-md-12'>
                                         <label for="AccessoryModel" class="block font-bold mb-3">Casco do pedido</label>
@@ -196,12 +195,21 @@ import { BoatService } from '../../../services/boats.service';
                                 </div>
 
                                 <hr />
+
+                                <div *ngIf="salesOrderForm.get('BoatModel')?.value" class='card-cs'>
+                                    <div>
+                                        <h4>{{ formBoat.get('BoatModel')?.value }}</h4>
+                                        <p-tag severity="success" [value]="_formatBRLMoney(formBoat.get('BoatPrice')?.value)" />
+
+                                    </div>
+                                </div>
+
+                                <hr />
                             </form>
                         </div>
 
                         <div class='col-md-6'>
                             <form [formGroup]="formEng" style='margin-bottom: 4rem;'>
-                                <button id="btn_submit_eng" style='display:none;' type="submit"></button>
                                 
                                 <div class='row'>
                                     <div style='margin-bottom:1rem;' class='col-md-12'>
@@ -225,18 +233,29 @@ import { BoatService } from '../../../services/boats.service';
                                 </div>
 
                                 <hr />
+
+                                <div *ngIf="salesOrderForm.get('EngineModel')?.value" class='card-cs'>
+                                    <div>
+                                        <h4>{{ formEng.get('EngineModel')?.value }}</h4>
+                                        <p-tag severity="success" [value]="_formatBRLMoney(formEng.get('EnginePrice')?.value)" />
+                                    </div>
+                                </div>
+
+                                <hr />
                             </form>
                         </div>
                     
                     </div>
 
-
-                    <div class='row'>
-                        <div class='col-md-12'>
-                            <label for="Details" class="block font-bold mb-3">Detalhes do pedido</label>
-                            <textarea  class="w-full mb-2" rows="5" cols="30" pTextarea formControlName="Details"></textarea>
+                    <form [formGroup]="salesOrderFormExtra" (ngSubmit)="onSubmit()">
+                        <div class='row'>
+                            <div class='col-md-12'>
+                                <label for="Details" class="block font-bold mb-3">Detalhes do pedido</label>
+                                <textarea  class="w-full mb-2" rows="5" cols="30" pTextarea formControlName="Details"></textarea>
+                            </div>
                         </div>
-                    </div>
+                    </form>
+
 
 
                 </p-tabpanel>
@@ -279,6 +298,12 @@ export class SalesOrderModal {
     autoFilteredValueEng: any[] = []
     autoFilteredValueBoat: any[] = []
 
+    _statusType: string = ""
+
+    salesOrderFormExtra = this.formBuilder.group({
+        Details: ['', []],
+    })
+
     salesOrderForm = this.formBuilder.group({
         Id: [{value: '', disabled: true}, []],
         SellerName: [{value: '', disabled: true}, []],
@@ -292,6 +317,16 @@ export class SalesOrderModal {
         State: [{value: '', disabled: true}, []],
         Cpf: [{value: '', disabled: true}, []],
         Cnpj: [{value: '', disabled: true}, []],
+        StatusType: [{value: '', disabled: true}, []],
+
+        BoatModel: [{value: '', disabled: true}, []],
+        BoatId: [{value: '', disabled: true}, []],
+        BoatPrice: [{value: 0.0, disabled: true}, []],
+
+        EngineModel: [{value: '', disabled: true}, []],
+        EngineId: [{value: '', disabled: true}, []],
+        EnginePrice: [{value: 0.0, disabled: true}, []],
+
 
         Details: ['', []],
     })
@@ -299,11 +334,13 @@ export class SalesOrderModal {
     formBoat = this.formBuilder.group({
         BoatModel: ['', []],
         BoatId: ['', []],
+        BoatPrice: [0.0, []],
     })
 
     formEng = this.formBuilder.group({
         EngineModel: ['', []],
         EngineId: ['', []],
+        EnginePrice: [0.0, []],
     })
 
     submit() {
@@ -325,19 +362,16 @@ export class SalesOrderModal {
         if (this.formBoat.valid) {
             this.isLoading = true
 
-            // this.boatService.registerBoatAccessory(this.id, this.formAcc?.value?.AccessoryId).subscribe({
-            //     next: (res: any) => {
-            //         this.accListComponent.loadBoatAccessories()
-            //     }, 
-            //     error: (err) => {
-            //         if(err?.error?.message == 'accessory already linked with the boat'){
-            //             this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Acessório já está vinculado ao casco' })
-            //         } else {
-            //             this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar adicionar o acessório' })
-
-            //         }
-            //     },
-            // })
+            // @ts-ignore
+            this.salesService.insertBoatSalesOrder(this.id, this.formBoat?.value.BoatId).subscribe({
+                next: (res: any) => {
+                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Casco vinculado com sucesso' })
+                    this.loadSalesOrder(this.id)
+                }, 
+                error: (err) => {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar adicionar o casco' })
+                },
+            })
             
         }
     }
@@ -348,25 +382,80 @@ export class SalesOrderModal {
         if (this.formBoat.valid) {
             this.isLoading = true
 
-            // this.boatService.registerBoatAccessory(this.id, this.formAcc?.value?.AccessoryId).subscribe({
-            //     next: (res: any) => {
-            //         this.accListComponent.loadBoatAccessories()
-            //     }, 
-            //     error: (err) => {
-            //         if(err?.error?.message == 'accessory already linked with the boat'){
-            //             this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Acessório já está vinculado ao casco' })
-            //         } else {
-            //             this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar adicionar o acessório' })
+            // @ts-ignore
+            this.salesService.insertEngineSalesOrder(this.id, this.formEng?.value.EngineId).subscribe({
+                next: (res: any) => {
+                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Motor vinculado com sucesso' })
+                    this.loadSalesOrder(this.id)
 
-            //         }
-            //     },
-            // })
+                }, 
+                error: (err) => {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar adicionar o motor' })
+                },
+            })
             
         }
     }
 
     loadSalesOrder(id: string){
+        this.salesService.getSalesOrder(id).subscribe({
+            next: (res: any) => {
+                //@ts-ignore
+                this.salesOrderForm.get("Id")?.setValue(res.data['id'])
+                this.salesOrderForm.get("SellerName")?.setValue(res.data['seller_name'])
+                this.salesOrderForm.get("CustomerName")?.setValue(res.data['customer_name'])
+                this.salesOrderForm.get("Cep")?.setValue(res.data['Cep'])
+                this.salesOrderForm.get("Street")?.setValue(res.data['Street'])
+                this.salesOrderForm.get("Neighborhood")?.setValue(res.data['Neighborhood'])
+                this.salesOrderForm.get("City")?.setValue(res.data['City'])
+                this.salesOrderForm.get("Complement")?.setValue(res.data['Complement'])
+                this.salesOrderForm.get("Cpf")?.setValue(res.data['Cpf'])
+                this.salesOrderForm.get("Cnpj")?.setValue(res.data['Cnpj'])
+                this.salesOrderForm.get("StatusType")?.setValue(res.data['status_type'])
+                this._statusType = res.data['status_type']
 
+               // this.salesOrderForm.get("Details")?.setValue(res.data['details'])
+                if(res.data['PfPj']?.trimEnd() == 'PF'){
+                    //@ts-ignore
+                    this.salesOrderForm.get("PfPj")?.setValue(this.TypeClient[0])
+                } else if(res.data['PfPj']?.trimEnd() == 'PJ'){
+                    //@ts-ignore
+                    this.salesOrderForm.get("PfPj")?.setValue(this.TypeClient[1])
+                } else {
+                    //@ts-ignore
+                    this.salesOrderForm.get("PfPj")?.setValue('')
+                }
+
+                if(res.data['State'] !== null){
+                    BrStates.forEach(element => {
+                        if(element.code == res.data['State']?.trimEnd()){
+                            //@ts-ignore
+                            this.salesOrderForm.get("State")?.setValue(element)
+                        }
+                    })
+                } 
+
+                this.formBoat.get("BoatModel")?.setValue(res.data['OrderBoatModel'])
+                this.formBoat.get("BoatId")?.setValue(res.data['OrderBoatId'])
+                this.formBoat.get("BoatPrice")?.setValue(res.data['OrderBoatPrice'])
+
+                this.formEng.get("EngineModel")?.setValue(res.data['OrderEngineModel'])
+                this.formEng.get("EngineId")?.setValue(res.data['OrderEngineId'])
+                this.formEng.get("EnginePrice")?.setValue(res.data['OrderEnginePrice'])
+                        
+                this.salesOrderForm.get("BoatModel")?.setValue(res.data['OrderBoatModel'])
+                this.salesOrderForm.get("BoatId")?.setValue(res.data['OrderBoatId'])
+                this.salesOrderForm.get("BoatPrice")?.setValue(res.data['OrderBoatPrice'])
+
+                this.salesOrderForm.get("EngineModel")?.setValue(res.data['OrderEngineModel'])
+                this.salesOrderForm.get("EngineId")?.setValue(res.data['OrderEngineId'])
+                this.salesOrderForm.get("EnginePrice")?.setValue(res.data['OrderEnginePrice'])
+
+            }, 
+            error: (err) => {
+                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar buscar pedido de venda' })
+            },
+        })
     }
 
     orderProblems(){
@@ -387,23 +476,23 @@ export class SalesOrderModal {
         const filtered: any[] = []
         const query = event.query   
 
-        // this.accessoryService.getAccessories(1, 1000, query, "Y").subscribe({
-        //     next: (res: any) => {
-        //        // this.accessories.set(res.data)
+        this.boatService.getBoats(1, 1000).subscribe({
+            next: (res: any) => {
+               // this.accessories.set(res.data)
 
-        //         for (let i = 0; i < res?.data?.length; i++) {
-        //             const acc = res?.data[i]
-        //             if (acc?.model?.toLowerCase().indexOf(query.toLowerCase()) == 0) {
-        //                 filtered.push(acc)
-        //             }
-        //         }
+                for (let i = 0; i < res?.data?.length; i++) {
+                    const acc = res?.data[i]
+                    if (acc?.model?.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+                        filtered.push(acc)
+                    }
+                }
 
-        //         this.autoFilteredValueAccessory = filtered
-        //     }, 
-        //     error: (err) => {
-        //         this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os acessórios.' });
-        //     },
-        // })
+                this.autoFilteredValueBoat = filtered
+            }, 
+            error: (err) => {
+                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os cascos.' });
+            },
+        })
     }
 
     filterClassAutocompleteEng(event: AutoCompleteCompleteEvent){
@@ -432,9 +521,9 @@ export class SalesOrderModal {
 
     setBoatChoosen(e: any){
         //@ts-ignore
-        this.formBoat.get("AccessoryModel")?.setValue(e.value.model)
+        this.formBoat.get("BoatModel")?.setValue(e.value.model)
         //@ts-ignore
-        this.formBoat.get("AccessoryId")?.setValue(e.value.id)
+        this.formBoat.get("BoatId")?.setValue(e.value.id)
     }
 
     setEngineChoosen(e: any){
@@ -442,6 +531,10 @@ export class SalesOrderModal {
         this.formEng.get("EngineModel")?.setValue(e.value.model)
         //@ts-ignore
         this.formEng.get("EngineId")?.setValue(e.value.id)
+    }
+
+    _formatBRLMoney(amount: number){
+        return formatBRLMoney(amount.toString())
     }
 
     isInvalid(controlName: string) {

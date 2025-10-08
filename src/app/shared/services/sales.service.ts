@@ -123,6 +123,18 @@ export class SalesService {
         return this.http.get(`${environment.apiBaseURL}/sales/negotiations/${id}`)
     }
 
+    insertBoatSalesOrder(id: string, id_boat: string) {
+        return this.http.patch(`${environment.apiBaseURL}/sales/orders/${id}/boat/${id_boat}`, null)
+    }
+
+    insertEngineSalesOrder(id: string, id_engine: string) {
+        return this.http.patch(`${environment.apiBaseURL}/sales/orders/${id}/engine/${id_engine}`, null)
+    }
+
+    getSalesOrder(id: string) {
+        return this.http.get(`${environment.apiBaseURL}/sales/orders/${id}`)
+    }
+
     registerSalesOrderUsingBusinnesHistory(id: string) {
         return this.http.post(`${environment.apiBaseURL}/sales/orders/negotiations/history/${id}`, null)
     }
