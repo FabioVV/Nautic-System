@@ -29,6 +29,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { FileUploadModule } from 'primeng/fileupload';
+import { ImageModule } from 'primeng/image';
 
 
 import { ListEnginesBoatComponent } from './list.engines_boat';
@@ -44,7 +45,7 @@ import { ListAdsBoatComponent } from './list.ads_boat';
 
 @Component({
     selector: 'open-boat',
-    imports: [DialogModule, TabsModule, DatePickerModule, FileUploadModule, ListAdsBoatComponent, ListAccessoriesBoatComponent, ListEnginesBoatComponent, InputGroupModule, AutoCompleteModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, TabsModule, ImageModule, DatePickerModule, FileUploadModule, ListAdsBoatComponent, ListAccessoriesBoatComponent, ListEnginesBoatComponent, InputGroupModule, AutoCompleteModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
     standalone: true,
@@ -263,10 +264,32 @@ import { ListAdsBoatComponent } from './list.ads_boat';
 
                 
                 <p-tabpanel value="3">
-                <div class="card flex flex-wrap gap-6 items-center justify-between">
+                    <div class="card flex flex-wrap gap-6 items-center justify-between">
                         <p-fileupload #fu mode="basic" customUpload chooseLabel="Escolha o arquivo" chooseIcon="pi pi-upload" name="file[]" accept="image/*" maxFileSize="1000000000" (uploadHandler)="onUpload($event)"></p-fileupload>
                         <p-button label="Enviar arquivo" (onClick)="fu.upload()" severity="secondary" [style]="{'text-align': 'center'}"></p-button>
-                </div>
+                    </div>
+                    
+                    <div class="container">
+                        <div class="row">
+                        <ng-container *ngFor="let f of boatFiles(); let i = index">
+                            <div class="col-6 col-sm-4 col-md-3 mb-4" >
+                                <div class="card h-100">
+                                    <p-image [src]="f.path" alt="Image" width="250" [preview]="true" />
+
+                                    <div class="card-body p-2">
+                                        <div class="d-flex justify-content-between">
+                                            <p-buttongroup>
+                                                <p-button (click)="removeFile(f.id)" severity="danger" icon="pi pi-trash" rounded/>
+                                                <p-button (click)="downloadFile(f.path)" severity="info" icon="pi pi-download" rounded/>
+                                            </p-buttongroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                        </div>
+                    </div>
+                    
                 </p-tabpanel>
                 
                 <p-tabpanel value="4">
@@ -318,6 +341,14 @@ import { ListAdsBoatComponent } from './list.ads_boat';
             <p-button type="submit" label="Salvar" (click)="submit()" icon="pi pi-check" id="action-acom-button"/>
         </ng-template>
     </p-dialog>
+
+    <p-confirmdialog
+        [rejectLabel]="rejectLabel"
+        [acceptLabel]="confirmLabel"
+        [acceptAriaLabel]="confirmLabel"
+        [rejectAriaLabel]="rejectLabel"
+        [style]="{ width: '550px' }"
+    />
     `,
 })
 export class BoatModal {
@@ -329,15 +360,21 @@ export class BoatModal {
         private boatService: BoatService,
         private accessoryService: AccessoryService,
         private engineService: EngineService,
+        private confirmationService: ConfirmationService,
     ) { }
-
+    
+    confirmLabel = "Confirmar"
+    rejectLabel = "Cancelar"
 
     @ViewChild('engineList') engineListComponent!: ListEnginesBoatComponent
     @ViewChild('accessoryList') accListComponent!: ListAccessoriesBoatComponent
     @ViewChild('adsList') adListComponent!: ListAdsBoatComponent
+    @ViewChild('fu') fileUploader!: any
 
     @ViewChild('cdialog') myDialog!: Dialog
     @Input() title: any = "Casco"
+
+    boatFiles = signal<any[]>([])
 
     CabinatedOpen: SelectItem[] = [ { name: 'Aberta', code: 'A' }, { name: 'Cabinada', code: 'C' }]
     NewUsed: SelectItem[] = [{ name: 'Nova', code: 'N' }, { name: 'Usada', code: 'U' }]
@@ -352,6 +389,17 @@ export class BoatModal {
     visible: boolean = false
     id: string = ""
     url: any
+
+    responsiveOptions: any[] = [
+        {
+            breakpoint: '1300px',
+            numVisible: 4
+        },
+        {
+            breakpoint: '575px',
+            numVisible: 1
+        }
+    ]
 
 
     formEng= this.formBuilder.group({     
@@ -397,6 +445,49 @@ export class BoatModal {
     }
 
     ngOnInit() {
+    }
+
+    removeFile(id: string) {
+
+        this.confirmationService.confirm({
+            message: 'Confirma apagar a imagem selecionada?',
+            header: 'Confirmação',
+            icon: 'pi pi-exclamation-triangle',
+            closeOnEscape: true,
+            rejectButtonProps: {
+                label: 'Cancelar',
+                severity: 'secondary',
+                outlined: true,
+            },
+            acceptButtonProps: {
+                label: 'Confirmar',
+                severity: 'danger',
+                outlined: true,
+            },
+            accept: () => {
+                this.boatService.deleteBoatImage(this.id, id).subscribe({
+                    next: (res: any) => {
+                        this.loadBoatFiles()
+                    }, 
+                    error: (err) => {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar apagar arquivo' })
+                    },
+                })
+            }
+        })
+
+
+
+    }
+
+    downloadFile(path: string) {
+        const a = document.createElement('a')
+        a.href = path;
+        a.download = ''
+        a.target = '_blank'
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
     }
 
     onSubmitAds(){
@@ -518,6 +609,8 @@ export class BoatModal {
         this.boatService.uploadBoatFile(this.id, formData).subscribe({
             next: (res: any) => {
                 this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Upload feito com sucesso' });
+                this.loadBoatFiles()
+                this.fileUploader.clear()
             }, 
             error: (err) => {
                 if (err.status) {
@@ -569,10 +662,24 @@ export class BoatModal {
                 this.accListComponent.loadBoatAccessories()
                 this.engineListComponent.loadBoatEngines()
                 this.adListComponent.loadBoatAds()
+                this.loadBoatFiles()
             },
             error: (err) => {
                 if (err.status) {
                     this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar dados do casco.' });
+                }
+            },
+        })
+    }
+
+    loadBoatFiles(){
+        this.boatService.getBoatFiles(this.id).subscribe({
+            next: (res: any) => {
+                this.boatFiles.set(res.data)
+            },
+            error: (err) => {
+                if (err.status) {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os arquivos do barco.' });
                 }
             },
         })

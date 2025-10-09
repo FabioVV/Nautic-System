@@ -88,5 +88,13 @@ export class BoatService {
     getBoat(id: string) {
         return this.http.get(`${environment.apiBaseURL}/boats/${id}`)
     }
+
+    getBoatFiles(id: string) {
+        return this.http.get(`${environment.apiBaseURL}/boats/${id}/files`)
+    }
+
+    deleteBoatImage(id: string, id_file: string) {
+        return this.http.delete(`${environment.apiBaseURL}/boats/${id}/files/${id_file}`)
+    }
 }
 
