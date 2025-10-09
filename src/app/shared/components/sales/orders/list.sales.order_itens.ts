@@ -82,11 +82,11 @@ import { SalesService } from '../../../services/sales.service';
                 </td>
 
                 <td>
-                    <p-inputnumber (onInput)="changeAccQty($event, this.id, acc.id_accessory)" [(ngModel)]="acc.qty" [useGrouping]="false" class=""  />
+                    <p-inputnumber [disabled]="SalesOrderCancelled" (onInput)="changeAccQty($event, this.id, acc.id_accessory)" [(ngModel)]="acc.qty" [useGrouping]="false" class=""  />
                 </td>
 
                 <td>
-                    <p-buttongroup>
+                    <p-buttongroup *ngIf="!SalesOrderCancelled">
                         <p-button (click)="removeAccessory(this.id, acc.id_accessory, acc.model)" icon="pi pi-trash" severity="contrast" rounded/>
                     </p-buttongroup>
                 </td>
@@ -116,6 +116,9 @@ export class ListSalesOrderBoatItensComponent {
     ) { }
 
     @Input() reloadSalesOrder: any
+    @Input() SalesOrderCancelled: any
+
+    
     salesOrderItens = signal<any[]>([])
     id: string = ""
     _name: string = ""

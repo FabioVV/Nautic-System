@@ -55,7 +55,7 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
     <p-dialog #cdialog [header]="title" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" >
 
         <div class='ped-total'>
-            <div>
+            <div style='display:none;'> <!-- TODO -->
                 <h4>Avisos</h4>
                 <div class='p-message-content' style='justify-content: center;'>
                     <p-button severity="warn" type="submit" label="Clique aqui para ver avisos sobre este pedido" (click)="orderProblems()" icon="pi pi-exclamation-triangle" />
@@ -300,7 +300,7 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
                         </div>
                     </div>
 
-                    <list-sales-orders-boat-itens [reloadSalesOrder]="this.loadSalesOrder" #listSalesOrderBoatItens></list-sales-orders-boat-itens>
+                    <list-sales-orders-boat-itens [SalesOrderCancelled]="SalesOrderCancelled" [reloadSalesOrder]="this.loadSalesOrder" #listSalesOrderBoatItens></list-sales-orders-boat-itens>
 
                     <form [formGroup]="salesOrderFormExtra" (ngSubmit)="onSubmit()">
                         <div class='row'>
@@ -326,7 +326,7 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
                             <ng-container *ngFor="let f of salesOrderFiles(); let i = index">
 
                             <div class="col-6 col-sm-4 col-md-3 mb-4">
-                                <select style='padding:1rem;' (change)="changeFileType(f.id, $event)" [(ngModel)]="f.type">
+                                <select [disabled]="SalesOrderCancelled" style='padding:1rem; border:1px solid black; border-radius:4px;' (change)="changeFileType(f.id, $event)" [(ngModel)]="f.type">
                                     <option *ngFor="let type of FileSoTypes" [value]="type.code">{{ type.name }}</option>
                                 </select>
 
@@ -354,7 +354,7 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
 
                                     <div class="card-body p-2">
                                         <div class="d-flex justify-content-between">
-                                        <p-buttongroup>
+                                        <p-buttongroup *ngIf="!SalesOrderCancelled">
                                             <p-button (click)="removeFile(f.id)" severity="danger" icon="pi pi-trash" rounded></p-button>
                                             <p-button (click)="downloadFile(f.path)" severity="info" icon="pi pi-download" rounded></p-button>
                                         </p-buttongroup>
