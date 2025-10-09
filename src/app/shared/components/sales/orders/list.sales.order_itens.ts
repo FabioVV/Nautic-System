@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, signal, ViewChild } from '@angular/core';
+import { Component, input, Input, signal, ViewChild } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
@@ -82,12 +82,12 @@ import { SalesService } from '../../../services/sales.service';
                 </td>
 
                 <td>
-                    <p-inputnumber (onInput)="changeAccQty($event, this.id, acc.id)" [(ngModel)]="acc.qty" [useGrouping]="false" class=""  />
+                    <p-inputnumber (onInput)="changeAccQty($event, this.id, acc.id_accessory)" [(ngModel)]="acc.qty" [useGrouping]="false" class=""  />
                 </td>
 
                 <td>
                     <p-buttongroup>
-                        <p-button (click)="removeAccessory(this.id, acc.id, acc.model)" icon="pi pi-trash" severity="contrast" rounded/>
+                        <p-button (click)="removeAccessory(this.id, acc.id_accessory, acc.model)" icon="pi pi-trash" severity="contrast" rounded/>
                     </p-buttongroup>
                 </td>
             </tr>
@@ -115,6 +115,7 @@ export class ListSalesOrderBoatItensComponent {
 
     ) { }
 
+    @Input() reloadSalesOrder: any
     salesOrderItens = signal<any[]>([])
     id: string = ""
     _name: string = ""
@@ -160,6 +161,7 @@ export class ListSalesOrderBoatItensComponent {
                     this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Pedido/orçamento atualizado com sucesso' });
                     
                     this.isLoading = false
+                    this.reloadSalesOrder(this.id)
                 },
                 error: (err) => {
                     if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
@@ -179,6 +181,7 @@ export class ListSalesOrderBoatItensComponent {
                 this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Pedido/orçamento atualizado com sucesso' });
                 
                 this.isLoading = false
+                this.reloadSalesOrder(this.id)
             },
             error: (err) => {
                 if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
@@ -214,6 +217,7 @@ export class ListSalesOrderBoatItensComponent {
                         this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Pedido/orçamento atualizado com sucesso' });
                         
                         this.isLoading = false
+                        this.reloadSalesOrder(this.id)
                     },
                     error: (err) => {
                         if (err?.status == 400 && err?.error?.errors?.type == "TODO") {

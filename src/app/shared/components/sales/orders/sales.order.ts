@@ -297,7 +297,7 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
                         </div>
                     </div>
 
-                    <list-sales-orders-boat-itens #listSalesOrderBoatItens></list-sales-orders-boat-itens>
+                    <list-sales-orders-boat-itens [reloadSalesOrder]="this.loadSalesOrder" #listSalesOrderBoatItens></list-sales-orders-boat-itens>
 
                     <form [formGroup]="salesOrderFormExtra" (ngSubmit)="onSubmit()">
                         <div class='row'>
@@ -515,7 +515,7 @@ export class SalesOrderModal {
         }
     }
 
-    loadSalesOrder(id: string){
+    loadSalesOrder = (id: string) =>{
         this.salesService.getSalesOrder(id).subscribe({
             next: (res: any) => {
                 //@ts-ignore
