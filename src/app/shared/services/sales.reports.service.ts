@@ -11,12 +11,15 @@ import { environment } from '../../../environments/environment';
 export class SalesReportsService {
     constructor(private http: HttpClient) { }
 
-    getNegotiationsReport(page = 1, perPage = 10, name: string, boat: string){
-        return this.http.get(`${environment.apiBaseURL}/sales/reports/negotiations?pageNumber=${page}&perPage=${perPage}&name=${name}&boat=${boat}`)
+    getNegotiationsReport(page = 1, perPage = 10, name: string, boat: string, dateIni?: Date | null, dateEnd?: Date | null){
+        return this.http.get(`${environment.apiBaseURL}/sales/reports/negotiations?pageNumber=${page}&perPage=${perPage}&name=${name}&boat=${boat}&dateIni=${dateIni?.toISOString()}&dateEnd=${dateEnd?.toISOString()}`)
     }
 
-    getSalesOrdersReport(page = 1, perPage = 10, name: string, boat: string){
-        return this.http.get(`${environment.apiBaseURL}/sales/reports/sales-orders?pageNumber=${page}&perPage=${perPage}&name=${name}&boat=${boat}`)
+    getSalesOrdersReport(page = 1, perPage = 10, name: string, boat: string, dateIni?: Date | null, dateEnd?: Date | null){
+        return this.http.get(`${environment.apiBaseURL}/sales/reports/sales-orders?pageNumber=${page}&perPage=${perPage}&name=${name}&boat=${boat}&dateIni=${dateIni?.toISOString()}&dateEnd=${dateEnd?.toISOString()}`)
     }
 
+    getLostBusinessReport(page = 1, perPage = 10, name: string, boat: string, dateIni?: Date | null, dateEnd?: Date | null){
+        return this.http.get(`${environment.apiBaseURL}/sales/reports/lost-negotiations?pageNumber=${page}&perPage=${perPage}&name=${name}&boat=${boat}&dateIni=${dateIni?.toISOString()}&dateEnd=${dateEnd?.toISOString()}`)
+    }
 }

@@ -21,8 +21,9 @@ import { finalize } from 'rxjs';
 import { UserService } from '../../shared/services/user.service';
 import { SalesReportsService } from '../../shared/services/sales.reports.service';
 import { SalesOrderModal } from '../../shared/components/sales/orders/sales.order';
+import { DatePickerModule } from 'primeng/datepicker';
 
-import { formatBRLDate, formatBRLMoney } from '../../shared/components/utils';
+import { formatBRLDate, formatBRLMoney, firstDayOfMonth, lastDayOfMonth } from '../../shared/components/utils';
 
 interface Column {
     field: string;
@@ -37,7 +38,7 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-report-sales-orders',
-    imports: [DialogModule, ButtonGroupModule, SalesOrderModal, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, DatePickerModule, ButtonGroupModule, SalesOrderModal, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrls: [],
     standalone: true,
@@ -68,6 +69,18 @@ interface ExportColumn {
             <p-iconfield>
                 <p-inputicon styleClass="pi pi-search" />
                 <input [(ngModel)]="modelSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Modelo barco..." />
+            </p-iconfield>
+
+            <p-iconfield>
+                <p-datepicker (input)="onGlobalFilter($event)" [(ngModel)]="dateIni" dateFormat="dd/mm/yy" required fluid />
+            </p-iconfield>
+
+            <p-iconfield>
+            Até
+            </p-iconfield>
+
+            <p-iconfield>
+                <p-datepicker (input)="onGlobalFilter($event)" [(ngModel)]="dateEnd" dateFormat="dd/mm/yy" required fluid />
             </p-iconfield>
 
 
@@ -199,6 +212,8 @@ export class ListReportSalesOrdersComponent {
 
     modelSearch: string = ""
     nameSearch: string = ""
+    dateIni: Date | null = firstDayOfMonth()
+    dateEnd: Date | null = lastDayOfMonth()
 
     cols!: Column[]
     exportColumns!: ExportColumn[]
@@ -225,7 +240,7 @@ export class ListReportSalesOrdersComponent {
     loadReportNegotiations(page: number) {
         // const rmLoading = showLoading()
 
-        this.reportsService.getSalesOrdersReport(page, this.limitPerPage, this.nameSearch, this.modelSearch).pipe(finalize(() => { })).subscribe({
+        this.reportsService.getSalesOrdersReport(page, this.limitPerPage, this.nameSearch, this.modelSearch, this.dateIni, this.dateEnd).pipe(finalize(() => { })).subscribe({
             next: (res: any) => {
                 this.list.set(res.data ?? [])
 

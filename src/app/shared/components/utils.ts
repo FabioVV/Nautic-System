@@ -105,3 +105,12 @@ export function formatBRLDate(date: any) {
 
     return brFormatter.format(new Date(date))
 }
+
+
+export function firstDayOfMonth(d: Date = new Date()): Date {
+    return new Date(d.getFullYear(), d.getMonth(), 1)
+}
+
+export function lastDayOfMonth(d: Date = new Date()): Date {
+    return new Date(d.getFullYear(), d.getMonth() + 1, 0)
+}

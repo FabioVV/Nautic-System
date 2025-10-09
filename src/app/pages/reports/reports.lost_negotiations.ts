@@ -20,23 +20,24 @@ import { ButtonGroupModule } from 'primeng/buttongroup';
 import { finalize } from 'rxjs';
 import { UserService } from '../../shared/services/user.service';
 import { SalesReportsService } from '../../shared/services/sales.reports.service';
+import { DatePickerModule } from 'primeng/datepicker';
 
 import { formatBRLDate } from '../../shared/components/utils';
 
 interface Column {
-    field: string;
-    header: string;
+    field: string
+    header: string
     customExportHeader?: string;
 }
 
 interface ExportColumn {
-    title: string;
-    dataKey: string;
+    title: string
+    dataKey: string
 }
 
 @Component({
     selector: 'list-report-lost-negotiations',
-    imports: [DialogModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, ButtonGroupModule, DatePickerModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrls: [],
     standalone: true,
@@ -52,7 +53,7 @@ interface ExportColumn {
     >
     <ng-template #caption>
         <div class="flex items-center justify-between mb-4">
-            <span class="text-xl font-bold">Relatório de negociações</span>
+            <span class="text-xl font-bold">Relatório de negociações perdidas</span>
         </div>
 
         <div class="flex flex-wrap items-center justify-end gap-2">
@@ -68,6 +69,17 @@ interface ExportColumn {
                 <input [(ngModel)]="modelSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Modelo barco..." />
             </p-iconfield>
 
+            <p-iconfield>
+                <p-datepicker (input)="onGlobalFilter($event)" [(ngModel)]="dateIni" dateFormat="dd/mm/yy" required fluid />
+            </p-iconfield>
+
+            <p-iconfield>
+            Até
+            </p-iconfield>
+
+            <p-iconfield>
+                <p-datepicker (input)="onGlobalFilter($event)" [(ngModel)]="dateEnd" dateFormat="dd/mm/yy" required fluid />
+            </p-iconfield>
 
         </div>
         <div class="text-end pb-4 mt-2">
@@ -85,36 +97,29 @@ interface ExportColumn {
                 <p-sortIcon field="customer_name" />
             </th>
 
-            <th pSortableColumn="customer_email">
-                E-mail cliente
-                <p-sortIcon field="customer_email" />
+            <th pSortableColumn="motive">
+                Motivo da perda
+                <p-sortIcon field="motive" />
             </th>
 
-            <th pSortableColumn="customer_phone">
-                Telefone cliente
-                <p-sortIcon field="customer_phone" />
+            <th >
+                Data da perda
+                
             </th>
 
-            <th pSortableColumn="com_name">
-                Meio de contato
-                <p-sortIcon field="com_name" />
+            <th>
+                Cliente comprou outro barco?
+                
+            </th>
+            <th>
+                Qual?
+                
             </th>
 
-            <th pSortableColumn="days_since_stage_change">
-                Dias desde a última mudança de estágio do funil
-                <p-sortIcon field="days_since_stage_change" />
+            <th>
+                Qual barco nós ofertamos?
+                
             </th>
-
-            <th pSortableColumn="days_since_last_history">
-                Dias desde o último acompanhamento
-                <p-sortIcon field="days_since_last_history" />
-            </th>
-            
-            <th pSortableColumn="last_history_at">
-                Dada do último acompanhamento
-                <p-sortIcon field="last_history_at" />
-            </th>
-            
 
             <th></th>
         </tr>
@@ -130,39 +135,23 @@ interface ExportColumn {
             </td>
 
             <td>
-                {{ report.customer_email }}
+                {{ report.motive }}
+            </td>
+            
+            <td>
+                {{ report.created_at | date:'dd/MM/yyyy' }}
             </td>
 
             <td>
-                {{ report.customer_phone }}
+                {{ report.customer_got_another_boat == 'Y' ? 'Sim' : 'Não' }}
             </td>
 
             <td>
-                {{ report.com_name }}
+                {{ report.which_boat }}
             </td>
 
             <td>
-                <p-tag
-                    [value]="report.days_since_stage_change"
-                    [severity]="getSeverity(report.days_since_stage_change)"
-                    styleClass="dark:!bg-surface-900"
-                />
-            </td>
-
-            <td>
-                <p-tag
-                    [value]="report.days_since_last_history == null ? 'Sem acompanhamento' : report.days_since_last_history"
-                    [severity]="getSeverity(report.days_since_last_history)"
-                    styleClass="dark:!bg-surface-900"
-                />
-            </td>
-
-            <td>
-                <p-tag
-                    [value]="getDate(report.last_history_at)"
-                    [severity]="getSeverityDate(report.last_history_at)"
-                    styleClass="dark:!bg-surface-900"
-                />
+                {{ report.our_boat_offered }}
             </td>
 
             <td></td>
@@ -213,12 +202,22 @@ export class ListReportLostNegotiationsComponent {
 
     modelSearch: string = ""
     nameSearch: string = ""
+    dateIni: Date | null = this.firstDayOfMonth()
+    dateEnd: Date | null = this.lastDayOfMonth()
 
     cols!: Column[]
     exportColumns!: ExportColumn[]
 
     confirmLabel = "Confirmar"
     rejectLabel = "Cancelar"
+
+    firstDayOfMonth(d: Date = new Date()): Date {
+        return new Date(d.getFullYear(), d.getMonth(), 1)
+    }
+
+    lastDayOfMonth(d: Date = new Date()): Date {
+        return new Date(d.getFullYear(), d.getMonth() + 1, 0)
+    }
 
     onPageChange(e: any) {
         this.loadReportNegotiations(e.page)
@@ -239,7 +238,7 @@ export class ListReportLostNegotiationsComponent {
     loadReportNegotiations(page: number) {
         // const rmLoading = showLoading()
 
-        this.reportsService.getNegotiationsReport(page, this.limitPerPage, this.nameSearch, this.modelSearch).pipe(finalize(() => { })).subscribe({
+        this.reportsService.getLostBusinessReport(page, this.limitPerPage, this.nameSearch, this.modelSearch, this.dateIni, this.dateEnd).pipe(finalize(() => { })).subscribe({
             next: (res: any) => {
                 this.list.set(res.data ?? [])
 
