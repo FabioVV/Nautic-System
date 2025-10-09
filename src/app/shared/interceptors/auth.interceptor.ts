@@ -8,30 +8,29 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
 
     if (authService.isLoggedIn()) {
-        //let url = req.url.split(`/`)
-        //let last_url_portion = url[url.length - 1]
-        //     if(last_url_portion == `uploadVideo` || last_url_portion == `uploadPdf`){
-        //
-        //       clone = req.clone({
-        //         headers: req.headers
-        //           .set('Authorization', 'Bearer ' + authService.getUserToken())
-        //       })
-        //
-        //     } else {
-        //       clone = req.clone({
-        //         headers: req.headers
-        //           .set('Authorization', 'Bearer ' + authService.getUserToken())
-        //           .set('Content-Type', 'application/json')
-        //
-        //       })
-        //     }
-        //
-        clone = req.clone({
-            headers: req.headers
-                .set('Authorization', 'Bearer ' + authService.getUserToken())
-                .set('Content-Type', 'application/json')
+        let url = req.url.split(`/`)
+        let last_url_portion = url[url.length - 1]
+        if (last_url_portion == `boat-file`) {
+            clone = req.clone({
+                headers: req.headers
+                    .set('Authorization', 'Bearer ' + authService.getUserToken())
+            })
 
-        })
+        } else {
+            clone = req.clone({
+                headers: req.headers
+                    .set('Authorization', 'Bearer ' + authService.getUserToken())
+                    .set('Content-Type', 'application/json')
+
+            })
+        }
+
+        // clone = req.clone({
+        //     headers: req.headers
+        //         .set('Authorization', 'Bearer ' + authService.getUserToken())
+        //         .set('Content-Type', 'application/json')
+
+        // })
 
 
         return next(clone)

@@ -33,6 +33,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { TabsModule } from 'primeng/tabs';
 import { TextareaModule } from 'primeng/textarea';
 import { Tag } from 'primeng/tag';
+import { DatePickerModule } from 'primeng/datepicker';
 
 import { formatBRLMoney } from '../utils';
 import { User, UserService } from '../../services/user.service';
@@ -43,6 +44,7 @@ import { SalesCustomerModal } from './frame.user';
 import { SalesAboutPanel } from './about.sales_panel';
 import { ListNegotiationHistoryComponent } from './list.negotiation_history';
 import { SalesOrderModal } from './orders/sales.order';
+import { ListNegotiationsAlertsComponent } from './list.negotiations_alerts';
 
 interface Column {
     field: string
@@ -57,7 +59,7 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-negotiations',
-    imports: [DialogModule, SalesOrderModal, ListNegotiationHistoryComponent, SalesCustomerModal, SalesAboutPanel, CardModule, Tag, TextareaModule, TabsModule, InputGroupAddonModule, InputNumberModule, InputMaskModule, AutoCompleteModule, InputGroupModule, FontAwesomeModule, ToolbarModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, SalesOrderModal, ListNegotiationsAlertsComponent, DatePickerModule, ListNegotiationHistoryComponent, SalesCustomerModal, SalesAboutPanel, CardModule, Tag, TextareaModule, TabsModule, InputGroupAddonModule, InputNumberModule, InputMaskModule, AutoCompleteModule, InputGroupModule, FontAwesomeModule, ToolbarModule, TooltipModule, ContextMenuModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrl: "negotiation.css",
     standalone: true,
@@ -70,7 +72,7 @@ interface ExportColumn {
 
         <ng-template #start>
             <p-button (click)="openNewLead()" pTooltip="Cadastrar novo lead" tooltipPosition="top" icon="pi pi-plus" class="mr-2" text severity="success" />
-            <p-button pTooltip="Visualizar seus alertas" tooltipPosition="top" icon="pi pi-bell" class="mr-2" text severity="warn" />
+            <p-button (click)="showAlerts()" pTooltip="Visualizar seus alertas" tooltipPosition="top" icon="pi pi-bell" class="mr-2" text severity="warn" />
 
             <p-button (click)="openCustomerBirthdays()" pTooltip="Clientes aniversariantes" tooltipPosition="top" class="mr-2" text severity="secondary">
                 <fa-icon style='color:#0ea5e9;' [icon]="faCakeCandles" />
@@ -682,7 +684,78 @@ interface ExportColumn {
     </p-dialog>
     
     <p-dialog header="Perdeu negociação" [modal]="true" [(visible)]="lostNegotiation" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }">
+        <form [formGroup]="lostNegotiationForm" (ngSubmit)="onSubmitLostNeg()" style='margin-bottom: 7.5rem;'>
+            <div class='row'>
 
+                <div class='col-md-12'>
+                    <label class="block font-bold mb-3">Motivo</label>
+                    <input formControlName="motive" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                    
+                    <div class="error-feedback" *ngIf="hasBeenSubmitedLostNeg('motive')">
+                        <p-message styleClass="mb-2" *ngIf="lostNegotiationForm.controls.motive.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o motivo da perda</p-message>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class='row'>
+                <div class='col-md-6'>
+                    <label class="block font-bold mb-3">Data de alerta para tentar contato novamente</label>
+                    <p-datepicker formControlName="dateAlert" dateFormat="dd/mm/yy" required fluid />
+
+                    <div class="error-feedback" *ngIf="hasBeenSubmitedLostNeg('dateAlert')">
+                        <p-message styleClass="mb-2" *ngIf="lostNegotiationForm.controls.dateAlert.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar a data do alerta</p-message>
+                    </div>
+                </div>
+
+                <div class='col-md-6'>
+                    <label class="block font-bold mb-3">Motivo de alerta</label>
+                    <input formControlName="dateAlertMotive" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                    
+                    <div class="error-feedback" *ngIf="hasBeenSubmitedLostNeg('dateAlertMotive')">
+                        <p-message styleClass="mb-2" *ngIf="lostNegotiationForm.controls.dateAlertMotive.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o motivo do alerta</p-message>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class='row'>
+                <div class='col-md-4'>
+                    <label class="block font-bold mb-3">Cliente comprou outro barco de concorrente?</label>
+                    <p-select [invalid]="isInvalidUpdate('customerGotAnotherBoat')" [options]="CustomerGotAnotherBoat" formControlName="customerGotAnotherBoat" optionLabel="name" placeholder="Selecione uma opção" class="w-full mb-2" />
+                
+                    @if (isInvalidUpdate('customerGotAnotherBoat')) {
+                        <p-message severity="error" size="small" variant="simple">Por favor, selecione se o cliente comprou outra embarcação</p-message>
+                    }
+
+                </div>
+
+                <div *ngIf="this.lostNegotiationForm.get('customerGotAnotherBoat')?.value?.code == 'S'" class='col-md-4'>
+                    <label class="block font-bold mb-3">Qual barco?</label>
+                    <input formControlName="whichBoat" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                </div>
+
+                <div *ngIf="this.lostNegotiationForm.get('customerGotAnotherBoat')?.value?.code == 'S'" class='col-md-4'>
+                    <label class="block font-bold mb-3">Qual barco nós ofertamos?</label>
+                    <input formControlName="OurBoatOffered" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                </div>
+            </div>
+
+
+        </form>
+
+        <ng-template #footer>
+            <p-button label="Fechar" icon="pi pi-times" text (click)="hideLostNegotiation()" />
+            <p-button [disabled]="isLoading" (click)="onSubmitLostNeg()" type="submit" label="Salvar" icon="pi pi-check" />
+        </ng-template>
+    </p-dialog>
+
+    <p-dialog header="Atenção!" [modal]="true" [(visible)]="AlertsDialog" [style]="{ width: '90rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }">
+        <h3><mark>Seus alertas do dia</mark></h3>
+
+        <div style='padding:1rem;'>
+            <list-negotiations-alerts [alerts]="negotiations_alerts" [closeAlertModal]="closeAndReload" />
+        </div>
     </p-dialog>
 
     <p-confirmdialog
@@ -720,6 +793,8 @@ export class ListNegotiationsComponent {
     MovingCard: any
 
     negotiations = signal<Negotiation[]>([])
+    negotiations_alerts = signal<any[]>([])
+
     stageOne = computed(() => this.negotiations()?.filter(n => n.stage === 1))
     stageTwo = computed(() => this.negotiations()?.filter(n => n.stage === 2))
     stageThree = computed(() => this.negotiations()?.filter(n => n.stage === 3))
@@ -735,6 +810,7 @@ export class ListNegotiationsComponent {
     accDialog: boolean = false
     negotiationDialog: boolean = false
     followupDialog: boolean = false
+    AlertsDialog: boolean = false
 
     lostNegotiation: boolean = false
     birthdaysDialog: boolean = false
@@ -797,7 +873,7 @@ export class ListNegotiationsComponent {
         dateAlert: ['', []],
         dateAlertMotive: ['', []],
 
-        customerGotAnotherBoat: ['', []],
+        customerGotAnotherBoat: [{ name: 'Não', code: 'N' }, []],
         whichBoat: ['', []],
 
         OurBoatOffered: ['', []],
@@ -822,6 +898,7 @@ export class ListNegotiationsComponent {
     CabinatedOpen: SelectItem[] = [ { name: 'Aberta', code: 'A' }, { name: 'Cabinada', code: 'C' }]
     NewUsed: SelectItem[] = [{ name: 'Nova', code: 'N' }, { name: 'Usada', code: 'U' }]
     HasBoat: SelectItem[] = [{ name: 'Sim', code: 'S' }, { name: 'Não', code: 'N' }]
+    CustomerGotAnotherBoat: SelectItem[] = [{ name: 'Sim', code: 'S' }, { name: 'Não', code: 'N' }]
 
     qualifiedType: SelectItem[] = [
         { name: 'Muito decidido. Intenção clara de compra imediata', code: 'A' }, 
@@ -840,6 +917,9 @@ export class ListNegotiationsComponent {
 
     ngOnInit() {
         this.loadNegotiations()
+        this.loadNegotiationsAlerts()
+        this.AlertsDialog = true
+
 
         this.salesService.getComs(1, 1000, "", "Y").subscribe({
             next: (res: any) => {
@@ -895,7 +975,7 @@ export class ListNegotiationsComponent {
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }))
     }
 
-    loadNegotiations(isDelete = false) {
+    loadNegotiations() {
         //const rmLoading = showLoading()
 
         this.salesService.getNegotiations(this.negotiationSearch).pipe(finalize(() => { this.isLoading = false })).subscribe({
@@ -905,6 +985,21 @@ export class ListNegotiationsComponent {
             error: (err) => {
                 if (err.status) {
                     this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar negociações.' })
+                }
+            },
+        })
+    }
+
+    loadNegotiationsAlerts() {
+        //const rmLoading = showLoading()
+
+        this.salesService.getNegotiationsAlerts().pipe(finalize(() => {})).subscribe({
+            next: (res: any) => {
+                this.negotiations_alerts.set(res.data)
+            },
+            error: (err) => {
+                if (err.status) {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar alertas de negociações.' })
                 }
             },
         })
@@ -1236,6 +1331,38 @@ export class ListNegotiationsComponent {
         }
     }
 
+    onSubmitLostNeg(){
+        this.submitted = true
+
+        if (this.lostNegotiationForm.valid) {
+            this.isLoading = true
+            // @ts-ignore
+            this.lostNegotiationForm.get("customerGotAnotherBoat")?.setValue(this.lostNegotiationForm.value.customerGotAnotherBoat?.code)
+
+            this.salesService.deactivateNegotiation(this._id, this.lostNegotiationForm.value).subscribe({
+                next: (res: any) => {
+                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Negociação cancelada com sucesso' });
+                    //this.loadCommunicationMeans()
+                    
+                    this.submitted = false
+                    this.isLoading = false
+                    this.hideLostNegotiation()
+                    this.lostNegotiationForm.reset()
+
+                    this.loadNegotiations()
+                },
+                error: (err) => {
+                    if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
+                    } else {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                    }
+                    this.isLoading = false
+                },
+
+            })
+        }
+    }
+
     isInvalid(controlName: string) {
         const control = this.form.get(controlName)
         return control?.invalid && (control.touched || this.submitted)
@@ -1347,6 +1474,11 @@ export class ListNegotiationsComponent {
 
     }
 
+    hideLostNegotiation() {
+        this.lostNegotiation = false
+        this.submitted = false
+    }
+
     hideFollowUp() {
         this.followupDialog = false
         this.submitted = false
@@ -1364,6 +1496,19 @@ export class ListNegotiationsComponent {
     hideDialog() {
         this.negotiationDialog = false
         this.submitted = false
+    }
+
+    hideAlerts() {
+        this.AlertsDialog = false
+    }
+
+    showAlerts(){
+        this.AlertsDialog = true
+    }
+
+    closeAndReload = () => {
+        this.hideAlerts()
+        this.loadNegotiations()
     }
 
     onGlobalFilter(event: any) {
@@ -1423,6 +1568,13 @@ export class ListNegotiationsComponent {
 
     hasBeenSubmited(controlName: string): boolean {
         const control = this.form.get(controlName)
+        return Boolean(control?.invalid)
+            && (this.submitted || Boolean(control?.touched))
+        //|| Boolean(control?.dirty
+    }
+
+    hasBeenSubmitedLostNeg(controlName: string): boolean {
+        const control = this.lostNegotiationForm.get(controlName)
         return Boolean(control?.invalid)
             && (this.submitted || Boolean(control?.touched))
         //|| Boolean(control?.dirty

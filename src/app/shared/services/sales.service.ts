@@ -119,8 +119,20 @@ export class SalesService {
         return this.http.get(`${environment.apiBaseURL}/sales/negotiations?search=${search}`)
     }
 
+    getNegotiationsAlerts(){
+        return this.http.get(`${environment.apiBaseURL}/sales/negotiations/alerts`)
+    }
+
     getNegotiation(id: string) {
         return this.http.get(`${environment.apiBaseURL}/sales/negotiations/${id}`)
+    }
+
+    deactivateNegotiation(id: string, formData: any) {
+        return this.http.patch(`${environment.apiBaseURL}/sales/negotiations/${id}/deactivate`, formData)
+    }
+
+    reactivateNegotiation(id: string) {
+        return this.http.patch(`${environment.apiBaseURL}/sales/negotiations/${id}/reactivate`, null)
     }
 
     insertBoatSalesOrder(id: string, id_boat: string) {

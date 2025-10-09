@@ -113,6 +113,12 @@ export class AppMenu {
                             code: "reports_negotiations:view"
                         },
                         {
+                            label: 'Negociações perdidas',
+                            icon: 'pi pi-filter',
+                            routerLink: ['/reports/lost-negotiations'],
+                            code: "reports_lost_negotiations:view"
+                        },
+                        {
                             label: 'Orçamentos/Pedidos',
                             icon: 'pi pi-filter',
                             routerLink: ['/reports/sales-orders'],

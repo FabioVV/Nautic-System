@@ -35,7 +35,7 @@ interface ExportColumn {
 }
 
 @Component({
-    selector: 'list-report-negotiations',
+    selector: 'list-report-lost-negotiations',
     imports: [DialogModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrls: [],
@@ -188,7 +188,7 @@ interface ExportColumn {
 
     `,
 })
-export class ListReportNegotiationsComponent {
+export class ListReportLostNegotiationsComponent {
     constructor(
         private router: Router,
         private messageService: MessageService,

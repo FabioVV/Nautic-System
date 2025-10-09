@@ -41,6 +41,10 @@ export class BoatService {
         return this.http.patch(`${environment.apiBaseURL}/boats/${id}`, formData)
     }
 
+    uploadBoatFile(id: string, formData: any) {
+        return this.http.post(`${environment.apiBaseURL}/boats/${id}/boat-file`, formData)
+    }
+
     getBoats(page = 1, perPage = 10, model: string = "", price: string = "", id: string = "", active: string = "Y",) {
         return this.http.get(`${environment.apiBaseURL}/boats?pageNumber=${page}&perPage=${perPage}&model=${model}&price=${price}&id=${id}&active=${active}`)
     }

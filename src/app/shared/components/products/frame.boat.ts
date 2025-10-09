@@ -28,6 +28,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { DatePickerModule } from 'primeng/datepicker';
 import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { InputGroupModule } from 'primeng/inputgroup';
+import { FileUploadModule } from 'primeng/fileupload';
 
 
 import { ListEnginesBoatComponent } from './list.engines_boat';
@@ -43,7 +44,7 @@ import { ListAdsBoatComponent } from './list.ads_boat';
 
 @Component({
     selector: 'open-boat',
-    imports: [DialogModule, TabsModule, DatePickerModule, ListAdsBoatComponent, ListAccessoriesBoatComponent, ListEnginesBoatComponent, InputGroupModule, AutoCompleteModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, TabsModule, DatePickerModule, FileUploadModule, ListAdsBoatComponent, ListAccessoriesBoatComponent, ListEnginesBoatComponent, InputGroupModule, AutoCompleteModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
     standalone: true,
@@ -262,6 +263,10 @@ import { ListAdsBoatComponent } from './list.ads_boat';
 
                 
                 <p-tabpanel value="3">
+                <div class="card flex flex-wrap gap-6 items-center justify-between">
+                        <p-fileupload #fu mode="basic" customUpload chooseLabel="Escolha o arquivo" chooseIcon="pi pi-upload" name="file[]" accept="image/*" maxFileSize="1000000000" (uploadHandler)="onUpload($event)"></p-fileupload>
+                        <p-button label="Enviar arquivo" (onClick)="fu.upload()" severity="secondary" [style]="{'text-align': 'center'}"></p-button>
+                </div>
                 </p-tabpanel>
                 
                 <p-tabpanel value="4">
@@ -502,6 +507,25 @@ export class BoatModal {
 
             })
         }
+    }
+
+    onUpload(event: any){
+
+        const file: File = event.files[0]
+        const formData = new FormData()
+        formData.append('file', file, file.name)
+
+        this.boatService.uploadBoatFile(this.id, formData).subscribe({
+            next: (res: any) => {
+                this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Upload feito com sucesso' });
+            }, 
+            error: (err) => {
+                if (err.status) {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao fazer upload' });
+                } 
+                this.isLoading = false
+            },
+        })
     }
 
     loadBoat(id: string){
