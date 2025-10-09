@@ -70,7 +70,7 @@ import { BoatService } from '../../services/boats.service';
             </td>
 
             <td>
-                <p-button (click)="removeAd(this.id, ad.id, '')" icon="pi pi-trash" severity="contrast" rounded/>
+                <p-button (click)="removeAd(this.id, ad.id_mean_communication, '')" icon="pi pi-trash" severity="contrast" rounded/>
             </td>
         </tr>
     </ng-template>
@@ -135,9 +135,8 @@ export class ListAdsBoatComponent {
                 outlined: true,
             },
             accept: () => {
-                const rmLoading = showLoading()
 
-                this.boatsService.removeBoatAd(id, id_mean_communication).pipe(finalize(() => { rmLoading() })).subscribe({
+                this.boatsService.removeBoatAd(id, id_mean_communication).pipe(finalize(() => {  })).subscribe({
                     next: (res: any) => {
                         this.loadBoatAds()
                         this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Anuncio removido com sucesso' });
