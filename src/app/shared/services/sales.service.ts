@@ -190,4 +190,20 @@ export class SalesService {
     getComs(page = 1, perPage = 10, name: string, active: string) {
         return this.http.get(`${environment.apiBaseURL}/sales/communication-means?pageNumber=${page}&perPage=${perPage}&name=${name}&active=${active}`)
     }
+
+    getSalesOrderFiles(id: string) {
+        return this.http.get(`${environment.apiBaseURL}/sales/orders/${id}/files`)
+    }
+
+    uploadSalesOrderFile(id: string, formData: any) {
+        return this.http.post(`${environment.apiBaseURL}/sales/orders/${id}/so-files`, formData)
+    }
+
+    deleteSalesOrderFile(id: string, id_file: string) {
+        return this.http.delete(`${environment.apiBaseURL}/sales/orders/${id}/files/${id_file}`)
+    }
+
+    changeSalesOrderFileType(id: string, id_file: string, type: number) {
+        return this.http.patch(`${environment.apiBaseURL}/sales/orders/${id}/files/${id_file}/change-type`, {type: type})
+    }
 }

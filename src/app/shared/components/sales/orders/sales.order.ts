@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, Input, ViewChild } from '@angular/core';
+import { Component, computed, inject, Input, signal, ViewChild } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
@@ -30,6 +31,8 @@ import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { InputGroupModule } from 'primeng/inputgroup';
+import { FileUploadModule } from 'primeng/fileupload';
+import { ImageModule } from 'primeng/image';
 
 import { BrStates, SelectItem } from '../../utils';
 import { SalesService } from '../../../services/sales.service';
@@ -41,7 +44,7 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
 
 @Component({
     selector: 'open-sales-order',
-    imports: [DialogModule, TagModule, AutoCompleteModule, ListSalesOrderBoatItensComponent, InputGroupModule, TabsModule, CardModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, TagModule, FileUploadModule, ImageModule, AutoCompleteModule, ListSalesOrderBoatItensComponent, InputGroupModule, TabsModule, CardModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
     standalone: true,
@@ -313,6 +316,55 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
                 </p-tabpanel>
 
                 <p-tabpanel value="2">
+                    <div *ngIf="!SalesOrderCancelled" class="card flex flex-wrap gap-6 items-center justify-between">
+                        <p-fileupload #fu mode="basic" customUpload chooseLabel="Escolha o arquivo" chooseIcon="pi pi-upload" name="file[]" accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,.doc,.docx,.pdf,.txt" maxFileSize="1000000000" (uploadHandler)="onUpload($event)"></p-fileupload>
+                        <p-button label="Enviar arquivo" (onClick)="fu.upload()" severity="secondary" [style]="{'text-align': 'center'}"></p-button>
+                    </div>
+
+                    <div class="container">
+                        <div class="row">
+                            <ng-container *ngFor="let f of salesOrderFiles(); let i = index">
+
+                            <div class="col-6 col-sm-4 col-md-3 mb-4">
+                                <select style='padding:1rem;' (change)="changeFileType(f.id, $event)" [(ngModel)]="f.type">
+                                    <option *ngFor="let type of FileSoTypes" [value]="type.code">{{ type.name }}</option>
+                                </select>
+
+                                <div class="card h-100">
+                                    <ng-container [ngSwitch]="fileType(f.path)">
+                                        <!-- Images -->
+                                        <ng-container *ngSwitchCase="'image'">
+                                            <p-image [src]="f.path" alt="Image" width="250" [preview]="true"></p-image>
+                                        </ng-container>
+
+                                        <!-- PDF -->
+                                        <ng-container *ngSwitchCase="'pdf'">
+                                        <div style="height:160px; overflow:hidden;">
+                                            <embed [src]="safeUrl(f.path)" type="application/pdf" width="100%" height="160px" />
+                                        </div>
+                                        </ng-container>
+
+                                        <!-- Other files -->
+                                        <ng-container *ngSwitchDefault>
+                                        <div class="d-flex align-items-center justify-content-center" style="height:160px;">
+                                            <img src="/assets/file.jpg" alt="file" style="width:64px;height:64px;">
+                                        </div>
+                                        </ng-container>
+                                    </ng-container>
+
+                                    <div class="card-body p-2">
+                                        <div class="d-flex justify-content-between">
+                                        <p-buttongroup>
+                                            <p-button (click)="removeFile(f.id)" severity="danger" icon="pi pi-trash" rounded></p-button>
+                                            <p-button (click)="downloadFile(f.path)" severity="info" icon="pi pi-download" rounded></p-button>
+                                        </p-buttongroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </ng-container>
+                        </div>
+                    </div>
 
                 </p-tabpanel>
                 
@@ -350,7 +402,8 @@ export class SalesOrderModal {
         private salesService: SalesService,
         private engineService: EngineService,
         private boatService: BoatService,
-        private confirmationService: ConfirmationService
+        private confirmationService: ConfirmationService,
+        private sanitizer: DomSanitizer
     ) {}
 
     confirmLabel = "Confirmar"
@@ -360,7 +413,9 @@ export class SalesOrderModal {
 
     @ViewChild('cdialog') myDialog!: Dialog
     @ViewChild('listSalesOrderBoatItens') listSalesOrderBoatItens!: ListSalesOrderBoatItensComponent
+    @ViewChild('fu') fileUploader!: any
 
+    salesOrderFiles = signal<any[]>([])
 
     // @ts-ignore
     get TotalPriceEngine() { return `${this._formatBRLMoney(this.formEng.get('EnginePrice')?.value)}` }
@@ -383,7 +438,21 @@ export class SalesOrderModal {
     visible: boolean = false
     id: string = ""
     TypeClient: SelectItem[] = [{ name: 'Pessoa física', code: 'PF' }, { name: 'Pessoa juridica', code: 'PJ' }]
+    FileSoTypes: SelectItem[] = [
+        { name: 'Comprovante de residência', code: '1' }, 
+        { name: 'CNH', code: '2' }, 
+        { name: 'Identidade', code: '3' }, 
+        { name: 'Contrato de pedido assinado', code: '4' },
+        { name: 'Comprovante de pagamento', code: '5' },
 
+        { name: 'Nota fiscal casco', code: '6' },
+        { name: 'Nota fiscal motor', code: '7' },
+        { name: 'Nota fiscal de acessórios', code: '8' },
+        { name: 'Nota fiscal de comissão', code: '9' },
+
+        { name: 'Outro', code: '9999' }
+    ]
+    
     autoFilteredValueEng: any[] = []
     autoFilteredValueBoat: any[] = []
     autoFilteredValueAcc: any[] = []
@@ -439,6 +508,11 @@ export class SalesOrderModal {
         AccessoryId: ['', []],
         AccessoryPrice: [0.0, []],
     })
+
+
+    safeUrl(url: string): SafeResourceUrl {
+        return this.sanitizer.bypassSecurityTrustResourceUrl(url)
+    }
 
     submit() {
         document.getElementById(`btn_submit`)?.click()
@@ -572,6 +646,9 @@ export class SalesOrderModal {
 
                 //@ts-ignore
                 this.listSalesOrderBoatItens.loadSalesOrdersBoatItens(this.id)
+
+                this.loadSalesOrderFiles()
+
             }, 
             error: (err) => {
                 this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar buscar pedido de venda' })
@@ -581,6 +658,81 @@ export class SalesOrderModal {
 
     orderProblems(){
 
+    }
+
+    changeFileType(id: string, event: any){
+        const value = (event.target as HTMLSelectElement).value;
+
+        this.salesService.changeSalesOrderFileType(this.id, id, parseInt(value)).subscribe({
+            next: (res: any) => {
+                //this.loadSalesOrderFiles()
+            },
+            error: (err) => {
+                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar alterar o tipo do arquivo' })
+            },
+        })
+    }
+
+    loadSalesOrderFiles(){
+        this.salesService.getSalesOrderFiles(this.id).subscribe({
+            next: (res: any) => {
+                //@ts-ignore
+                this.salesOrderFiles.set(res.data ?? [])
+            },
+            error: (err) => {
+                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os arquivos do pedido de venda' })
+            },
+        })
+    }
+
+    removeFile(id: string) {
+        this.confirmationService.confirm({
+            message: 'Confirma apagar o arquivo selecionado?',
+            header: 'Confirmação',
+            icon: 'pi pi-exclamation-triangle',
+            closeOnEscape: true,
+            rejectButtonProps: {
+                label: 'Cancelar',
+                severity: 'secondary',
+                outlined: true,
+            },
+            acceptButtonProps: {
+                label: 'Confirmar',
+                severity: 'danger',
+                outlined: true,
+            },
+            accept: () => {
+                this.salesService.deleteSalesOrderFile(this.id, id).subscribe({
+                    next: (res: any) => {
+                        this.loadSalesOrderFiles()
+                    }, 
+                    error: (err) => {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar apagar arquivo' })
+                    },
+                })
+            }
+        })
+    }
+
+    onUpload(event: any){
+
+        const file: File = event.files[0]
+        const formData = new FormData()
+        formData.append('file', file, file.name)
+
+        this.salesService.uploadSalesOrderFile(this.id, formData).subscribe({
+            next: (res: any) => {
+                this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Upload feito com sucesso' });
+                this.loadSalesOrderFiles()
+                this.fileUploader.clear()
+            }, 
+            error: (err) => {
+                if (err.status) {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao fazer upload' });
+                } 
+                this.isLoading = false
+            },
+        })
     }
 
     showSalesOrder(id: string, title: string) {
@@ -759,6 +911,24 @@ export class SalesOrderModal {
         this.formAcc.get("AccessoryModel")?.setValue(e.value.model)
         //@ts-ignore
         this.formAcc.get("AccessoryId")?.setValue(e.value.id)
+    }
+
+    downloadFile(path: string) {
+        const a = document.createElement('a')
+        a.href = path;
+        a.download = ''
+        a.target = '_blank'
+        document.body.appendChild(a)
+        a.click()
+        a.remove()
+    }
+
+    fileType(path: string): 'image' | 'pdf' | 'other' {
+        const ext = (path || '').split('?')[0].split('.').pop() || ''
+        const e = ext.toLowerCase()
+        if (e.match(/^(jpg|jpeg|png|gif|bmp|webp|svg)$/)) return 'image'
+        if (e === 'pdf') return 'pdf'
+        return 'other'
     }
 
     _formatBRLMoney(amount: number){

@@ -10,7 +10,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     if (authService.isLoggedIn()) {
         let url = req.url.split(`/`)
         let last_url_portion = url[url.length - 1]
-        if (last_url_portion == `boat-file`) {
+        if (last_url_portion == `boat-file` || last_url_portion == `so-files`) {
             clone = req.clone({
                 headers: req.headers
                     .set('Authorization', 'Bearer ' + authService.getUserToken())

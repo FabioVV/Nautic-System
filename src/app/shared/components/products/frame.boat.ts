@@ -34,7 +34,6 @@ import { ImageModule } from 'primeng/image';
 
 import { ListEnginesBoatComponent } from './list.engines_boat';
 import { ListAccessoriesBoatComponent } from './list.accessories_boat';
-import { BrStates } from '../utils';
 import { SelectItem, showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
 import { SalesService } from '../../services/sales.service';
@@ -362,7 +361,7 @@ export class BoatModal {
         private engineService: EngineService,
         private confirmationService: ConfirmationService,
     ) { }
-    
+
     confirmLabel = "Confirmar"
     rejectLabel = "Cancelar"
 
@@ -448,7 +447,6 @@ export class BoatModal {
     }
 
     removeFile(id: string) {
-
         this.confirmationService.confirm({
             message: 'Confirma apagar a imagem selecionada?',
             header: 'Confirmação',
@@ -475,9 +473,6 @@ export class BoatModal {
                 })
             }
         })
-
-
-
     }
 
     downloadFile(path: string) {
