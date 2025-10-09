@@ -18,6 +18,7 @@ import { ButtonGroupModule } from 'primeng/buttongroup';
 import { MessageModule } from 'primeng/message';
 import { finalize } from 'rxjs';
 import { ConfirmationService } from 'primeng/api';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 
 import { SalesService } from '../../../services/sales.service';
@@ -25,7 +26,7 @@ import { SalesService } from '../../../services/sales.service';
 
 @Component({
     selector: 'list-sales-orders-boat-itens',
-    imports: [DialogModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, MessageModule, InputNumberModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
     standalone: true,
@@ -57,6 +58,11 @@ import { SalesService } from '../../../services/sales.service';
                     <p-sortIcon field="price" />
                 </th>
 
+                <th>
+                    Quantidade
+                </th>
+
+
                 <th></th>
             </tr>
         </ng-template>
@@ -76,8 +82,12 @@ import { SalesService } from '../../../services/sales.service';
                 </td>
 
                 <td>
-                    <p-buttongroup>
+                    <p-inputnumber (onInput)="changeAccQty($event, this.id, acc.id)" [(ngModel)]="acc.qty" [useGrouping]="false" class=""  />
+                </td>
 
+                <td>
+                    <p-buttongroup>
+                        <p-button (click)="removeAccessory(this.id, acc.id, acc.model)" icon="pi pi-trash" severity="contrast" rounded/>
                     </p-buttongroup>
                 </td>
             </tr>
@@ -133,6 +143,88 @@ export class ListSalesOrderBoatItensComponent {
                 }
                 this.isLoading = false
             },
+        })
+    }
+
+    changeAccQty(input: any, id_sales_order: string, id_accessory: string){
+        console.log(input?.value)
+
+        if(input?.value < 0){
+            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Quantidade de itens não pode ser negativa.' });
+            return
+        }
+
+        if(input?.value == 0){
+            this.salesService.removeSalesOrderAccessory(id_sales_order, id_accessory).subscribe({
+                next: (res: any) => {
+                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Pedido/orçamento atualizado com sucesso' });
+                    
+                    this.isLoading = false
+                },
+                error: (err) => {
+                    if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
+                    } else {
+                        this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                    }
+                    this.isLoading = false
+                },
+
+            })
+
+            return
+        }
+
+        this.salesService.salesOrderchangeItemQty(id_sales_order, id_accessory, {qty: input?.value}).subscribe({
+            next: (res: any) => {
+                this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Pedido/orçamento atualizado com sucesso' });
+                
+                this.isLoading = false
+            },
+            error: (err) => {
+                if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
+                } else {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                }
+                this.isLoading = false
+            },
+
+        })
+
+    }
+
+    removeAccessory(id_sales_order: string, id_accessory: string, model:string){
+        this.confirmationService.confirm({
+            message: `Confirma remover ${model} do pedido/orçamento` + '?',
+            header: 'Confirmação',
+            icon: 'pi pi-exclamation-triangle',
+            closeOnEscape: true,
+            rejectButtonProps: {
+                label: 'Cancelar',
+                severity: 'secondary',
+                outlined: true,
+            },
+            acceptButtonProps: {
+                label: 'Confirmar',
+                severity: 'danger',
+                outlined: true,
+            },
+            accept: () => {
+                this.salesService.removeSalesOrderAccessory(id_sales_order, id_accessory).subscribe({
+                    next: (res: any) => {
+                        this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Pedido/orçamento atualizado com sucesso' });
+                        
+                        this.isLoading = false
+                    },
+                    error: (err) => {
+                        if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
+                        } else {
+                            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                        }
+                        this.isLoading = false
+                    },
+
+                })
+            }
         })
     }
 

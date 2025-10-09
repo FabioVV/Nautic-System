@@ -193,7 +193,7 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
                     <div class='row'>
 
                         <div class='col-md-6'>
-                            <form [formGroup]="formBoat" style='margin-bottom: 4rem;'>
+                            <form [formGroup]="formBoat" style='margin-bottom: 1rem;'>
 
                                 <div class='row'>
                                     <div style='margin-bottom:1rem;' class='col-md-12'>
@@ -213,7 +213,7 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
                                         </div>
                                     </div>
 
-                                    <p-button type="submit" label="Salvar casco" (click)="onSubmitBoat()" icon="pi pi-check" />
+                                    <p-button *ngIf="!SalesOrderCancelled" type="submit" label="Salvar casco" (click)="onSubmitBoat()" icon="pi pi-check" />
                                 </div>
 
                                 <hr />
@@ -231,7 +231,7 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
                         </div>
 
                         <div *ngIf="salesOrderForm.get('BoatModel')?.value" class='col-md-6'>
-                            <form [formGroup]="formEng" style='margin-bottom: 4rem;'>
+                            <form [formGroup]="formEng" style='margin-bottom: 1rem;'>
                                 
                                 <div class='row'>
                                     <div style='margin-bottom:1rem;' class='col-md-12'>
@@ -251,7 +251,7 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
                                         </div>
                                     </div>
 
-                                    <p-button type="submit" label="Salvar motor" (click)="onSubmitEngine()" icon="pi pi-check" />
+                                    <p-button *ngIf="!SalesOrderCancelled" type="submit" label="Salvar motor" (click)="onSubmitEngine()" icon="pi pi-check" />
                                 </div>
 
                                 <hr />
@@ -271,7 +271,7 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
 
                     <div class='row'>
                         <div *ngIf="salesOrderForm.get('BoatModel')?.value" class='col-md-12'>
-                            <form [formGroup]="formAcc" style='margin-bottom: 4rem;'>
+                            <form [formGroup]="formAcc" style='margin-bottom: 1rem;'>
                                 
                                 <div class='row'>
                                     <div style='margin-bottom:1rem;' class='col-md-12'>
@@ -290,7 +290,7 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
                                         </div>
                                     </div>
 
-                                    <p-button type="submit" label="Salvar acessório" (click)="onSubmitAccessory()" icon="pi pi-check" />
+                                    <p-button *ngIf="!SalesOrderCancelled" type="submit" label="Salvar acessório" (click)="onSubmitAccessory()" icon="pi pi-check" />
                                 </div>
 
                             </form>
@@ -321,18 +321,25 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
 
         <ng-template #footer>
             <!-- <p-button type="submit" label="Salvar" (click)="submit()" icon="pi pi-check" id="action-acom-button"/> -->
-            <p-button severity="danger" label="Cancelar pedido/Orçamento" (click)="visible=false" />
 
+            <p-button (click)="cancelOrder()" *ngIf="!SalesOrderCancelled" severity="danger" label="Cancelar pedido/Orçamento" />
 
-            <p-button severity="success" label="Transformar em pedido" (click)="visible=false" />
+            <p-button (click)="upgradeToActualSalesOrder()" *ngIf="salesOrderForm.get('StatusType')?.value == 'Novo orçamento'" severity="success" label="Transformar em pedido" />
 
-
-            <p-button severity="success" label="Gerar PDF" icon="pi pi-file-pdf" (click)="visible=false" />
-            <p-button severity="success" label="Compartilhar via E-mail" icon="pi pi-send" (click)="visible=false" />
-            <p-button severity="success" label="Compartilhar Via WhatsApp" icon="pi pi-send" (click)="visible=false" />
+            <p-button *ngIf="!SalesOrderCancelled" severity="success" label="Gerar PDF" icon="pi pi-file-pdf"  />
+            <p-button *ngIf="!SalesOrderCancelled" severity="success" label="Compartilhar via E-mail" icon="pi pi-send" />
+            <p-button *ngIf="!SalesOrderCancelled" severity="success" label="Compartilhar Via WhatsApp" icon="pi pi-send" />
 
         </ng-template>
     </p-dialog>
+
+    <p-confirmdialog
+        [rejectLabel]="rejectLabel"
+        [acceptLabel]="confirmLabel"
+        [acceptAriaLabel]="confirmLabel"
+        [rejectAriaLabel]="rejectLabel"
+        [style]="{ width: '450px' }"
+    />
     `,
 })
 export class SalesOrderModal {
@@ -343,8 +350,11 @@ export class SalesOrderModal {
         private salesService: SalesService,
         private engineService: EngineService,
         private boatService: BoatService,
+        private confirmationService: ConfirmationService
     ) {}
 
+    confirmLabel = "Confirmar"
+    rejectLabel = "Cancelar"
     BrStates = BrStates
     @Input() title: any
 
@@ -357,8 +367,16 @@ export class SalesOrderModal {
     // @ts-ignore
     get TotalPriceBoat() { return `${this._formatBRLMoney(this.formBoat.get('BoatPrice')?.value)}` }
     // @ts-ignore
-    get TotalOrder() { return `${this._formatBRLMoney(this.formEng?.get('EnginePrice')?.value + this.formBoat.get('BoatPrice')?.value)}` }
+    get TotalOrder() { return `${this._formatBRLMoney(this.formEng?.get('EnginePrice')?.value + this.formBoat.get('BoatPrice')?.value + this.salesOrderForm.get('TotalItensPrice')?.value)}` }
 
+    // @ts-ignore
+    get SalesOrderCancelled() { 
+        if(this.salesOrderForm.get("StatusType")?.value == "Orçamento cancelado" || this.salesOrderForm.get("StatusType")?.value == "Pedido cancelado"){
+            return true
+        }
+
+        return false 
+    }
 
     isLoading: boolean = false
     submitted: boolean = false
@@ -398,6 +416,7 @@ export class SalesOrderModal {
         EngineModel: [{value: '', disabled: true}, []],
         EngineId: [{value: '', disabled: true}, []],
         EnginePrice: [{value: 0.0, disabled: true}, []],
+        TotalItensPrice: [{value: 0.0, disabled: true}, []],
 
 
         Details: ['', []],
@@ -549,9 +568,10 @@ export class SalesOrderModal {
                 this.salesOrderForm.get("EngineModel")?.setValue(res.data['OrderEngineModel'])
                 this.salesOrderForm.get("EngineId")?.setValue(res.data['OrderEngineId'])
                 this.salesOrderForm.get("EnginePrice")?.setValue(res.data['OrderEnginePrice'])
+                this.salesOrderForm.get("TotalItensPrice")?.setValue(res.data['TotalItensPrice'])
 
                 //@ts-ignore
-                this.listSalesOrderBoatItens.loadSalesOrderBoatItens(this.id)
+                this.listSalesOrderBoatItens.loadSalesOrdersBoatItens(this.id)
             }, 
             error: (err) => {
                 this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar buscar pedido de venda' })
@@ -641,6 +661,82 @@ export class SalesOrderModal {
             error: (err) => {
                 this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar os acessórios.' });
             },
+        })
+    }
+
+    cancelOrder(){
+        this.confirmationService.confirm({
+            message: 'Confirma cancelar pedido/orçamento' + `` + '?',
+            header: 'Confirmação',
+            icon: 'pi pi-exclamation-triangle',
+            closeOnEscape: true,
+            rejectButtonProps: {
+                label: 'Cancelar',
+                severity: 'secondary',
+                outlined: true,
+            },
+            acceptButtonProps: {
+                label: 'Confirmar',
+                severity: 'danger',
+                outlined: true,
+            },
+            accept: () => {
+                this.salesService.cancelSalesOrder(this.id).subscribe({
+                    next: (res: any) => {
+                        this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Pedido/orçamento cancelado com sucesso' });
+                        
+                        this.submitted = false
+                        this.isLoading = false
+                        this.loadSalesOrder(this.id)
+                    },
+                    error: (err) => {
+                        if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
+                        } else {
+                            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                        }
+                        this.isLoading = false
+                    },
+
+                })
+            }
+        })
+    }
+
+    upgradeToActualSalesOrder(){
+        this.confirmationService.confirm({
+            message: 'Confirma transformar o orçamento em pedido' + `` + '?',
+            header: 'Confirmação',
+            icon: 'pi pi-exclamation-triangle',
+            closeOnEscape: true,
+            rejectButtonProps: {
+                label: 'Cancelar',
+                severity: 'secondary',
+                outlined: true,
+            },
+            acceptButtonProps: {
+                label: 'Confirmar',
+                severity: 'danger',
+                outlined: true,
+            },
+            accept: () => {
+                this.salesService.upgradeQuoteToOrder(this.id).subscribe({
+                    next: (res: any) => {
+                        this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Pedido criado com sucesso' });
+                        
+                        this.submitted = false
+                        this.isLoading = false
+                        this.loadSalesOrder(this.id)
+                    },
+                    error: (err) => {
+                        if (err?.status == 400 && err?.error?.errors?.type == "TODO") {
+                        } else {
+                            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro com sua requisição.' });
+                        }
+                        this.isLoading = false
+                    },
+
+                })
+            }
         })
     }
 

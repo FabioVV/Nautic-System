@@ -143,6 +143,22 @@ export class SalesService {
         return this.http.get(`${environment.apiBaseURL}/sales/orders/${id}/itens`)
     }
 
+    cancelSalesOrder(id: string) {
+        return this.http.delete(`${environment.apiBaseURL}/sales/orders/${id}`)
+    }
+
+    removeSalesOrderAccessory(id: string, id_accessory: string) {
+        return this.http.delete(`${environment.apiBaseURL}/sales/orders/${id}/accessory/${id_accessory}`)
+    }
+
+    upgradeQuoteToOrder(id: string) {
+        return this.http.patch(`${environment.apiBaseURL}/sales/orders/${id}/upgrade-quote`, null)
+    }
+
+    salesOrderchangeItemQty(id: string, id_accessory: string, formData: any) {
+        return this.http.patch(`${environment.apiBaseURL}/sales/orders/${id}/accessory/${id_accessory}/change-qty`, formData)
+    }
+
     registerSalesOrderUsingBusinnesHistory(id: string) {
         return this.http.post(`${environment.apiBaseURL}/sales/orders/negotiations/history/${id}`, null)
     }

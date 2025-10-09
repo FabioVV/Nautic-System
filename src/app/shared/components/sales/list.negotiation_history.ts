@@ -84,8 +84,8 @@ interface ExportColumn {
                                     <div>
                                         <span class="font-medium text-secondary " style='color:var(--p-emerald-500);'>Via {{ item.com_name }} as {{ _formatBRLDate(item.created_at) }}</span>
                                         
-                                        <span [ngStyle]="{ color: item.id_business == null ? 'var(--p-amber-500)' : 'var(--p-sky-500)' }" class="font-medium text-secondary "> {{ item.id_business == null ? 'Acompanhamento não vinculado a uma negociação.' : '(Cód. Negociação #' + item.id_business + ')' }}</span>
-
+                                        <span style='margin-right:5px;' [ngStyle]="{ color: item.id_business == null ? 'var(--p-amber-500)' : 'var(--p-sky-500)' }" class="font-medium text-secondary "> {{ item.id_business == null ? 'Acompanhamento não vinculado a uma negociação.' : '(Cód. Negociação #' + item.id_business + ')' }}</span>
+                                        <p-tag *ngIf="item.sales_order_canceled == 'QC' || item.sales_order_canceled == 'OC'" severity="danger" value="(Cancelado)" />
                                         
                                         <div class="text-lg font-medium text-surface-900 dark:text-surface-0 mt-2">
                                             {{ item.description }}
@@ -104,7 +104,10 @@ interface ExportColumn {
                                                 (click)="_openSalesOrder(item?.id_sales_order)"
                                             >
                                                 <i class="pi pi-dollar" pButtonIcon></i>
-                                                <span pButtonLabel>Abrir orçamento Cód. {{item.id}}</span>
+                                                <span pButtonLabel>
+                                                    Abrir {{ item.sales_order_canceled == 'NQ' ||  item.sales_order_canceled == 'QC' ? "orçamento" : "pedido"}} Cód. {{item.id}} <br>
+                                                    
+                                                </span>
 
                                             </button>
                                         </div>
