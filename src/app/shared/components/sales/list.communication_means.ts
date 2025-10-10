@@ -252,7 +252,7 @@ export class ListCommunicationMeansComponent {
 
         this.form = this.formBuilder.group({
             Name: [this._name, [Validators.required]],
-        });
+        })
     }
 
     deactivate(id: string, _type: string) {

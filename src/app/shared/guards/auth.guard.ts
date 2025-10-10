@@ -13,7 +13,7 @@ export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: R
             const useaPermissions = authService.parseUserJwt()?.permissions
             const userRoles = authService.parseUserJwt()?.roles
 
-            if (useaPermissions.includes(code) || (userRoles.includes("admin"))) {
+            if (useaPermissions.includes(code) || (userRoles.includes("Admin"))) {
                 return true
             } else {
                 return false

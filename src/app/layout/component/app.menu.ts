@@ -165,7 +165,7 @@ export class AppMenu {
 
         if (this.authService.isLoggedIn()) {
             const userjwt = this.authService.parseUserJwt()
-            const isAdmin = userjwt?.roles.includes("admin")
+            const isAdmin = userjwt?.roles.includes("Admin")
 
             const menuItems = [relatSalesMenuItem, productsMenu, salesMenuItem].reverse()
 
