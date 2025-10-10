@@ -77,7 +77,7 @@ export interface BoatSel {
                     </td>
 
                     <td>
-                        {{ aler.date }}
+                        {{ aler.date | date:'dd/MM/yyyy' }}
                     </td>
 
                     <td>

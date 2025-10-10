@@ -918,7 +918,6 @@ export class ListNegotiationsComponent {
     ngOnInit() {
         this.loadNegotiations()
         this.loadNegotiationsAlerts()
-        this.AlertsDialog = true
 
 
         this.salesService.getComs(1, 1000, "", "Y").subscribe({
@@ -995,6 +994,9 @@ export class ListNegotiationsComponent {
 
         this.salesService.getNegotiationsAlerts().pipe(finalize(() => {})).subscribe({
             next: (res: any) => {
+                if(res.data.length > 0){
+                    this.AlertsDialog = true
+                }
                 this.negotiations_alerts.set(res.data)
             },
             error: (err) => {

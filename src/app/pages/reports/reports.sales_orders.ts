@@ -45,6 +45,7 @@ interface ExportColumn {
 
     template: `
     <p-toast></p-toast>
+
     <p-table [value]="list()" [columns]="cols" csvSeparator=";" [exportHeader]="'customExportHeader'" stripedRows selectionMode="multiple" [(selection)]="selectedUsers" dataKey="id" [tableStyle]="{ 'min-width': '50rem', 'margin-top':'10px' }"
         #dt
         [rows]="10"
@@ -53,44 +54,60 @@ interface ExportColumn {
         dataKey="id"
     >
     <ng-template #caption>
-        <div class="flex items-center justify-between mb-4">
-            <span class="text-xl font-bold">Relatório de orçamentos e pedidos - Total da listagem: {{ this._formatBRLMoney(TotalValueFromListedOrders()) }}</span>
+        <div style='display:flex; flex-direction:column; flex-wrap:wrap;'>
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xl font-bold">Relatório de orçamentos e pedidos</span>
+
+                </div>
+
+                <div class="flex flex-wrap items-center justify-end gap-2">
+                
+                    <p-iconfield>
+                        <p-inputicon styleClass="pi pi-search" />
+                        <input [(ngModel)]="nameSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Nome cliente..." />
+                    </p-iconfield>
+
+
+                    <p-iconfield>
+                        <p-inputicon styleClass="pi pi-search" />
+                        <input [(ngModel)]="sellerSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Nome do vendedor..." />
+                    </p-iconfield>
+
+                    <p-iconfield>
+                        <p-datepicker (input)="onGlobalFilter($event)" [(ngModel)]="dateIni" dateFormat="dd/mm/yy" required fluid />
+                    </p-iconfield>
+
+                    <p-iconfield>
+                    Até
+                    </p-iconfield>
+
+                    <p-iconfield>
+                        <p-datepicker (input)="onGlobalFilter($event)" [(ngModel)]="dateEnd" dateFormat="dd/mm/yy" required fluid />
+                    </p-iconfield>
+
+
+                </div>
+                <div class="text-end pb-4 mt-2">
+                    <p-button icon="pi pi-external-link" label="Exportar CSV" (click)="dt.exportCSV()" />
+                </div>
+            </div>
+
+            <div>
+                <div class='results-report'>
+                    <div>
+                        <h4>Total dos pedidos</h4>
+                        
+                        <h4 style='color: var(--p-tag-success-color);'>
+                            {{  _formatBRLMoney(TotalValueFromListedOrders()) }}
+                        </h4>
+                    </div>
+                </div>
+            </div>
 
         </div>
-
-        <div class="flex flex-wrap items-center justify-end gap-2">
-        
-            <p-iconfield>
-                <p-inputicon styleClass="pi pi-search" />
-                <input [(ngModel)]="nameSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Nome cliente..." />
-            </p-iconfield>
-
-
-            <p-iconfield>
-                <p-inputicon styleClass="pi pi-search" />
-                <input [(ngModel)]="modelSearch" pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Modelo barco..." />
-            </p-iconfield>
-
-            <p-iconfield>
-                <p-datepicker (input)="onGlobalFilter($event)" [(ngModel)]="dateIni" dateFormat="dd/mm/yy" required fluid />
-            </p-iconfield>
-
-            <p-iconfield>
-            Até
-            </p-iconfield>
-
-            <p-iconfield>
-                <p-datepicker (input)="onGlobalFilter($event)" [(ngModel)]="dateEnd" dateFormat="dd/mm/yy" required fluid />
-            </p-iconfield>
-
-
-        </div>
-        <div class="text-end pb-4 mt-2">
-        <p-button icon="pi pi-external-link" label="Exportar CSV" (click)="dt.exportCSV()" />
-        </div>
-
     </ng-template>
-
+    
     <ng-template #header>
         <tr>
             <th>Cód. Orçamento/pedido</th>
@@ -123,7 +140,9 @@ interface ExportColumn {
             <th></th>
         </tr>
     </ng-template>
+    
     <ng-template #body let-report>
+
         <tr [pSelectableRow]="report">
             <td>
                 {{ report.id }}
@@ -159,8 +178,6 @@ interface ExportColumn {
                 </p-buttongroup>
             </td>
         </tr>
-
-
     </ng-template>
 
     </p-table>
@@ -194,7 +211,7 @@ export class ListReportSalesOrdersComponent {
     ) { }
 
     @ViewChild('salesOrder') salesOrder!: SalesOrderModal
-    @ViewChild('tr') trBody!: any
+    @ViewChild('body') trBody!: any
 
 
     TotalValueFromListedOrders = computed(() => this.list()?.filter(n => n.total_value).reduce((sum, v) => sum + v.total_value, 0))
@@ -210,7 +227,7 @@ export class ListReportSalesOrdersComponent {
     selectedUsers!: any[] // does nothing for now
     autoFilteredValue: any[] = []
 
-    modelSearch: string = ""
+    sellerSearch: string = ""
     nameSearch: string = ""
     dateIni: Date | null = firstDayOfMonth()
     dateEnd: Date | null = lastDayOfMonth()
@@ -235,18 +252,18 @@ export class ListReportSalesOrdersComponent {
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }))
 
         this.loadReportNegotiations(1)
+        console.log(this.trBody)
     }
 
     loadReportNegotiations(page: number) {
         // const rmLoading = showLoading()
 
-        this.reportsService.getSalesOrdersReport(page, this.limitPerPage, this.nameSearch, this.modelSearch, this.dateIni, this.dateEnd).pipe(finalize(() => { })).subscribe({
+        this.reportsService.getSalesOrdersReport(page, this.limitPerPage, this.nameSearch, this.sellerSearch, this.dateIni, this.dateEnd).pipe(finalize(() => { })).subscribe({
             next: (res: any) => {
                 this.list.set(res.data ?? [])
 
                 this.totalRecords = res.totalRecords
                 this.first = 1
-                console.log(this.TotalValueFromListedOrders())
 
             },
             error: (err) => {
