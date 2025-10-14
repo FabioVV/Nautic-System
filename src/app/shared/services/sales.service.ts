@@ -151,6 +151,10 @@ export class SalesService {
         return this.http.get(`${environment.apiBaseURL}/sales/orders/${id}`)
     }
 
+    getSalesOrderQuote(uuid: string) {
+        return this.http.get(`${environment.apiBaseURL}/sales/orders/${uuid}/quote`)
+    }
+
     getSalesOrderItens(id: string) {
         return this.http.get(`${environment.apiBaseURL}/sales/orders/${id}/itens`)
     }

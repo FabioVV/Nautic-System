@@ -4,13 +4,21 @@ import { Dashboard } from './app/pages/dashboard/dashboard';
 import { Notfound } from './app/pages/notfound/notfound';
 import { authGuard } from './app/shared/guards/auth.guard';
 import { AppLayoutStripped } from './app/layout/component/app.stripped.layout';
-
+import { QuoteComponent } from './app/shared/components/sales/orders/quote';
 
 export const appRoutes: Routes = [
     { path: "", redirectTo: "/auth/login", pathMatch: "full" },
     { path: "auth", redirectTo: "/auth/login", pathMatch: "full" },
 
     { path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') },
+
+    {
+        path: '',
+        component: AppLayoutStripped,
+        children: [
+            { path: 'sales/order/quote/:id', component: QuoteComponent },
+        ]
+    },
 
     {
         path: '',

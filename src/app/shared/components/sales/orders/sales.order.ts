@@ -33,6 +33,7 @@ import { AutoCompleteModule, AutoCompleteCompleteEvent } from 'primeng/autocompl
 import { InputGroupModule } from 'primeng/inputgroup';
 import { FileUploadModule } from 'primeng/fileupload';
 import { ImageModule } from 'primeng/image';
+import { Router } from '@angular/router';
 
 import { BrStates, SelectItem } from '../../utils';
 import { SalesService } from '../../../services/sales.service';
@@ -377,6 +378,8 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
             <p-button (click)="cancelOrder()" *ngIf="!SalesOrderCancelled" severity="danger" label="Cancelar pedido/Orçamento" />
 
             <p-button (click)="upgradeToActualSalesOrder()" *ngIf="salesOrderForm.get('StatusType')?.value == 'Novo orçamento'" severity="success" label="Transformar em pedido" />
+            
+            <p-button (click)="openQuoteFromSalesOrder()" *ngIf="!SalesOrderCancelled" severity="success" label="Abrir orçamento" icon="pi pi-file-pdf"  />
 
             <p-button *ngIf="!SalesOrderCancelled" severity="success" label="Gerar PDF" icon="pi pi-file-pdf"  />
             <p-button *ngIf="!SalesOrderCancelled" severity="success" label="Compartilhar via E-mail" icon="pi pi-send" />
@@ -403,8 +406,12 @@ export class SalesOrderModal {
         private engineService: EngineService,
         private boatService: BoatService,
         private confirmationService: ConfirmationService,
-        private sanitizer: DomSanitizer
+        private sanitizer: DomSanitizer,
+        private router: Router
     ) {}
+
+    id: string = ""
+    uuid: string = ""
 
     confirmLabel = "Confirmar"
     rejectLabel = "Cancelar"
@@ -436,7 +443,8 @@ export class SalesOrderModal {
     isLoading: boolean = false
     submitted: boolean = false
     visible: boolean = false
-    id: string = ""
+
+
     TypeClient: SelectItem[] = [{ name: 'Pessoa física', code: 'PF' }, { name: 'Pessoa juridica', code: 'PJ' }]
     FileSoTypes: SelectItem[] = [
         { name: 'Comprovante de residência', code: '1' }, 
@@ -465,6 +473,8 @@ export class SalesOrderModal {
 
     salesOrderForm = this.formBuilder.group({
         Id: [{value: '', disabled: true}, []],
+        Uuid: [{value: '', disabled: true}, []],
+
         SellerName: [{value: '', disabled: true}, []],
         CustomerName: [{value: '', disabled: true}, []],
         PfPj: [{value: '', disabled: true}, []],
@@ -593,7 +603,10 @@ export class SalesOrderModal {
         this.salesService.getSalesOrder(id).subscribe({
             next: (res: any) => {
                 //@ts-ignore
+                this.uuid = res.data['uuid'];
                 this.salesOrderForm.get("Id")?.setValue(res.data['id'])
+                this.salesOrderForm.get("Uuid")?.setValue(res.data['uuid'])
+
                 this.salesOrderForm.get("SellerName")?.setValue(res.data['seller_name'])
                 this.salesOrderForm.get("CustomerName")?.setValue(res.data['customer_name'])
                 this.salesOrderForm.get("Cep")?.setValue(res.data['Cep'])
@@ -658,6 +671,13 @@ export class SalesOrderModal {
 
     orderProblems(){
 
+    }
+
+    openQuoteFromSalesOrder(){
+        const path = this.router.createUrlTree(['sales', 'order', 'quote', this.uuid])
+        const relativeUrl = this.router.serializeUrl(path) // e.g. /sales/order/quote/123
+        const absoluteUrl = `${location.origin}${relativeUrl}` // ignores base href
+        window.open(absoluteUrl, '_blank')
     }
 
     changeFileType(id: string, event: any){

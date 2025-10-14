@@ -15,13 +15,8 @@ import { AppTopbarStripped } from './app.stripped.topbar';
     imports: [ButtonModule, CommonModule, AppTopbar, AppSidebar, RouterModule, AppFooter, AppTopbarStripped],
     template: `
     <div class="layout-wrapper" [ngClass]="containerClass">
-        <app-topbar-stripped />
 
-        <div class="layout-main-container" style='margin-left:0 !important; padding: 1rem 1rem 0 1rem !important;'>
-            <div class="layout-main">
-                <router-outlet></router-outlet>
-            </div>
-        </div>
+        <router-outlet></router-outlet>
 
         <div class="layout-mask animate-fadein"></div>
     </div> `
