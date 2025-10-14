@@ -24,5 +24,21 @@ export class RolesService {
     getRoles(page = 1, perPage = 10, name: string = "", showAdmin: string = "N") {
         return this.http.get(`${environment.apiBaseURL}/roles?pageNumber=${page}&perPage=${perPage}&name=${name}&show_admin=${showAdmin}`)
     }
+
+    getRolePermissions(id: string){
+        return this.http.get(`${environment.apiBaseURL}/roles/${id}/permissions`)
+    }
+
+    getPermissions(){
+        return this.http.get(`${environment.apiBaseURL}/permissions`)
+    }
+
+    updateRolePermissions(id: string, id_permission: string, checked: boolean) {
+        if(checked){
+            return this.http.patch(`${environment.apiBaseURL}/roles/${id}/permissions/${id_permission}`, null)
+        } else {
+            return this.http.delete(`${environment.apiBaseURL}/roles/${id}/permissions/${id_permission}`)
+        }
+    }
 }
 

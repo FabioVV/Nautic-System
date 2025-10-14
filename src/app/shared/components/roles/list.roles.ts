@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
@@ -20,6 +20,7 @@ import { ToastModule } from 'primeng/toast';
 import { ButtonGroupModule } from 'primeng/buttongroup';
 import { finalize } from 'rxjs';
 import { MessageModule } from 'primeng/message';
+import { RolePermissionsModal } from './frame.rpermissions';
 
 import { showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
@@ -27,19 +28,19 @@ import { RolesService } from '../../services/roles.service';
 
 
 interface Column {
-    field: string;
-    header: string;
-    customExportHeader?: string;
+    field: string
+    header: string
+    customExportHeader?: string
 }
 
 interface ExportColumn {
-    title: string;
-    dataKey: string;
+    title: string
+    dataKey: string
 }
 
 @Component({
     selector: 'list-roles',
-    imports: [DialogModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, MessageModule, RolePermissionsModal, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrls: [],
     standalone: true,
@@ -95,8 +96,10 @@ interface ExportColumn {
                 </td>
 
                 <td>
+
                     <p-buttongroup>
                         <p-button (click)="updateRole(role.id, role.name)" icon="pi pi-pencil" severity="contrast" rounded/>
+                        <p-button (click)="openRolePermissionsModal(role.id, role.name)" icon="pi pi-key" severity="contrast" rounded/>
                         <p-button (click)="deleteRole(role.id, role.name)" icon="pi pi-trash" severity="contrast" rounded/>
                     </p-buttongroup>
                 </td>
@@ -146,6 +149,8 @@ interface ExportColumn {
         [rejectAriaLabel]="rejectLabel"
         [style]="{ width: '450px' }"
     />
+
+    <open-role-permissions #roleModal title="Cargo"/>
     `,
 })
 export class ListRolesComponent {
@@ -159,6 +164,7 @@ export class ListRolesComponent {
     @Input() roles: any
     @Input() totalRecords: any
     @Input() limitPerPage: any
+    @ViewChild('roleModal') roleModal!: RolePermissionsModal
 
     form = this.formBuilder.group({
         Name: ['', [Validators.required]],
@@ -196,6 +202,10 @@ export class ListRolesComponent {
 
         this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }))
     }
+
+    openRolePermissionsModal = (id: number, roleName: string) => {// arrow function so that when i reference this function somewhere, it maintains the correct 'this' internal reference
+        this.roleModal.showRole(id.toString(), roleName)
+    } 
 
     loadRoles(page: number, isDelete = false) {
         if (!isDelete) page++
