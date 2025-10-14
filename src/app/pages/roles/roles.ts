@@ -138,7 +138,7 @@ export class RolesPage implements OnInit {
     }
 
     loadRoles() {
-        this.rolesService.getRoles(1, this.limitPerPage, "").subscribe({
+        this.rolesService.getRoles(1, this.limitPerPage, "", "N").subscribe({
             next: (res: any) => {
                 this.roles.set(res.data ?? [])
                 this.totalRecords = res.totalRecords

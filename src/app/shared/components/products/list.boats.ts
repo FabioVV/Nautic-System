@@ -21,8 +21,7 @@ import { ButtonGroupModule } from 'primeng/buttongroup';
 import { finalize } from 'rxjs';
 
 import { BoatModal } from './frame.boat';
-import { formatBRLMoney, showLoading } from '../utils';
-import { UserStatus } from '../../../pages/users/users';
+import { formatBRLMoney, SelectItem, showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
 import { BoatService } from '../../services/boats.service';
 
@@ -207,8 +206,8 @@ export class ListBoatsComponent {
 
     selectedUsers!: any[] // does nothing for now
 
-    selectedBoatState: UserStatus | undefined = { name: "Indiferente", code: "" }
-    boatStates: UserStatus[] | undefined
+    selectedBoatState: SelectItem | undefined = { name: "Indiferente", code: "" }
+    boatStates: SelectItem[] | undefined
     autoFilteredValue: any[] = []
 
     modelSearch: string = ""

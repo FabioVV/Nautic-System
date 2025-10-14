@@ -24,16 +24,9 @@ import { InputMaskModule } from 'primeng/inputmask';
 import { ListUsersComponent } from '../../shared/components/users/list.users';
 import { User, UserService } from '../../shared/services/user.service';
 import { PASSWORD_PATTERN_VALIDATOR } from '../../shared/constants';
+import { SelectItem } from '../../shared/components/utils';
+import { RolesService } from '../../shared/services/roles.service';
 
-export interface UserStatus {
-    name: string
-    code: string
-}
-
-interface Cargo {
-    name: string;
-    code: string;
-}
 
 @Component({
     selector: 'app-users',
@@ -115,11 +108,11 @@ interface Cargo {
             </div>
 
             <div class='col-md-6'>
-                <label for="Cargo" class="block font-bold mb-3">Cargo</label>
+                <label for="Role" class="block font-bold mb-3">Cargo</label>
 
-                <p-select [invalid]="isInvalid('Cargo')" [options]="cargos" formControlName="Cargo" optionLabel="name" placeholder="Selecione um cargo" class="w-full mb-2" />
-                @if (isInvalid('Cargo')) {
-                    <p-message severity="error" size="small" variant="simple">Por favor, selecione um cargo</p-message>
+                <p-select [invalid]="isInvalid('Role')" [options]="roles" formControlName="Role" optionLabel="name" placeholder="Selecione um Role" class="w-full mb-2" />
+                @if (isInvalid('Role')) {
+                    <p-message severity="error" size="small" variant="simple">Por favor, selecione um Role</p-message>
                 }
             </div>
 
@@ -183,7 +176,7 @@ export class UsersPage implements OnInit {
         private messageService: MessageService,
         private userService: UserService,
         private confirmationService: ConfirmationService,
-
+        private rolesService: RolesService,
     ) { }
 
     passwordMatchValidator: ValidatorFn = (control: AbstractControl): null => {
@@ -207,10 +200,7 @@ export class UsersPage implements OnInit {
     limitPerPage = 20;
 
     users = signal<User[]>([]);
-    cargos: Cargo[] = [{ name: 'Vendedor', code: 'NY' },
-    { name: 'Montador', code: 'RM' },
-    { name: 'Executivo', code: 'LDN' },
-    { name: 'Administrador', code: 'IST' }]
+    roles: SelectItem[] = []
 
     form = this.formBuilder.group({
         Name: ['', [Validators.required]],
@@ -218,15 +208,26 @@ export class UsersPage implements OnInit {
         Password: ['', [Validators.pattern(PASSWORD_PATTERN_VALIDATOR)]],
         ConfirmPassword: ['', [Validators.pattern(PASSWORD_PATTERN_VALIDATOR)]],
         Phone: ['', [Validators.required]],
-        Cargo: ['', [Validators.required]],
+        Role: ['', [Validators.required]],
 
     }, { validators: [this.passwordMatchValidator] })
 
     ngOnInit(): void {
         this.loadUsers()
 
-    }
+        this.rolesService.getRoles(1, 1000, "", "Y").subscribe({
+            next: (res: any) => {
 
+                res?.data?.forEach((i: any) => {
+                    this.roles.push({name: i?.name, code: i?.name})
+                })
+
+            }, 
+            error: (err: any) => {
+                this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar as negociações.' });
+            },
+        })
+    }
 
     loadUsers() {
         this.userService.getUsers(1, this.limitPerPage, "", "", "").subscribe({
@@ -244,13 +245,13 @@ export class UsersPage implements OnInit {
     }
 
     hideDialog() {
-        this.userDialog = false;
-        this.submitted = false;
+        this.userDialog = false
+        this.submitted = false
     }
 
     openNew() {
-        this.submitted = false;
-        this.userDialog = true;
+        this.submitted = false
+        this.userDialog = true
     }
 
     submit() {
@@ -262,6 +263,10 @@ export class UsersPage implements OnInit {
 
         if (this.form.valid) {
             this.isLoading = true
+
+            // @ts-ignore
+            this.form.get("Role")?.setValue(this.form?.value?.Role?.code)
+
 
             this.userService.registerUser(this.form.value).subscribe({
                 next: (res: any) => {

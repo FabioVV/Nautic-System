@@ -21,8 +21,8 @@ export class RolesService {
         return this.http.post(`${environment.apiBaseURL}/roles`, formData)
     }
 
-    getRoles(page = 1, perPage = 10, name: string) {
-        return this.http.get(`${environment.apiBaseURL}/roles?pageNumber=${page}&perPage=${perPage}&name=${name}`)
+    getRoles(page = 1, perPage = 10, name: string = "", showAdmin: string = "N") {
+        return this.http.get(`${environment.apiBaseURL}/roles?pageNumber=${page}&perPage=${perPage}&name=${name}&show_admin=${showAdmin}`)
     }
 }
 

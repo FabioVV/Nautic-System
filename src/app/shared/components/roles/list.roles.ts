@@ -22,7 +22,6 @@ import { finalize } from 'rxjs';
 import { MessageModule } from 'primeng/message';
 
 import { showLoading } from '../utils';
-import { UserStatus } from '../../../pages/users/users';
 import { UserService } from '../../services/user.service';
 import { RolesService } from '../../services/roles.service';
 
@@ -202,7 +201,7 @@ export class ListRolesComponent {
         if (!isDelete) page++
         const rmLoading = showLoading()
 
-        this.rolesService.getRoles(page, this.limitPerPage, this.nameSearch).pipe(finalize(() => { rmLoading() })).subscribe({
+        this.rolesService.getRoles(page, this.limitPerPage, this.nameSearch, "N").pipe(finalize(() => { rmLoading() })).subscribe({
             next: (res: any) => {
                 this.roles.set(res.data ?? [])
                 this.totalRecords = res.totalRecords

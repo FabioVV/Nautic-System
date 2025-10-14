@@ -22,7 +22,6 @@ import { MessageModule } from 'primeng/message';
 import { InputNumberModule } from 'primeng/inputnumber';
 
 import { SelectItem, showLoading } from '../utils';
-import { UserStatus } from '../../../pages/users/users';
 import { UserService } from '../../services/user.service';
 import { EngineService } from '../../services/engine.service';
 
@@ -351,8 +350,8 @@ export class ListEnginesComponent {
 
     selectedUsers!: any[] // does nothing for now
 
-    selectedUserState: UserStatus | undefined = { name: "Indiferente", code: "" }
-    userStates: UserStatus[] | undefined
+    selectedUserState: SelectItem | undefined = { name: "Indiferente", code: "" }
+    userStates: SelectItem[] | undefined
     autoFilteredValue: any[] = []
 
     nameSearch: string = ""

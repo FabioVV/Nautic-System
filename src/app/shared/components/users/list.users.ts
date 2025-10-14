@@ -15,13 +15,11 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputTextModule } from 'primeng/inputtext';
 import { Tag } from 'primeng/tag';
 import { SelectModule } from 'primeng/select';
-import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ToastModule } from 'primeng/toast';
 import { ButtonGroupModule } from 'primeng/buttongroup';
 import { finalize } from 'rxjs';
 
-import { showLoading } from '../utils';
-import { UserStatus } from '../../../pages/users/users';
+import { SelectItem, showLoading } from '../utils';
 import { UserService } from '../../services/user.service';
 
 
@@ -162,8 +160,8 @@ export class ListUsersComponent {
 
     selectedUsers!: any[] // does nothing for now
 
-    selectedUserState: UserStatus | undefined = { name: "Indiferente", code: "" }
-    userStates: UserStatus[] | undefined
+    selectedUserState: SelectItem | undefined = { name: "Indiferente", code: "" }
+    userStates: SelectItem[] | undefined
     autoFilteredValue: any[] = []
 
     emailSearch: string = ""
