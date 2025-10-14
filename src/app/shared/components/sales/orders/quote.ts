@@ -43,7 +43,48 @@ import { formatBRLMoney } from '../../utils';
     selector: 'quote',
     imports: [DialogModule, TagModule, FileUploadModule, ImageModule, AutoCompleteModule, InputGroupModule, TabsModule, CardModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
-    styleUrl: "quote.css",
+    styles: `
+    .main-page {
+        margin-left: 9rem;
+        margin-right: 9rem;
+        display: flex;
+        justify-content: center;
+        padding-top: 10px;
+    }
+
+    h1{
+        margin: 0 !important;
+    }
+
+    .header {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .header-info{
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .header > img{
+        height: 250px;
+        width: 700px;
+        margin: 0 auto;
+        object-fit: cover;
+    }
+
+    .fade{
+        position: absolute;
+        left: 0;
+        right: 0;
+        /* bottom: 0; */
+        height: 30%;
+        pointer-events: none;
+        background: linear-gradient(to top, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.6) 30%, rgba(255, 255, 255, 0.25) 60%, rgba(255, 255, 255, 0) 100%);
+        top: 152px;
+    }
+    `,
     standalone: true,
 
     template: `
@@ -52,11 +93,14 @@ import { formatBRLMoney } from '../../utils';
 
     <section #pdfContent class='main-page'>
         <div class='header'>
-            <img src="/assets/images/bgq.jpg">
+            <img style='    height: 250px;
+    width: 700px;
+    margin: 0 auto;
+    object-fit: cover;' src="/assets/images/bgq.jpg">
 
-            <div class='header-info'>
+            <div style='    display: flex; justify-content: space-between;' >
                 <h1>{{ this.formBoat.get("BoatModel")?.value }}</h1>
-                <h1></h1>
+                <h1>&nbsp;</h1>
                 <h6>Cód. Orçamento: {{ this.id }} <br> Emissão: {{ this.salesOrderForm.get("CreatedAt")?.value | date:'dd/MM/yyyy' }}</h6>
             </div>
             <div class='fade'></div>
