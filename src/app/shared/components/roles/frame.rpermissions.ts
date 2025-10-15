@@ -58,7 +58,7 @@ import { RolesService } from '../../services/roles.service';
 
                         <div class="flex items-center gap-2">
                             <p-checkbox (change)="changeUserPermission($event, perm.id_permission)" [binary]="true" [ngModel]="perm.has_permission"  name="size" value="Large" size="large" />
-                            <label
+                            <label id="{{perm.id_permission}}"
                             [ngStyle]="{ color: !perm.has_permission ? 'var(--p-amber-500)' : 'var(--p-emerald-500)' }"
                             for="{{ perm.code }}" 
                             class="text-lg">{{ perm.has_permission ? 'Permitido' : 'Não permitido' }}</label>
@@ -129,8 +129,20 @@ export class RolePermissionsModal {
     changeUserPermission(event:any, id_permission: string){
         this.rolesService.updateRolePermissions(this.id, id_permission, event?.target?.checked).pipe(finalize(() => { this.isLoading = false })).subscribe({
             next: (res: any) => {
-                this.role_permissions.set(res?.data ?? [])
-                
+                const LABEL = document.getElementById(id_permission)
+                if(LABEL){
+                    if(event?.target?.checked){
+                        LABEL.innerText = "Permitido"
+                        LABEL.style = "color: var(--p-emerald-500);"
+                    } else {
+                        LABEL.innerText = "Não permitido"
+                        LABEL.style = "color: var(--p-amber-500);"
+                    }
+                }
+
+                //this.loadRolePermissions(this.id)
+                this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Permissão modificado com sucesso' });
+
             },
             error: (err) => {
                 if (err.status) {

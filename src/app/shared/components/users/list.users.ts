@@ -117,6 +117,7 @@ interface ExportColumn {
                 <td>
                     <p-buttongroup>
                         <p-button icon="pi pi-pencil" severity="contrast" rounded/>
+                        <p-button icon="pi pi-key" severity="contrast" rounded/>
                         <p-button (click)="deactivateUser(user.id, user.email)" icon="pi pi-trash" severity="contrast" rounded/>
                     </p-buttongroup>
                 </td>
