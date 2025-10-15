@@ -92,7 +92,6 @@ interface Role {
 
             </form>
 
-
             <ng-template #footer>
                 <p-button label="Cancelar" icon="pi pi-times" text (click)="hideDialog()" />
                 <p-button [disabled]="isLoading" (click)="submit()" type="submit" label="Salvar" icon="pi pi-check" />

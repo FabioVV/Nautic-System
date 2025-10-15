@@ -165,7 +165,7 @@ export class AppMenu {
 
         if (this.authService.isLoggedIn()) {
             const userjwt = this.authService.parseUserJwt()
-            const isAdmin = userjwt?.roles.includes("Admin")
+            const isAdmin = userjwt?.roles?.includes("Admin")
 
             const menuItems = [relatSalesMenuItem, productsMenu, salesMenuItem].reverse()
 
@@ -182,21 +182,39 @@ export class AppMenu {
                 this.model = [adminMenuItem, ...this.model]
             } else {
 
-                
-
                 for (const menui of menuItems) {
+                   // console.log(menui.items)
 
-                    if('code' in menui.items){
-                        //@ts-ignore
-                        menui.items = menui.items.filter((i) => userjwt?.permissions.includes(i.code))
-                        this.model = [menui, ...this.model]
-                    } else {
-                        //@ts-ignore
-                        menui.items.items = menui.items?.items?.filter((i) => userjwt?.permissions.includes(i.code))
-                        this.model = [menui, ...this.model]
-
+                    for(const menuii of menui.items){
+                        if('code' in menuii){
+                            //@ts-ignore
+                            menui.items = menui.items.filter((i) => userjwt?.permissions.includes(i.code))
+                            if(menui.items.length > 0){
+                                this.model = [menui, ...this.model]
+                            }
+                            
+                            break
+                        } else if('items' in menuii.items){
+                            //@ts-ignore
+                            menui.items.items = menui.items?.items?.filter((i) => userjwt?.permissions.includes(i.code))
+                            //@ts-ignore
+                            if(menui.items.items.length > 0){
+                                this.model = [menui, ...this.model]
+                            }
+                            break
+                        }
                     }
 
+                    // if('code' in menui.items){
+                    //     //@ts-ignore
+                    //     menui.items = menui.items.filter((i) => userjwt?.permissions.includes(i.code))
+                    //     this.model = [menui, ...this.model]
+                    // } else {
+                    //     //@ts-ignore
+                            //menui.items.items = menui.items?.items?.filter((i) => userjwt?.permissions.includes(i.code))
+                            //this.model = [menui, ...this.model]
+
+                    // }
 
                 }
 

@@ -33,7 +33,7 @@ import { SalesService } from '../../services/sales.service';
 import { RolesService } from '../../services/roles.service';
 
 @Component({
-    selector: 'open-role-permissions',
+    selector: 'open-user-emp-modal',
     imports: [DialogModule, TabsModule, DatePickerModule, CheckboxModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styleUrls: [],
@@ -43,7 +43,7 @@ import { RolesService } from '../../services/roles.service';
     <p-toast></p-toast>
     <p-dialog #cdialog [header]="title" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" >
        
-        <p-table [value]="role_permissions()" [tableStyle]="{ 'min-width': '50rem' }">
+        <p-table [value]="user_permissions()" [tableStyle]="{ 'min-width': '50rem' }">
             <ng-template #header>
                 <tr>
                     <th>Módulo</th>
@@ -53,6 +53,15 @@ import { RolesService } from '../../services/roles.service';
             <ng-template #body let-perm>
                 <tr>
                     <td><mark>{{ perm.module }}</mark></td>
+                    <td>
+                        <span *ngIf="perm.code?.split(':')[1] === 'view'">
+                            Acesso/Visualização
+                        </span>
+
+                        <span *ngIf="perm.code?.split(':')[1] === 'edit'">
+                            Edição
+                        </span>
+                    </td>
                     <td>{{ perm.description }}</td>
                     <td>
 
@@ -74,19 +83,20 @@ import { RolesService } from '../../services/roles.service';
     </p-dialog>
     `,
 })
-export class RolePermissionsModal {
+export class UserEmployeeModal {
     constructor(
         public formBuilder: FormBuilder,
         private messageService: MessageService,
         private userService: UserService,
         private salesService: SalesService,
-        private rolesService: RolesService
+        private rolesService: RolesService,
+        private userServuce: UserService
     ) { }
 
     @ViewChild('cdialog') myDialog!: Dialog
     @Input() title: any
 
-    role_permissions = signal<any[]>([])
+    user_permissions = signal<any[]>([])
 
     isLoading: boolean = false
     submitted: boolean = false
@@ -112,22 +122,22 @@ export class RolePermissionsModal {
 
     }
 
-    loadRolePermissions(id: string){
-        this.rolesService.getRolePermissions(id).pipe(finalize(() => { this.isLoading = false })).subscribe({
+    loadUserPermissions(id: string){
+        this.userService.getUserPermissions(id).pipe(finalize(() => { this.isLoading = false })).subscribe({
             next: (res: any) => {
-                this.role_permissions.set(res?.data ?? [])
+                this.user_permissions.set(res?.data ?? [])
 
             },
             error: (err) => {
                 if (err.status) {
-                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar dados do cargo.' });
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao buscar dados do usuário.' });
                 }
             },
         })
     }
 
     changeUserPermission(event:any, id_permission: string){
-        this.rolesService.updateRolePermissions(this.id, id_permission, event?.target?.checked).pipe(finalize(() => { this.isLoading = false })).subscribe({
+        this.userService.updateUserPermissions(this.id, id_permission, event?.target?.checked).pipe(finalize(() => { this.isLoading = false })).subscribe({
             next: (res: any) => {
                 const LABEL = document.getElementById(id_permission)
                 if(LABEL){
@@ -140,7 +150,7 @@ export class RolePermissionsModal {
                     }
                 }
 
-                //this.loadRolePermissions(this.id)
+                //this.loadUserPermissions(this.id)
                 this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Permissão modificado com sucesso' });
 
             },
@@ -152,14 +162,14 @@ export class RolePermissionsModal {
         })
     }
 
-    showRole(id: string, roleName: string) {
+    showUserEmployee(id: string, roleName: string) {
         this.visible = true
         this.id = id
         this.title = roleName
 
         this.myDialog.maximizable = true
         this.myDialog.maximize()
-        this.loadRolePermissions(this.id)
+        this.loadUserPermissions(this.id)
     }
 
     isInvalid(controlName: string) {
