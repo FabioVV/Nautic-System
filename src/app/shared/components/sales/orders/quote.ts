@@ -100,7 +100,7 @@ import { formatBRLMoney } from '../../utils';
     }
     `,
     standalone: true,
-    
+
     //<img style='height: 340px; width: 100%; margin: 0 auto; object-fit: cover;' src="/assets/placeholders/test.png">
     template: `
     <p-toast></p-toast>
@@ -115,7 +115,7 @@ import { formatBRLMoney } from '../../utils';
             <div style='display: flex; justify-content: space-between;' >
                 <h1>{{ this.formBoat.get("BoatModel")?.value }}</h1>
                 <h1>&nbsp;</h1>
-                <h6>ORÇAMENTO Nº {{ this.id }} <br> DATA: {{ this.salesOrderForm.get("CreatedAt")?.value | date:'dd/MM/yyyy' }}</h6>
+                <h4>ORÇAMENTO Nº {{ this.id }} <br> DATA: {{ this.salesOrderForm.get("CreatedAt")?.value | date:'dd/MM/yyyy' }}</h4>
             </div>
         </div>
 
@@ -123,19 +123,19 @@ import { formatBRLMoney } from '../../utils';
             <div>
                 <h5>Cliente</h5>
                 <hr>
-                <h6>Faibo gabriel rodrigues varela</h6>
+                <h6>{{ this.salesOrderForm.get("CustomerName")?.value }}</h6>
             </div>
 
             <div>
                 <h5>Endereço de entrega</h5>
                 <hr>
-                <h6>Rua mariano procopio n27</h6>
+                <h6>Não especificado</h6>
             </div>
 
             <div>
                 <h5>Data de entrega</h5>
                 <hr>
-                <h6>10102010</h6>
+                <h6>Não especificado</h6>
             </div>
         </div>
 
@@ -169,10 +169,10 @@ import { formatBRLMoney } from '../../utils';
                     <ng-template #body let-product>
                         <tr>
                             <td>{{ product.code }}</td>
-                            <td>{{ product.name }}</td>
-                            <td>{{ product.category }}</td>
-                            <td>{{ product.quantity }}</td>
-                            <td>{{ product.quantity }}</td>
+                            <td>{{ this.salesOrderForm.get("CustomerName")?.value }}</td>
+                            <td>{{ this.TotalPriceBoat }}</td>
+                            <td>-</td>
+                            <td>{{ this.TotalPriceBoat }}</td>
                         </tr>
                     </ng-template>
                 </p-table>
@@ -202,9 +202,9 @@ import { formatBRLMoney } from '../../utils';
                         <tr>
                             <td>{{ product.code }}</td>
                             <td>{{ product.name }}</td>
-                            <td>{{ product.category }}</td>
-                            <td>{{ product.quantity }}</td>
-                            <td>{{ product.quantity }}</td>
+                            <td>{{ this.TotalPriceEngine }}</td>
+                            <td>-</td>
+                            <td>{{ this.TotalPriceEngine }}</td>
                         </tr>
                     </ng-template>
                 </p-table>
@@ -278,6 +278,9 @@ export class QuoteComponent implements OnInit {
 
     salesOrderFiles = signal<any[]>([])
 
+    _formatBRLMoney(amount: number){
+        return formatBRLMoney(amount.toString())
+    }
     // @ts-ignore
     get TotalPriceEngine() { return `${this._formatBRLMoney(this.formEng.get('EnginePrice')?.value)}` }
     // @ts-ignore
@@ -375,15 +378,6 @@ export class QuoteComponent implements OnInit {
         AccessoryId: ['', []],
         AccessoryPrice: [0.0, []],
     })
-
-    // @ts-ignore
-    get SalesOrderCancelled() { 
-        if(this.salesOrderForm.get("StatusType")?.value == "Orçamento cancelado" || this.salesOrderForm.get("StatusType")?.value == "Pedido cancelado"){
-            return true
-        }
-
-        return false 
-    }
 
     safeUrl(url: string): SafeResourceUrl {
         return this.sanitizer.bypassSecurityTrustResourceUrl(url)
