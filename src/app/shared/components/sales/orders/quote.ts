@@ -7,7 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { PaginatorModule } from 'primeng/paginator';
 import { FormsModule, ReactiveFormsModule, FormBuilder } from '@angular/forms';
-import { MessageService } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { InputIconModule } from 'primeng/inputicon';
@@ -33,6 +33,8 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { FileUploadModule } from 'primeng/fileupload';
 import { ImageModule } from 'primeng/image';
 import { ActivatedRoute } from '@angular/router';
+import { MenubarModule } from 'primeng/menubar';
+
 import { jsPDF } from 'jspdf';
 
 import { BrStates, SelectItem } from '../../utils';
@@ -41,7 +43,7 @@ import { formatBRLMoney } from '../../utils';
 
 @Component({
     selector: 'quote',
-    imports: [DialogModule, TagModule, FileUploadModule, ImageModule, AutoCompleteModule, InputGroupModule, TabsModule, CardModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, TagModule, MenubarModule, FileUploadModule, ImageModule, AutoCompleteModule, InputGroupModule, TabsModule, CardModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styles: `
     .main-page {
@@ -49,10 +51,12 @@ import { formatBRLMoney } from '../../utils';
         margin-right: 9rem;
         display: flex;
         justify-content: center;
+        flex-direction:column;
         padding-top: 10px;
+        gap: 1rem;
     }
 
-    h1{
+    h1 {
         margin: 0 !important;
     }
 
@@ -62,48 +66,183 @@ import { formatBRLMoney } from '../../utils';
         flex-direction: column;
     }
 
-    .header-info{
+    .header-info {
         display: flex;
         justify-content: space-between;
     }
 
-    .header > img{
+    .header > img {
         height: 250px;
         width: 700px;
         margin: 0 auto;
         object-fit: cover;
     }
 
-    .fade{
-        position: absolute;
-        left: 0;
-        right: 0;
-        /* bottom: 0; */
-        height: 30%;
-        pointer-events: none;
-        background: linear-gradient(to top, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.6) 30%, rgba(255, 255, 255, 0.25) 60%, rgba(255, 255, 255, 0) 100%);
-        top: 152px;
+    .customer {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    h6 {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    hr {
+        border-top: solid #bfc4cb !important;
+        border-width: 2px 0 0 0 !important;
+    }
+
+    .buy-info {
+        margin-top:1rem;
     }
     `,
     standalone: true,
-
+    
+    //<img style='height: 340px; width: 100%; margin: 0 auto; object-fit: cover;' src="/assets/placeholders/test.png">
     template: `
     <p-toast></p-toast>
-    <button (click)="generatePdf()">AAA</button>
+    <div *ngIf="!SalesOrderCancelled" class="card" style='background-color: transparent !important;'>
+        <p-menubar [model]="items" />
+    </div>
 
     <section #pdfContent class='main-page'>
         <div class='header'>
-            <img style='    height: 250px;
-    width: 700px;
-    margin: 0 auto;
-    object-fit: cover;' src="/assets/images/bgq.jpg">
+            <img style='height: 340px; width: 100%; margin: 0 auto; object-fit: cover;' src="/assets/images/boat2.jpg">
 
-            <div style='    display: flex; justify-content: space-between;' >
+            <div style='display: flex; justify-content: space-between;' >
                 <h1>{{ this.formBoat.get("BoatModel")?.value }}</h1>
                 <h1>&nbsp;</h1>
-                <h6>Cód. Orçamento: {{ this.id }} <br> Emissão: {{ this.salesOrderForm.get("CreatedAt")?.value | date:'dd/MM/yyyy' }}</h6>
+                <h6>ORÇAMENTO Nº {{ this.id }} <br> DATA: {{ this.salesOrderForm.get("CreatedAt")?.value | date:'dd/MM/yyyy' }}</h6>
             </div>
-            <div class='fade'></div>
+        </div>
+
+        <div class='customer'>
+            <div>
+                <h5>Cliente</h5>
+                <hr>
+                <h6>Faibo gabriel rodrigues varela</h6>
+            </div>
+
+            <div>
+                <h5>Endereço de entrega</h5>
+                <hr>
+                <h6>Rua mariano procopio n27</h6>
+            </div>
+
+            <div>
+                <h5>Data de entrega</h5>
+                <hr>
+                <h6>10102010</h6>
+            </div>
+        </div>
+
+        <div class='buy-info'>
+            <div style='display: flex; justify-content: space-between;' >
+                <h1>INFORMAÇÕES DA COMPRA</h1>
+                <h1>&nbsp;</h1>
+                <h6>&nbsp;</h6>
+                <hr/>
+            </div>
+
+            <div style='display: flex; justify-content: space-between;' >
+                <h1>Embarcação</h1>
+                <h1>&nbsp;</h1>
+                <h6>&nbsp;</h6>
+                <hr/>
+            </div>
+
+            <div>
+
+                <p-table [value]="products" [tableStyle]="{ 'min-width': '50rem' }">
+                    <ng-template #header>
+                        <tr>
+                            <th>Cód.</th>
+                            <th>Modelo</th>
+                            <th>Preço inicial</th>
+                            <th>Desconto</th>
+                            <th>Preço final</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template #body let-product>
+                        <tr>
+                            <td>{{ product.code }}</td>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.category }}</td>
+                            <td>{{ product.quantity }}</td>
+                            <td>{{ product.quantity }}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+
+            </div>
+        
+            <div style='display: flex; justify-content: space-between;' >
+                <h1>Motor</h1>
+                <h1>&nbsp;</h1>
+                <h6>&nbsp;</h6>
+                <hr/>
+            </div>
+
+            <div>
+
+                <p-table [value]="products" [tableStyle]="{ 'min-width': '50rem' }">
+                    <ng-template #header>
+                        <tr>
+                            <th>Cód.</th>
+                            <th>Modelo</th>
+                            <th>Preço inicial</th>
+                            <th>Desconto</th>
+                            <th>Preço final</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template #body let-product>
+                        <tr>
+                            <td>{{ product.code }}</td>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.category }}</td>
+                            <td>{{ product.quantity }}</td>
+                            <td>{{ product.quantity }}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+
+            </div>
+
+            <div style='display: flex; justify-content: space-between;' >
+                <h1>Acessórios</h1>
+                <h1>&nbsp;</h1>
+                <h6>&nbsp;</h6>
+                <hr/>
+            </div>
+
+            <div>
+
+                <p-table [value]="products" [tableStyle]="{ 'min-width': '50rem' }">
+                    <ng-template #header>
+                        <tr>
+                            <th>Cód.</th>
+                            <th>Modelo</th>
+                            <th>Preço inicial</th>
+                            <th>Desconto</th>
+                            <th>Preço final</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template #body let-product>
+                        <tr>
+                            <td>{{ product.code }}</td>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.category }}</td>
+                            <td>{{ product.quantity }}</td>
+                            <td>{{ product.quantity }}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+
+            </div>
+
         </div>
 
     </section>
@@ -119,9 +258,24 @@ export class QuoteComponent implements OnInit {
         private route: ActivatedRoute
     ) {}
 
+    items: MenuItem[] | undefined
     Uuid: string = ""
     @ViewChild('pdfContent', { static: false }) contentToConvert!: ElementRef;
     
+    products: any[] = [
+    {
+        id: '1000',
+        code: 'f230fh0g3',
+        name: 'Bamboo Watch',
+        description: 'Product Description',
+        image: 'bamboo-watch.jpg',
+        price: 65,
+        category: 'Accessories',
+        quantity: 24,
+        inventoryStatus: 'INSTOCK',
+        rating: 5
+    },]
+
     salesOrderFiles = signal<any[]>([])
 
     // @ts-ignore
@@ -202,6 +356,7 @@ export class QuoteComponent implements OnInit {
 
         Details: ['', []],
     })
+    
 
     formBoat = this.formBuilder.group({
         BoatModel: ['', []],
@@ -221,6 +376,15 @@ export class QuoteComponent implements OnInit {
         AccessoryPrice: [0.0, []],
     })
 
+    // @ts-ignore
+    get SalesOrderCancelled() { 
+        if(this.salesOrderForm.get("StatusType")?.value == "Orçamento cancelado" || this.salesOrderForm.get("StatusType")?.value == "Pedido cancelado"){
+            return true
+        }
+
+        return false 
+    }
+
     safeUrl(url: string): SafeResourceUrl {
         return this.sanitizer.bypassSecurityTrustResourceUrl(url)
     }
@@ -228,19 +392,40 @@ export class QuoteComponent implements OnInit {
     ngOnInit() {
         this.Uuid = this.route.snapshot.paramMap.get('id')!
         this.loadSalesOrder()
+
+
+        this.items = [
+            {
+                label: 'Gerar PDF',
+                icon: 'pi pi-file-pdf',
+                command: () => {
+                    this.generatePdf()
+                }
+            },
+            {
+                label: 'Enviar via WhatsApp',
+                icon: 'pi pi-send'
+            },
+            {
+                label: 'Enviar via Email',
+                icon: 'pi pi-send'
+            }
+        ]
     }
 
     generatePdf(){
         const doc = new jsPDF('p', 'pt', 'a4')
         const pdfTable = this.contentToConvert!.nativeElement
-        doc.html(pdfTable.innerHTML, {
-            x: 20,              // left margin in pt
+
+        doc.html(pdfTable, {
+            // x: 20,              // left margin in pt
             y: 20,              // top margin in pt
-            width: 555,         // pageWidth (595) - 2*margins (20*2) = 555
-            windowWidth: 1000,  // render at wide viewport to preserve CSS layout (adjust if needed)
+            width: 595,         // pageWidth (595) - 2*margins (20*2) = 555
+            windowWidth: 1400,  // render at wide viewport to preserve CSS layout (adjust if needed)
             callback: function (doc) {
                 doc.save("orcamento.pdf")
-            }
+            },
+            autoPaging: true
         })
     }
 
