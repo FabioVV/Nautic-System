@@ -37,5 +37,17 @@ export class UserService {
     getUsers(page = 1, perPage = 10, name: string, email: string, active: string) {
         return this.http.get(`${environment.apiBaseURL}/users?pageNumber=${page}&perPage=${perPage}&name=${name}&email=${email}&active=${active}`)
     }
+
+    getUserPermissions(id: string){
+        return this.http.get(`${environment.apiBaseURL}/users/${id}/permissions`)
+    }
+
+    updateUserPermissions(id: string, id_permission: string, checked: boolean) {
+        if(checked){
+            return this.http.patch(`${environment.apiBaseURL}/users/${id}/permissions/${id_permission}`, null)
+        } else {
+            return this.http.delete(`${environment.apiBaseURL}/users/${id}/permissions/${id_permission}`)
+        }
+    }
 }
 

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
@@ -18,9 +18,10 @@ import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { ButtonGroupModule } from 'primeng/buttongroup';
 import { finalize } from 'rxjs';
+import { UserEmployeeModal } from './frame.euser';
 
 import { SelectItem, showLoading } from '../utils';
-import { UserService } from '../../services/user.service';
+import { User, UserService } from '../../services/user.service';
 
 
 interface Column {
@@ -36,7 +37,7 @@ interface ExportColumn {
 
 @Component({
     selector: 'list-users',
-    imports: [DialogModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, UserEmployeeModal, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, Tag, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [ConfirmationService, MessageService],
     styleUrls: [],
     standalone: true,
@@ -117,7 +118,7 @@ interface ExportColumn {
                 <td>
                     <p-buttongroup>
                         <p-button icon="pi pi-pencil" severity="contrast" rounded/>
-                        <p-button icon="pi pi-key" severity="contrast" rounded/>
+                        <p-button (click)="openUserEmployeeModal(user.id, user.name)" icon="pi pi-key" severity="contrast" rounded/>
                         <p-button (click)="deactivateUser(user.id, user.email)" icon="pi pi-trash" severity="contrast" rounded/>
                     </p-buttongroup>
                 </td>
@@ -140,6 +141,9 @@ interface ExportColumn {
         [rejectAriaLabel]="rejectLabel"
         [style]="{ width: '450px' }"
     />
+
+        <open-user-emp-modal #userModal title="Usuário"/>
+
     `,
 })
 export class ListUsersComponent {
@@ -153,6 +157,7 @@ export class ListUsersComponent {
     @Input() users: any
     @Input() totalRecords: any
     @Input() limitPerPage: any
+    @ViewChild('userModal') userModal!: UserEmployeeModal
 
     isLoading: boolean = false
     typingTimeout: any
@@ -247,8 +252,12 @@ export class ListUsersComponent {
                     },
                 })
             }
-        });
+        })
     }
+
+    openUserEmployeeModal = (id: number, name: string) => {// arrow function so that when i reference this function somewhere, it maintains the correct 'this' internal reference
+        this.userModal.showUserEmployee(id.toString(), name)
+    } 
 
     onGlobalFilter(event: any) {
         if (this.typingTimeout) {
