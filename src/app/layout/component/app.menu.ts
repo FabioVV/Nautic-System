@@ -16,7 +16,7 @@ import { AuthService } from '../../shared/services/auth.service';
     imports: [CommonModule, InputGroupModule, InputGroupAddonModule, AppMenuitem, RouterModule, InputTextModule],
     template: `
         
-    <p-inputgroup>
+    <p-inputgroup *ngIf="false">
         <p-inputgroup-addon>
             <i class="pi pi-search"></i>
         </p-inputgroup-addon>
@@ -41,7 +41,20 @@ export class AppMenu {
     constructor(private authService: AuthService) { }
 
     SearchModule(){
-        alert(this.qmodule)
+
+
+        for(const menu of this.model){
+            //@ts-ignore
+            for(let item of menu?.items){
+
+
+                if(this.qmodule){
+
+                }
+
+            }
+        }
+        console.log(this.model)
     }
 
     ngOnInit() {
@@ -101,12 +114,12 @@ export class AppMenu {
                             routerLink: ['/sales/oportunities'],
                             code: "sales_oportunities:view"
                         },
-                        {
-                            label: 'Mala-Direta',
-                            icon: 'pi pi-send',
-                            routerLink: ['/sales/direct-mail'],
-                            code: "sales_direct_mail:view"
-                        },
+                        // { // FAZER ESSE DEPOIS
+                        //     label: 'Mala-Direta',
+                        //     icon: 'pi pi-send',
+                        //     routerLink: ['/sales/direct-mail'],
+                        //     code: "sales_direct_mail:view"
+                        // },
                         {
                             label: 'Meios de comunicação',
                             icon: 'pi pi-megaphone',

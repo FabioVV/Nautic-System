@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, Input, signal, ViewChild } from '@angular/core';
+import { Component, Input, signal, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DialogModule } from 'primeng/dialog';
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { PaginatorModule } from 'primeng/paginator';
-import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -37,8 +37,6 @@ import { Router } from '@angular/router';
 
 import { BrStates, SelectItem } from '../../utils';
 import { SalesService } from '../../../services/sales.service';
-import { UserService } from '../../../services/user.service';
-import { EngineService } from '../../../services/engine.service';
 import { BoatService } from '../../../services/boats.service';
 import { formatBRLMoney } from '../../utils';
 import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
@@ -379,12 +377,13 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
 
             <p-button (click)="upgradeToActualSalesOrder()" *ngIf="salesOrderForm.get('StatusType')?.value == 'Novo orçamento'" severity="success" label="Transformar em pedido" />
             
-            <p-button (click)="openQuoteFromSalesOrder()" *ngIf="!SalesOrderCancelled" severity="success" label="Abrir orçamento" icon="pi pi-file-pdf"  />
+            <p-button (click)="openQuoteFromSalesOrder()" *ngIf="!SalesOrderCancelled" severity="success" label="Abrir orçamento/pedido" icon="pi pi-file-pdf"  />
 
-            <p-button *ngIf="!SalesOrderCancelled" severity="success" label="Gerar PDF" icon="pi pi-file-pdf"  />
-            <p-button *ngIf="!SalesOrderCancelled" severity="success" label="Compartilhar via E-mail" icon="pi pi-send" />
-            <p-button *ngIf="!SalesOrderCancelled" severity="success" label="Compartilhar Via WhatsApp" icon="pi pi-send" />
-
+            <!-- 
+                <p-button *ngIf="!SalesOrderCancelled" severity="success" label="Gerar PDF" icon="pi pi-file-pdf"  />
+                <p-button *ngIf="!SalesOrderCancelled" severity="success" label="Compartilhar via E-mail" icon="pi pi-send" />
+                <p-button *ngIf="!SalesOrderCancelled" severity="success" label="Compartilhar Via WhatsApp" icon="pi pi-send" />
+            -->
         </ng-template>
     </p-dialog>
 
@@ -401,9 +400,7 @@ export class SalesOrderModal {
     constructor(
         public formBuilder: FormBuilder,
         private messageService: MessageService,
-        private userService: UserService,
         private salesService: SalesService,
-        private engineService: EngineService,
         private boatService: BoatService,
         private confirmationService: ConfirmationService,
         private sanitizer: DomSanitizer,

@@ -44,6 +44,69 @@ import { formatBRLMoney } from '../../utils';
 import { UserService } from '../../../services/user.service';
 import { AuthService } from '../../../services/auth.service';
 
+            // <div style='display: flex; justify-content: space-between;' >
+            //     <h1>Informações técnicas</h1>
+            //     <h1>&nbsp;</h1>
+            //     <h6>&nbsp;</h6>
+            //     <hr/>
+            // </div>
+
+            // <div>
+            //     <div class="ol-container">
+            //         <ol class="custom-ol">
+            //         <li>
+            //             <div>
+            //             <p class="item-title">First item</p>
+            //             <p class="item-desc">Short description for the first item.</p>
+            //             </div>
+            //         </li>
+            //         <li>
+            //             <div>
+            //             <p class="item-title">Second item</p>
+            //             <p class="item-desc">Short description for the second item.</p>
+            //             </div>
+            //         </li>
+            //         <li>
+            //             <div>
+            //             <p class="item-title">Third item</p>
+            //             <p class="item-desc">Short description for the third item.</p>
+            //             </div>
+            //         </li>
+            //         <li>
+            //             <div>
+            //             <p class="item-title">Fourth item</p>
+            //             <p class="item-desc">Short description for the fourth item.</p>
+            //             </div>
+            //         </li>
+            //         <li>
+            //             <div>
+            //             <p class="item-title">Fifth item</p>
+            //             <p class="item-desc">Short description for the fifth item.</p>
+            //             </div>
+            //         </li>
+            //                             <li>
+            //             <div>
+            //             <p class="item-title">Fifth item</p>
+            //             <p class="item-desc">Short description for the fifth item.</p>
+            //             </div>
+            //         </li>
+            //                             <li>
+            //             <div>
+            //             <p class="item-title">Fifth item</p>
+            //             <p class="item-desc">Short description for the fifth item.</p>
+            //             </div>
+            //         </li>
+            //                             <li>
+            //             <div>
+            //             <p class="item-title">Fifth item</p>
+            //             <p class="item-desc">Short description for the fifth item.</p>
+            //             </div>
+            //         </li>
+            //         </ol>
+            //     </div>
+            // </div>
+
+
 @Component({
     selector: 'quote',
     imports: [DialogModule, TagModule, MenubarModule, ListSalesOrderQuoteBoatItensComponent, FileUploadModule, ImageModule, AutoCompleteModule, InputGroupModule, TabsModule, CardModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
@@ -104,6 +167,59 @@ import { AuthService } from '../../../services/auth.service';
         margin-top:1rem;
     }
 
+
+        /* Container */
+    .ol-container {
+
+    }
+
+    /* Basic ordered list */
+    ol.custom-ol {
+      counter-reset: item;
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+    }
+
+    ol.custom-ol > li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 10px 0;
+      padding: 8px 12px;
+      background: #fbfbfd;
+      border: 1px solid #e8e8ee;
+      border-radius: 8px;
+    }
+
+    ol.custom-ol > li::before {
+      counter-increment: item;
+      content: counter(item);
+      min-width: 34px;
+      height: 34px;
+      line-height: 34px;
+      text-align: center;
+      background: var(--p-blue-500);
+      color: #fff;
+      font-weight: 600;
+      border-radius: 999px;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto;
+      box-shadow: 0 2px 6px rgba(16,24,40,0.08);
+    }
+
+    /* Item text */
+    .item-title {
+      font-weight: 600;
+      font-size: 15px;
+      margin: 0 0 4px 0;
+    }
+    .item-desc {
+      margin: 0;
+      color: #555;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
     @media (min-width: 768px) {
         .main-page {
             margin-left: 9rem;
@@ -161,7 +277,7 @@ import { AuthService } from '../../../services/auth.service';
             </div>
 
             <div style='display: flex; justify-content: space-between;' >
-                <h1>Embarcação</h1>
+                <h1>Embarcação e motor</h1>
                 <h1>&nbsp;</h1>
                 <h6>&nbsp;</h6>
                 <hr/>
@@ -187,31 +303,7 @@ import { AuthService } from '../../../services/auth.service';
                             <td>-</td>
                             <td>{{ this.TotalPriceBoat }}</td>
                         </tr>
-                    </ng-template>
-                </p-table>
 
-            </div>
-        
-            <div style='display: flex; justify-content: space-between;' >
-                <h1>Motor</h1>
-                <h1>&nbsp;</h1>
-                <h6>&nbsp;</h6>
-                <hr/>
-            </div>
-
-            <div style='margin-bottom:1.3rem;'>
-
-                <p-table [value]="placeholder_to_show_table" [tableStyle]="{ 'min-width': '50rem' }">
-                    <ng-template #header>
-                        <tr>
-                            <th>Cód.</th>
-                            <th>Modelo</th>
-                            <th>Preço inicial</th>
-                            <th>Desconto</th>
-                            <th>Preço final</th>
-                        </tr>
-                    </ng-template>
-                    <ng-template #body let-product>
                         <tr>
                             <td>{{ this.EngineId }}</td>
                             <td>{{ this.EngineModel }}</td>
@@ -223,7 +315,7 @@ import { AuthService } from '../../../services/auth.service';
                 </p-table>
 
             </div>
-
+    
             <div style='display: flex; justify-content: space-between;' >
                 <h1>Acessórios</h1>
                 <h1>&nbsp;</h1>
@@ -234,6 +326,9 @@ import { AuthService } from '../../../services/auth.service';
             <div style='margin-bottom:1.3rem;'>
                 <list-sales-orders-quote-boat-itens #listSalesOrderQuoteBoatItensComponent></list-sales-orders-quote-boat-itens>
             </div>
+
+
+
 
             <div style='display: flex; justify-content: space-between;' >
                 <h1>IMAGENS DA EMBARCAÇÃO</h1>
@@ -425,10 +520,10 @@ export class QuoteComponent implements OnInit {
             y: 20,              // top margin in pt
             width: 595,         // pageWidth (595) - 2*margins (20*2) = 555
             windowWidth: 1400,  // render at wide viewport to preserve CSS layout (adjust if needed)
+            autoPaging: true,
             callback: function (doc) {
                 doc.save("orcamento.pdf")
             },
-            autoPaging: true
         })
     }
 
