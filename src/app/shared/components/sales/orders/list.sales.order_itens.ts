@@ -117,7 +117,6 @@ export class ListSalesOrderBoatItensComponent {
 
     @Input() reloadSalesOrder: any
     @Input() SalesOrderCancelled: any
-
     
     salesOrderItens = signal<any[]>([])
     id: string = ""
@@ -132,7 +131,6 @@ export class ListSalesOrderBoatItensComponent {
 
 
     ngOnInit() {
-
     }
 
     loadSalesOrdersBoatItens(id: string) {

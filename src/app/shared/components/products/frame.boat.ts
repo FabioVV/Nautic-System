@@ -270,22 +270,22 @@ import { ListAdsBoatComponent } from './list.ads_boat';
                     
                     <div class="container">
                         <div class="row">
-                        <ng-container *ngFor="let f of boatFiles(); let i = index">
-                            <div class="col-6 col-sm-4 col-md-3 mb-4" >
-                                <div class="card h-100">
-                                    <p-image [src]="f.path" alt="Image" width="250" [preview]="true" />
+                            <ng-container *ngFor="let f of boatFiles(); let i = index">
+                                <div class="col-6 col-sm-4 col-md-3 mb-4" >
+                                    <div class="card h-100">
+                                        <p-image [src]="f.path" alt="Image" width="250" [preview]="true" />
 
-                                    <div class="card-body p-2">
-                                        <div class="d-flex justify-content-between">
-                                            <p-buttongroup>
-                                                <p-button (click)="removeFile(f.id)" severity="danger" icon="pi pi-trash" rounded/>
-                                                <p-button (click)="downloadFile(f.path)" severity="info" icon="pi pi-download" rounded/>
-                                            </p-buttongroup>
+                                        <div class="card-body p-2">
+                                            <div class="d-flex justify-content-between">
+                                                <p-buttongroup>
+                                                    <p-button (click)="removeFile(f.id)" severity="danger" icon="pi pi-trash" rounded/>
+                                                    <p-button (click)="downloadFile(f.path)" severity="info" icon="pi pi-download" rounded/>
+                                                </p-buttongroup>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </ng-container>
+                            </ng-container>
                         </div>
                     </div>
                     

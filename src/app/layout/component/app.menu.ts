@@ -3,14 +3,27 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
-import { AuthService } from '../../shared/services/auth.service';
 import { faPeopleArrows } from '@fortawesome/free-solid-svg-icons';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+
+import { AuthService } from '../../shared/services/auth.service';
 
 @Component({
     selector: 'app-menu',
     standalone: true,
-    imports: [CommonModule, AppMenuitem, RouterModule],
-    template: `<ul class="layout-menu">
+    imports: [CommonModule, InputGroupModule, InputGroupAddonModule, AppMenuitem, RouterModule, InputTextModule],
+    template: `
+        
+    <p-inputgroup>
+        <p-inputgroup-addon>
+            <i class="pi pi-search"></i>
+        </p-inputgroup-addon>
+        <input pInputText (change)="SearchModule()" (ngModel)="qmodule" type="text" pSize="small" placeholder="Módulo..." />
+    </p-inputgroup>
+
+    <ul class="layout-menu">
         <ng-container *ngFor="let item of model; let i = index">
             <li app-menuitem *ngIf="!item.separator" [item]="item" [index]="i" [root]="true"></li>
             <li *ngIf="item.separator" class="menu-separator"></li>
@@ -20,90 +33,109 @@ import { faPeopleArrows } from '@fortawesome/free-solid-svg-icons';
 })
 
 export class AppMenu {
-    model: MenuItem[] = [];
+    model: MenuItem[] = []
     faPeopleArrows = faPeopleArrows
+
+    qmodule: string = ""
 
     constructor(private authService: AuthService) { }
 
+    SearchModule(){
+        alert(this.qmodule)
+    }
+
     ngOnInit() {
         const dashMenu = {
-            label: 'Home',
+            label: '',
             items: [
-                { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'], },
+                { label: 'Home', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'], },
             ],
         }
 
         let adminMenuItem = {
-            label: 'Sistema',
+            label: '',
             items: [
                 {
-                    label: 'Usuários',
-                    icon: 'pi pi-user',
-                    routerLink: ['/system/users'],
-                    code: "users:view"
-                },
-                {
-                    label: 'Cargos',
-                    icon: 'pi pi-users',
-                    routerLink: ['/system/roles'],
-                    code: "roles:view"
-                },
+                    label: "Sistema",
+                    icon: 'pi pi-cog',
+                    items: [
+                        {
+                            label: 'Usuários',
+                            icon: 'pi pi-user',
+                            routerLink: ['/system/users'],
+                            code: "users:view"
+                        },
+                        {
+                            label: 'Cargos',
+                            icon: 'pi pi-users',
+                            routerLink: ['/system/roles'],
+                            code: "roles:view"
+                        },
+                    ]
+                },  
             ]
         }
 
         const salesMenuItem = {
-            label: 'Relacionamento',
+            label: '',
             items: [
                 {
-                    label: 'Painel de negociações',
-                    icon: 'pi pi-comment',
-                    routerLink: ['/sales/negotiation-panel'],
-                    code: "negotiation_panel:view"
-                },
-                {
-                    label: 'Clientes / Contatos',
+                    label: 'Painel de vendas',
                     icon: 'pi pi-users',
-                    routerLink: ['/sales/customers'],
-                    code: "sales_customers:view"
+                    items: [
+                        {
+                            label: 'Painel de negociações',
+                            icon: 'pi pi-comment',
+                            routerLink: ['/sales/negotiation-panel'],
+                            code: "negotiation_panel:view"
+                        },
+                        {
+                            label: 'Clientes / Contatos',
+                            icon: 'pi pi-users',
+                            routerLink: ['/sales/customers'],
+                            code: "sales_customers:view"
+                        },
+                        {
+                            label: 'Oportunidades',
+                            icon: 'pi pi-eye',
+                            routerLink: ['/sales/oportunities'],
+                            code: "sales_oportunities:view"
+                        },
+                        {
+                            label: 'Mala-Direta',
+                            icon: 'pi pi-send',
+                            routerLink: ['/sales/direct-mail'],
+                            code: "sales_direct_mail:view"
+                        },
+                        {
+                            label: 'Meios de comunicação',
+                            icon: 'pi pi-megaphone',
+                            routerLink: ['/sales/communication-means'],
+                            code: "communication_means:view"
+                        },
+                    ]
                 },
-                {
-                    label: 'Oportunidades',
-                    icon: 'pi pi-eye',
-                    routerLink: ['/sales/oportunities'],
-                    code: "sales_oportunities:view"
-                },
-                {
-                    label: 'Mala-Direta',
-                    icon: 'pi pi-send',
-                    routerLink: ['/sales/direct-mail'],
-                    code: "sales_direct_mail:view"
-                },
-                {
-                    label: 'Meios de comunicação',
-                    icon: 'pi pi-megaphone',
-                    routerLink: ['/sales/communication-means'],
-                    code: "communication_means:view"
-                },
+
             ]
         }
 
-        const afterSalesMenuItem = {
-            label: 'Pós vendas',
-            items: [
-                {
-                    label: 'Clientes',
-                    icon: 'pi pi-users',
-                    routerLink: ['/after-sales/customers'],
-                    code: "aftersales_customers:view"
-                },
-            ]
-        }
+        // const afterSalesMenuItem = {
+        //     label: 'Pós vendas',
+        //     items: [
+        //         {
+        //             label: 'Clientes',
+        //             icon: 'pi pi-users',
+        //             routerLink: ['/after-sales/customers'],
+        //             code: "aftersales_customers:view"
+        //         },
+        //     ]
+        // }
 
         const relatSalesMenuItem = {
-            label: 'Relatórios',
+            label: '',
             items: [
                 {
-                    label: 'Vendas',
+                    label: 'Relatórios de vendas',
                     icon: 'pi pi-fw pi-dollar',
                     items: [
                         {
@@ -127,38 +159,43 @@ export class AppMenu {
 
                     ]
                 },
-
-
             ]
         }
 
         const productsMenu = {
-            label: 'Produtos',
+            label: '',
             items: [
                 {
-                    label: 'Tipos Acessórios',
+                    label: 'Produtos',
                     icon: 'pi pi-hammer',
-                    routerLink: ['/products/accessories-types'],
-                    code: "accessories_types:view"
+                    items: [
+                        {
+                            label: 'Tipos Acessórios',
+                            icon: 'pi pi-hammer',
+                            routerLink: ['/products/accessories-types'],
+                            code: "accessories_types:view"
+                        },
+                        {
+                            label: 'Acessórios',
+                            icon: 'pi pi-hammer',
+                            routerLink: ['/products/accessories'],
+                            code: "accessories:view"
+                        },
+                        {
+                            label: 'Cascos',
+                            icon: 'pi pi-hammer',
+                            routerLink: ['/products/boats'],
+                            code: "pboats:view"
+                        },
+                        {
+                            label: 'Motores',
+                            icon: 'pi pi-hammer',
+                            routerLink: ['/products/engines'],
+                            code: "engines:view"
+                        },
+                    ],
                 },
-                {
-                    label: 'Acessórios',
-                    icon: 'pi pi-hammer',
-                    routerLink: ['/products/accessories'],
-                    code: "accessories:view"
-                },
-                {
-                    label: 'Cascos',
-                    icon: 'pi pi-hammer',
-                    routerLink: ['/products/boats'],
-                    code: "pboats:view"
-                },
-                {
-                    label: 'Motores',
-                    icon: 'pi pi-hammer',
-                    routerLink: ['/products/engines'],
-                    code: "engines:view"
-                },
+
             ]
         }
 
@@ -169,67 +206,24 @@ export class AppMenu {
 
             const menuItems = [relatSalesMenuItem, productsMenu, salesMenuItem].reverse()
 
-            // this.model = [relatSalesMenuItem, ...this.model]
-            // this.model = [productsMenu, ...this.model]
-            // this.model = [afterSalesMenuItem, ...this.model]
-            // this.model = [salesMenuItem, ...this.model]
-
             if (isAdmin) {
                 this.model = [relatSalesMenuItem, ...this.model]
                 this.model = [productsMenu, ...this.model]
                 // this.model = [afterSalesMenuItem, ...this.model]
                 this.model = [salesMenuItem, ...this.model]
                 this.model = [adminMenuItem, ...this.model]
+
             } else {
-
                 for (const menui of menuItems) {
-                   // console.log(menui.items)
-
-                    for(const menuii of menui.items){
-                        if('code' in menuii){
-                            //@ts-ignore
-                            menui.items = menui.items.filter((i) => userjwt?.permissions.includes(i.code))
-                            if(menui.items.length > 0){
-                                this.model = [menui, ...this.model]
-                            }
-                            
-                            break
-                        } else if('items' in menuii.items){
-                            //@ts-ignore
-                            menui.items.items = menui.items?.items?.filter((i) => userjwt?.permissions.includes(i.code))
-                            //@ts-ignore
-                            if(menui.items.items.length > 0){
-                                this.model = [menui, ...this.model]
-                            }
-                            break
+                    for (const menuii of menui.items) {
+                        menuii.items = menuii?.items?.filter((i) => userjwt?.permissions.includes(i.code))
+                        if (menuii?.items?.length > 0) {
+                            this.model = [menui, ...this.model]
                         }
                     }
-
-                    // if('code' in menui.items){
-                    //     //@ts-ignore
-                    //     menui.items = menui.items.filter((i) => userjwt?.permissions.includes(i.code))
-                    //     this.model = [menui, ...this.model]
-                    // } else {
-                    //     //@ts-ignore
-                            //menui.items.items = menui.items?.items?.filter((i) => userjwt?.permissions.includes(i.code))
-                            //this.model = [menui, ...this.model]
-
-                    // }
-
                 }
 
             }
-
-            // if (isAdmin || this.authService.checkUserPermissionsContains(adminMenuItem.items)) {
-            //     if (isAdmin) {
-            //         this.model = [adminMenuItem, ...this.model]
-            //     } else {
-            //         if (this.authService.parseUserJwt().permissions.length != 0) {
-            //             adminMenuItem.items = adminMenuItem.items.filter((i) => userjwt?.permissions.includes(i.code))
-            //             this.model = [adminMenuItem, ...this.model]
-            //         }
-            //     }
-            // }
 
             this.model = [dashMenu, ...this.model]
         }

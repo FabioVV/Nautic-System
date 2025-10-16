@@ -34,25 +34,30 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { ImageModule } from 'primeng/image';
 import { ActivatedRoute } from '@angular/router';
 import { MenubarModule } from 'primeng/menubar';
+import { ListSalesOrderQuoteBoatItensComponent } from './list.sales_order_itens_quote';
 
 import { jsPDF } from 'jspdf';
 
 import { BrStates, SelectItem } from '../../utils';
 import { SalesService } from '../../../services/sales.service';
 import { formatBRLMoney } from '../../utils';
+import { UserService } from '../../../services/user.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
     selector: 'quote',
-    imports: [DialogModule, TagModule, MenubarModule, FileUploadModule, ImageModule, AutoCompleteModule, InputGroupModule, TabsModule, CardModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
+    imports: [DialogModule, TagModule, MenubarModule, ListSalesOrderQuoteBoatItensComponent, FileUploadModule, ImageModule, AutoCompleteModule, InputGroupModule, TabsModule, CardModule, DatePickerModule, InputMaskModule, InputNumberModule, InputGroupAddonModule, TextareaModule, FieldsetModule, MessageModule, ButtonGroupModule, ConfirmDialogModule, TableModule, SelectModule, ToastModule, InputIconModule, InputTextModule, IconFieldModule, DataViewModule, RippleModule, ButtonModule, CommonModule, FormsModule, ReactiveFormsModule, PaginatorModule],
     providers: [MessageService, ConfirmationService],
     styles: `
+
     .main-page {
-        margin-left: 9rem;
-        margin-right: 9rem;
+        margin-left: 2rem;
+        margin-right: 2rem;
+        padding-bottom:10px;
+        
         display: flex;
         justify-content: center;
         flex-direction:column;
-        padding-top: 10px;
         gap: 1rem;
     }
 
@@ -98,13 +103,21 @@ import { formatBRLMoney } from '../../utils';
     .buy-info {
         margin-top:1rem;
     }
+
+    @media (min-width: 768px) {
+        .main-page {
+            margin-left: 9rem;
+            margin-right: 9rem;
+        }
+    }
     `,
     standalone: true,
 
     //<img style='height: 340px; width: 100%; margin: 0 auto; object-fit: cover;' src="/assets/placeholders/test.png">
     template: `
     <p-toast></p-toast>
-    <div *ngIf="!SalesOrderCancelled" class="card" style='background-color: transparent !important;'>
+
+    <div *ngIf="!SalesOrderCancelled && IsAuthenticatedUser" class="card" style='background-color: transparent !important;'>
         <p-menubar [model]="items" />
     </div>
 
@@ -112,7 +125,7 @@ import { formatBRLMoney } from '../../utils';
         <div class='header'>
             <img style='height: 340px; width: 100%; margin: 0 auto; object-fit: cover;' src="/assets/images/boat2.jpg">
 
-            <div style='display: flex; justify-content: space-between;' >
+            <div style='display: flex; justify-content: space-between; flex-wrap:wrap;' >
                 <h1>{{ this.formBoat.get("BoatModel")?.value }}</h1>
                 <h1>&nbsp;</h1>
                 <h4>ORÇAMENTO Nº {{ this.id }} <br> DATA: {{ this.salesOrderForm.get("CreatedAt")?.value | date:'dd/MM/yyyy' }}</h4>
@@ -121,19 +134,19 @@ import { formatBRLMoney } from '../../utils';
 
         <div class='customer'>
             <div>
-                <h5>Cliente</h5>
+                <h4>Cliente</h4>
                 <hr>
                 <h6>{{ this.salesOrderForm.get("CustomerName")?.value }}</h6>
             </div>
 
             <div>
-                <h5>Endereço de entrega</h5>
+                <h4>Endereço de entrega</h4>
                 <hr>
                 <h6>Não especificado</h6>
             </div>
 
             <div>
-                <h5>Data de entrega</h5>
+                <h4>Data de entrega</h4>
                 <hr>
                 <h6>Não especificado</h6>
             </div>
@@ -143,7 +156,7 @@ import { formatBRLMoney } from '../../utils';
             <div style='display: flex; justify-content: space-between;' >
                 <h1>INFORMAÇÕES DA COMPRA</h1>
                 <h1>&nbsp;</h1>
-                <h6>&nbsp;</h6>
+                <h3 style='color:var(--p-emerald-500)'>{{ this.TotalOrder }}</h3>
                 <hr/>
             </div>
 
@@ -154,9 +167,9 @@ import { formatBRLMoney } from '../../utils';
                 <hr/>
             </div>
 
-            <div>
+            <div style='margin-bottom:1.3rem;'>
 
-                <p-table [value]="products" [tableStyle]="{ 'min-width': '50rem' }">
+                <p-table [value]="placeholder_to_show_table" [tableStyle]="{ 'min-width': '50rem' }">
                     <ng-template #header>
                         <tr>
                             <th>Cód.</th>
@@ -168,8 +181,8 @@ import { formatBRLMoney } from '../../utils';
                     </ng-template>
                     <ng-template #body let-product>
                         <tr>
-                            <td>{{ product.code }}</td>
-                            <td>{{ this.salesOrderForm.get("CustomerName")?.value }}</td>
+                            <td>{{ this.BoatId }}</td>
+                            <td>{{ this.BoatModel }}</td>
                             <td>{{ this.TotalPriceBoat }}</td>
                             <td>-</td>
                             <td>{{ this.TotalPriceBoat }}</td>
@@ -186,9 +199,9 @@ import { formatBRLMoney } from '../../utils';
                 <hr/>
             </div>
 
-            <div>
+            <div style='margin-bottom:1.3rem;'>
 
-                <p-table [value]="products" [tableStyle]="{ 'min-width': '50rem' }">
+                <p-table [value]="placeholder_to_show_table" [tableStyle]="{ 'min-width': '50rem' }">
                     <ng-template #header>
                         <tr>
                             <th>Cód.</th>
@@ -200,8 +213,8 @@ import { formatBRLMoney } from '../../utils';
                     </ng-template>
                     <ng-template #body let-product>
                         <tr>
-                            <td>{{ product.code }}</td>
-                            <td>{{ product.name }}</td>
+                            <td>{{ this.EngineId }}</td>
+                            <td>{{ this.EngineModel }}</td>
                             <td>{{ this.TotalPriceEngine }}</td>
                             <td>-</td>
                             <td>{{ this.TotalPriceEngine }}</td>
@@ -218,29 +231,27 @@ import { formatBRLMoney } from '../../utils';
                 <hr/>
             </div>
 
-            <div>
+            <div style='margin-bottom:1.3rem;'>
+                <list-sales-orders-quote-boat-itens #listSalesOrderQuoteBoatItensComponent></list-sales-orders-quote-boat-itens>
+            </div>
 
-                <p-table [value]="products" [tableStyle]="{ 'min-width': '50rem' }">
-                    <ng-template #header>
-                        <tr>
-                            <th>Cód.</th>
-                            <th>Modelo</th>
-                            <th>Preço inicial</th>
-                            <th>Desconto</th>
-                            <th>Preço final</th>
-                        </tr>
-                    </ng-template>
-                    <ng-template #body let-product>
-                        <tr>
-                            <td>{{ product.code }}</td>
-                            <td>{{ product.name }}</td>
-                            <td>{{ product.category }}</td>
-                            <td>{{ product.quantity }}</td>
-                            <td>{{ product.quantity }}</td>
-                        </tr>
-                    </ng-template>
-                </p-table>
+            <div style='display: flex; justify-content: space-between;' >
+                <h1>IMAGENS DA EMBARCAÇÃO</h1>
+                <h1>&nbsp;</h1>
+                <h6>&nbsp;</h6>
+                <hr/>
+            </div>
 
+            <div class="container">
+                <div class="row">
+                    <ng-container *ngFor="let f of salesOrderFiles(); let i = index">
+                        <div class="col-8 col-sm-4 col-md-3 mb-4" >
+                            <div class="card h-100">
+                                <p-image [src]="f.path" alt="Image" width="250" [preview]="true" />
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
             </div>
 
         </div>
@@ -252,6 +263,7 @@ import { formatBRLMoney } from '../../utils';
 export class QuoteComponent implements OnInit {
     constructor(
         public formBuilder: FormBuilder,
+        private authService: AuthService,
         private messageService: MessageService,
         private salesService: SalesService,
         private sanitizer: DomSanitizer,
@@ -260,22 +272,11 @@ export class QuoteComponent implements OnInit {
 
     items: MenuItem[] | undefined
     Uuid: string = ""
-    @ViewChild('pdfContent', { static: false }) contentToConvert!: ElementRef;
-    
-    products: any[] = [
-    {
-        id: '1000',
-        code: 'f230fh0g3',
-        name: 'Bamboo Watch',
-        description: 'Product Description',
-        image: 'bamboo-watch.jpg',
-        price: 65,
-        category: 'Accessories',
-        quantity: 24,
-        inventoryStatus: 'INSTOCK',
-        rating: 5
-    },]
 
+    @ViewChild('pdfContent', { static: false }) contentToConvert!: ElementRef
+    @ViewChild('listSalesOrderQuoteBoatItensComponent') listSalesOrderQuoteBoatItensComponent!: ListSalesOrderQuoteBoatItensComponent
+    
+    placeholder_to_show_table: any[] = [{}]
     salesOrderFiles = signal<any[]>([])
 
     _formatBRLMoney(amount: number){
@@ -296,6 +297,14 @@ export class QuoteComponent implements OnInit {
 
         return false 
     }
+
+    get BoatModel(){ return this.formBoat.get("BoatModel")?.value ?? "-" }
+    get BoatId(){ return this.formBoat.get("BoatId")?.value ?? "-" }
+
+    get EngineModel(){ return this.formEng.get("EngineModel")?.value ?? "-" }
+    get EngineId(){ return this.formEng.get("EngineId")?.value ?? "-" }
+
+    get IsAuthenticatedUser(){ return this.authService.isLoggedIn() }
 
     isLoading: boolean = false
     submitted: boolean = false
@@ -424,7 +433,6 @@ export class QuoteComponent implements OnInit {
     }
 
     loadSalesOrder = () =>{
-        
         this.salesService.getSalesOrderQuote(this.Uuid).subscribe({
             next: (res: any) => {
                 //@ts-ignore
@@ -485,7 +493,7 @@ export class QuoteComponent implements OnInit {
 
 
                 this.loadSalesOrderFiles()
-
+                this.listSalesOrderQuoteBoatItensComponent.loadSalesOrdersBoatItens(res?.data['id'])
             }, 
             error: (err) => {
                 this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar buscar pedido de venda' })
@@ -494,7 +502,7 @@ export class QuoteComponent implements OnInit {
     }
 
     loadSalesOrderFiles(){
-        this.salesService.getSalesOrderFiles(this.id).subscribe({
+        this.salesService.getSalesOrderQuoteFiles(this.id).subscribe({
             next: (res: any) => {
                 //@ts-ignore
                 this.salesOrderFiles.set(res.data ?? [])

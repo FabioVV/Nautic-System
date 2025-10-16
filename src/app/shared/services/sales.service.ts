@@ -159,6 +159,14 @@ export class SalesService {
         return this.http.get(`${environment.apiBaseURL}/sales/orders/${id}/itens`)
     }
 
+    getSalesOrderQuoteItens(id: string) {
+        return this.http.get(`${environment.apiBaseURL}/sales/orders/${id}/quote/itens`)
+    }
+
+    getSalesOrderQuoteFiles(id: string) {
+        return this.http.get(`${environment.apiBaseURL}/sales/orders/${id}/quote/files`)
+    }
+
     cancelSalesOrder(id: string) {
         return this.http.delete(`${environment.apiBaseURL}/sales/orders/${id}`)
     }

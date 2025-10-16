@@ -72,7 +72,7 @@ export class AuthService {
 
     isLoggedIn() {
         if (!localStorage.getItem(USER_DATA)) {
-            return
+            return false
         }
 
         const exp = new Date(this.parseUserJwt().exp * 1000)
