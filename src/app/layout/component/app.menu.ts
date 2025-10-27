@@ -16,7 +16,7 @@ import { AuthService } from '../../shared/services/auth.service';
     imports: [CommonModule, InputGroupModule, InputGroupAddonModule, AppMenuitem, RouterModule, InputTextModule],
     template: `
         
-    <p-inputgroup *ngIf="false">
+    <p-inputgroup>
         <p-inputgroup-addon>
             <i class="pi pi-search"></i>
         </p-inputgroup-addon>
@@ -34,6 +34,7 @@ import { AuthService } from '../../shared/services/auth.service';
 
 export class AppMenu {
     model: MenuItem[] = []
+    bkpModel: MenuItem[] = []
     faPeopleArrows = faPeopleArrows
 
     qmodule: string = ""
@@ -41,20 +42,25 @@ export class AppMenu {
     constructor(private authService: AuthService) { }
 
     SearchModule(){
-
+        if(this.qmodule == ""){
+            this.model = [this.bkpModel, ...this.model]
+        }
 
         for(const menu of this.model){
             //@ts-ignore
-            for(let item of menu?.items){
-
-
-                if(this.qmodule){
-
+            if(menu?.items){
+                for(let item of menu?.items){
+                    if(item?.items){
+                        //@ts-ignore
+                        menu.items = menu?.items?.forEach((i) => i.label?.includes(this.qmodule))
+                        this.model = [menu, ...this.model]
+                    }
                 }
-
             }
+
         }
-        console.log(this.model)
+
+
     }
 
     ngOnInit() {
@@ -239,6 +245,8 @@ export class AppMenu {
             }
 
             this.model = [dashMenu, ...this.model]
+
+            this.bkpModel = [this.model, ...this.bkpModel]
         }
 
     }
