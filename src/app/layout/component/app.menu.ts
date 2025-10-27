@@ -7,20 +7,21 @@ import { faPeopleArrows } from '@fortawesome/free-solid-svg-icons';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { FormsModule } from '@angular/forms';
 
 import { AuthService } from '../../shared/services/auth.service';
 
 @Component({
     selector: 'app-menu',
     standalone: true,
-    imports: [CommonModule, InputGroupModule, InputGroupAddonModule, AppMenuitem, RouterModule, InputTextModule],
+    imports: [CommonModule, InputGroupModule, InputGroupAddonModule, AppMenuitem, RouterModule, InputTextModule, FormsModule],
     template: `
         
     <p-inputgroup>
         <p-inputgroup-addon>
             <i class="pi pi-search"></i>
         </p-inputgroup-addon>
-        <input pInputText (change)="SearchModule()" (ngModel)="qmodule" type="text" pSize="small" placeholder="Módulo..." />
+        <input pInputText (change)="SearchModule()" [(ngModel)]="qmodule" type="text" pSize="small" placeholder="Módulo..." />
     </p-inputgroup>
 
     <ul class="layout-menu">
@@ -42,25 +43,18 @@ export class AppMenu {
     constructor(private authService: AuthService) { }
 
     SearchModule(){
-        if(this.qmodule == ""){
-            this.model = [this.bkpModel, ...this.model]
-        }
-
-        for(const menu of this.model){
-            //@ts-ignore
-            if(menu?.items){
-                for(let item of menu?.items){
-                    if(item?.items){
-                        //@ts-ignore
-                        menu.items = menu?.items?.forEach((i) => i.label?.includes(this.qmodule))
-                        this.model = [menu, ...this.model]
-                    }
+        if(this.qmodule.trim() == ""){
+            this.ngOnInit()
+        } else {
+            for(const menu of this.model){
+                //@ts-ignore
+                if(menu?.items){
+                    //@ts-ignore
+                    menu.items = menu?.items?.filter((i) => i.label?.toLowerCase().includes(this.qmodule.toLowerCase()))
+                    this.model = [menu, ...this.model]
                 }
             }
-
         }
-
-
     }
 
     ngOnInit() {
@@ -222,6 +216,7 @@ export class AppMenu {
         if (this.authService.isLoggedIn()) {
             const userjwt = this.authService.parseUserJwt()
             const isAdmin = userjwt?.roles?.includes("Admin")
+            this.model = []
 
             const menuItems = [relatSalesMenuItem, productsMenu, salesMenuItem].reverse()
 
@@ -246,7 +241,7 @@ export class AppMenu {
 
             this.model = [dashMenu, ...this.model]
 
-            this.bkpModel = [this.model, ...this.bkpModel]
+            this.bkpModel = JSON.parse(JSON.stringify(this.model))
         }
 
     }
