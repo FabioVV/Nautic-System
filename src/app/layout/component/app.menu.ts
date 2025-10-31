@@ -21,7 +21,7 @@ import { AuthService } from '../../shared/services/auth.service';
         <p-inputgroup-addon>
             <i class="pi pi-search"></i>
         </p-inputgroup-addon>
-        <input pInputText (change)="SearchModule()" [(ngModel)]="qmodule" type="text" pSize="small" placeholder="Módulo..." />
+        <input pInputText (input)="SearchModule()" [(ngModel)]="qmodule" type="text" pSize="small" placeholder="Módulo..." />
     </p-inputgroup>
 
     <ul class="layout-menu">
@@ -35,7 +35,6 @@ import { AuthService } from '../../shared/services/auth.service';
 
 export class AppMenu {
     model: MenuItem[] = []
-    bkpModel: MenuItem[] = []
     faPeopleArrows = faPeopleArrows
 
     qmodule: string = ""
@@ -43,15 +42,17 @@ export class AppMenu {
     constructor(private authService: AuthService) { }
 
     SearchModule(){
+        localStorage.setItem('menu_search', this.qmodule)
+
         if(this.qmodule.trim() == ""){
             this.ngOnInit()
         } else {
+
             for(const menu of this.model){
                 //@ts-ignore
                 if(menu?.items){
                     //@ts-ignore
                     menu.items = menu?.items?.filter((i) => i.label?.toLowerCase().includes(this.qmodule.toLowerCase()))
-                    this.model = [menu, ...this.model]
                 }
             }
         }
@@ -241,7 +242,12 @@ export class AppMenu {
 
             this.model = [dashMenu, ...this.model]
 
-            this.bkpModel = JSON.parse(JSON.stringify(this.model))
+            const saved = localStorage.getItem('menu_search')
+            if (saved) {
+                this.qmodule = saved
+                this.SearchModule()
+            }
+
         }
 
     }
