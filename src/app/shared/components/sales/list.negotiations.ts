@@ -999,7 +999,7 @@ export class ListNegotiationsComponent {
 
         this.salesService.getNegotiationsAlerts().pipe(finalize(() => {})).subscribe({
             next: (res: any) => {
-                if(res.data.length > 0){
+                if(res?.data?.length > 0){
                     this.AlertsDialog = true
                 }
                 this.negotiations_alerts.set(res.data)
