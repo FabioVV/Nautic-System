@@ -108,7 +108,7 @@ interface ExportColumn {
                     (dragstart)="dragstart($event, n.id)"
                     (contextmenu)="onContextMenu($event, n, n.id_customer, n.id)"
                     (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
-                    [ngStyle]="{'border': '1px solid ' + getBorderColor(n)}"
+                    [ngStyle]="{'border': '1px solid ' + getBorderColor(n), 'transition':'transform 0.2s ease'}"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -143,7 +143,7 @@ interface ExportColumn {
                     [id]="n.id"
                     (contextmenu)="onContextMenu($event, n, n.id_customer, n.id)"
                     (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
-                    [ngStyle]="{'border': '1px solid ' + getBorderColor(n)}"
+                    [ngStyle]="{'border': '1px solid ' + getBorderColor(n), 'transition':'transform 0.2s ease'}"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -178,6 +178,7 @@ interface ExportColumn {
                     [id]="n.id"
                     (contextmenu)="onContextMenu($event, n, n.id_customer, n.id)"
                     (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
+                    [ngStyle]="{'transition':'transform 0.2s ease'}"
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -212,6 +213,8 @@ interface ExportColumn {
                     [id]="n.id"
                     (contextmenu)="onContextMenu($event, n, n.id_customer, n.id)"
                     (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
+                    [ngStyle]="{'transition':'transform 0.2s ease'}"
+
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -246,6 +249,8 @@ interface ExportColumn {
                     [id]="n.id"
                     (contextmenu)="onContextMenu($event, n, n.id_customer, n.id)"
                     (dblclick)="openFollowUp(n.id, n.id_customer, n.stage)"
+                    [ngStyle]="{'transition':'transform 0.2s ease'}"
+
                 >
                     <h6 class="card-text" pTooltip="{{ n.customer_name }}" tooltipPosition="top">{{ n.customer_name }}</h6>
                     <p class="m-0 card-text" pTooltip="{{ n.boat_name }}" tooltipPosition="top">
@@ -1012,21 +1017,23 @@ export class ListNegotiationsComponent {
         const el = Array.from(this.elementRef.nativeElement.getElementsByClassName('p-card'))
         el.forEach((e: any) => {
             e.classList.remove('hide-card')
+            e.classList.remove('tilt')
         })
 
         const eld = Array.from(this.elementRef.nativeElement.getElementsByClassName('dropzone'))
         eld.forEach((e: any) => {
             e.classList.remove('highlight-drag')
         })
+
+
     }
 
     dragstart(e: any, dragItemId: number) {
         const el = Array.from(this.elementRef.nativeElement.getElementsByClassName('p-card'))
         el.forEach((e: any) => dragItemId?.toString() != e.id ? e.classList.add('hide-card') : "")
+        el.forEach((e: any) => dragItemId?.toString() == e.id ? e.classList.add('tilt') : "")
 
         e.dataTransfer.setData('text', e.target.id)
-        console.log(e.target.id)
-
     }
 
     dragenter(e: any) {
