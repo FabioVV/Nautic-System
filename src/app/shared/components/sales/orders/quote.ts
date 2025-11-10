@@ -519,7 +519,7 @@ export class QuoteComponent implements OnInit {
             // x: 20,              // left margin in pt
             y: 20,              // top margin in pt
             width: 595,         // pageWidth (595) - 2*margins (20*2) = 555
-            windowWidth: 1400,  // render at wide viewport to preserve CSS layout (adjust if needed)
+            windowWidth: 1400,  
             autoPaging: true,
             callback: function (doc) {
                 doc.save("orcamento.pdf")

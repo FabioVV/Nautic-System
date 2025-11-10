@@ -130,7 +130,7 @@ interface ExportColumn {
         </div>
 
         <div id='stage2' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-            <h5 style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Inicio de negociação</h5>
+            <h5 style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Iniciando a negociação</h5>
             <div class='kb-cards'>
 
                 <p-card *ngFor="let n of stageTwo(); trackBy: trackById"
@@ -165,7 +165,7 @@ interface ExportColumn {
         </div>
 
         <div id='stage3' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-            <h5 style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Negociando</h5>
+            <h5 style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Em negociação</h5>
             <div class='kb-cards'>
 
                 <p-card *ngFor="let n of stageThree(); trackBy: trackById"
@@ -199,7 +199,7 @@ interface ExportColumn {
         </div>
 
         <div id='stage4' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-            <h5 style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Fechamento</h5>
+            <h5 style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Em fechamento</h5>
             <div class='kb-cards'>
 
                 <p-card *ngFor="let n of stageFour(); trackBy: trackById"
