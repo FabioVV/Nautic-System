@@ -35,6 +35,7 @@ export const appRoutes: Routes = [
             { path: '', loadChildren: () => import('./app/pages/users.routes') },
             { path: '', loadChildren: () => import('./app/pages/permissions.routes') },
             { path: '', loadChildren: () => import('./app/pages/roles.routes') },
+            { path: '', loadChildren: () => import('./app/pages/audit.routes') },
         ]
     },
 

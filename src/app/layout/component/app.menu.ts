@@ -85,6 +85,12 @@ export class AppMenu {
                             routerLink: ['/system/roles'],
                             code: "roles:view"
                         },
+                        {
+                            label: 'Auditoria',
+                            icon: 'pi pi-eye',
+                            routerLink: ['/system/logs'],
+                            code: "logs:view"
+                        },
                     ]
                 },  
             ]
