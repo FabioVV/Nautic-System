@@ -242,11 +242,10 @@ export class AppTopbar implements OnInit {
 
             this.userService.updateUser(this.userData.id, this.form.value).subscribe({
                 next: (res: any) => {
-                    if (res?.succeeded) {
-                        this.isSubmited = false
-                        this.authService.updateUserData(res.data)
-                        this.messageService.add({ severity: 'success', summary: 'Conta atualizada', detail: 'Sua conta foi atualizada com sucesso.' });
-                    }
+                    this.isSubmited = false
+                    this.authService.updateUserData(res.data)
+                    this.messageService.add({ severity: 'success', summary: 'Conta atualizada', detail: 'Sua conta foi atualizada com sucesso.' });
+                
                     this.isLoading = false
                 },
                 error: (err: any) => {
