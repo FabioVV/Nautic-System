@@ -618,12 +618,15 @@ export class SalesOrderModal {
                 next: (res: any) => {
                     this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'E-mail enviado com sucesso' })
                     this.hideEmailDialog()
+                    this.emailForm.reset()
                 }, 
                 error: (err) => {
                     this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar enviar seu o e-mail' })
                 },
             })
         }
+        this.isLoading = false
+
     }
 
     share(type: string){
