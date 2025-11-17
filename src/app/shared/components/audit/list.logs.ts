@@ -88,6 +88,10 @@ interface ExportColumn {
                     Descrição da ação
                     <p-sortIcon field="description" />
                 </th>
+                <th pSortableColumn="created_at">
+                   Data
+                    <p-sortIcon field="created_at" />
+                </th>
             </tr>
         </ng-template>
         <ng-template #body let-log>
@@ -106,6 +110,9 @@ interface ExportColumn {
 
                 <td>
                     {{ log.description }}
+                </td>
+                <td>
+                    {{ log.created_at | date:'dd/MM/yyyy HH:mm:ss' }}
                 </td>
             </tr>
         </ng-template>
