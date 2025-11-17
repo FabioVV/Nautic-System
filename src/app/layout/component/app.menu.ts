@@ -80,7 +80,7 @@ export class AppMenu {
                             code: "users:view"
                         },
                         {
-                            label: 'Cargos',
+                            label: 'Funções',
                             icon: 'pi pi-users',
                             routerLink: ['/system/roles'],
                             code: "roles:view"

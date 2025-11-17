@@ -75,7 +75,7 @@ interface ExportColumn {
 
         <ng-template #header>
             <tr>
-                <th>Cód. Cargo</th>
+                <th>Cód. Função</th>
 
                 <th pSortableColumn="name">
                     Nome

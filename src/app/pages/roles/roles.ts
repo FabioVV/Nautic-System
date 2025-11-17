@@ -66,14 +66,14 @@ interface Role {
     <p-toolbar styleClass="mb-6">
 
         <ng-template #start>
-            <p-button label="Novo cargo" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
+            <p-button label="Nova função" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
         </ng-template>
 
         <ng-template #end>
         </ng-template>
     </p-toolbar>
 
-    <p-dialog [(visible)]="userDialog" [style]="{ width: '50rem' }" header="Registrar Cargo" [modal]="true">
+    <p-dialog [(visible)]="userDialog" [style]="{ width: '50rem' }" header="Registrar função" [modal]="true">
         <ng-template #content>
             <form [formGroup]="form" (ngSubmit)="onSubmit()" style='margin-bottom: 4rem;'>
                 <button id="btn_submit" style='display:none;' type="submit"></button>
