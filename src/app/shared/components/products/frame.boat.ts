@@ -498,6 +498,7 @@ export class BoatModal {
             this.boatService.registerBoatAd(this.id, this.formAds?.value?.ComMeanId, formData).subscribe({
                 next: (res: any) => {
                     this.adListComponent.loadBoatAds()
+                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'Anuncio adicionado com sucesso' });
                 }, 
                 error: (err) => {
                     if(err?.error?.message == 'ad already linked with the boat'){

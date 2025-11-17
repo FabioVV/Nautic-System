@@ -144,7 +144,7 @@ interface ExportColumn {
             </td>
 
             <td>
-                {{ this._formatBRLMoney(boat.selling_price) }}
+                {{ this._formatBRLMoney(boat.selling_price ?? 0.00) }}
             </td>
 
 
