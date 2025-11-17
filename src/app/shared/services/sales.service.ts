@@ -71,6 +71,10 @@ export interface Negotiation {
 export class SalesService {
     constructor(private http: HttpClient) { }
 
+    sendQuoteViaEmail(id: string, formData: any){
+        return this.http.post(`${environment.apiBaseURL}/sales/orders/${id}/send-quote`, formData)
+    }
+
     getCustomersBirthday(){
         return this.http.get(`${environment.apiBaseURL}/sales/customers/birthdays`)
     }

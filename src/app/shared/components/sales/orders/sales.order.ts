@@ -6,7 +6,7 @@ import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 import { PaginatorModule } from 'primeng/paginator';
-import { FormsModule, ReactiveFormsModule, FormBuilder } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -35,7 +35,7 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { ImageModule } from 'primeng/image';
 import { Router } from '@angular/router';
 
-import { BrStates, SelectItem } from '../../utils';
+import { BrStates, SelectItem, openWppWithMessage } from '../../utils';
 import { SalesService } from '../../../services/sales.service';
 import { BoatService } from '../../../services/boats.service';
 import { formatBRLMoney } from '../../utils';
@@ -100,6 +100,20 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
                             <div class='col-md-4'>
                                 <label class="block font-bold mb-3">Código</label>
                                 <input formControlName="Id" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                            </div>
+
+                        </div>
+
+                        <div class='row'>
+
+                            <div class='col-md-4'>
+                                <label class="block font-bold mb-3">E-mail do cliente</label>
+                                <input formControlName="CustomerEmail" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
+                            </div>
+
+                            <div class='col-md-4'>
+                                <label class="block font-bold mb-3">Telefone do cliente</label>
+                                <input formControlName="CustomerPhone" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Type" required autofocus fluid />
                             </div>
 
                         </div>
@@ -379,11 +393,55 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
             
             <p-button (click)="openQuoteFromSalesOrder()" *ngIf="!SalesOrderCancelled" severity="success" label="Abrir orçamento/pedido" icon="pi pi-file-pdf"  />
 
-            <!-- 
-                <p-button *ngIf="!SalesOrderCancelled" severity="success" label="Gerar PDF" icon="pi pi-file-pdf"  />
-                <p-button *ngIf="!SalesOrderCancelled" severity="success" label="Compartilhar via E-mail" icon="pi pi-send" />
-                <p-button *ngIf="!SalesOrderCancelled" severity="success" label="Compartilhar Via WhatsApp" icon="pi pi-send" />
-            -->
+                
+            <p-button *ngIf="!SalesOrderCancelled" (click)="share('email')" severity="success" label="Compartilhar via E-mail" icon="pi pi-send" />
+            <p-button *ngIf="!SalesOrderCancelled" (click)="share('wpp')" severity="success" label="Compartilhar Via WhatsApp" icon="pi pi-send" />
+            
+        </ng-template>
+    </p-dialog>
+
+    <p-dialog [(visible)]="emailDialog" header="Enviar email" [style]="{width: '900px'}" [modal]="true">
+        <ng-template #content>
+            <h5>Não é necessário incluir o link ou número do orçamento, ele será adicionado automaticamente.</h5>
+
+            <form [formGroup]="emailForm" (ngSubmit)="onSubmitSendEmail()" style='margin-bottom: 4rem;'>
+                <button id="btn_submit_email" style='display:none;' type="submit"></button>
+
+
+                <div class='row'>
+                    <div class='col-md-12'>
+                        <label for="Subject" class="block font-bold mb-3">Assunto</label>
+                        <input formControlName="Subject" class="w-full md:w-[30rem] mb-2" type="text" pInputText id="Subject" required autofocus fluid />
+                        
+                        <div class="error-feedback" *ngIf="hasBeenSubmitedEmail('Subject')">
+                            <p-message styleClass="mb-2" *ngIf="emailForm.controls.Subject.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar o assunto do email</p-message>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <div class='row'>
+                    <div class='col-md-12'>
+                        <label for="Body" class="block font-bold mb-3">Mensagem</label>
+
+                        <textarea formControlName="Body" class="w-full mb-2" rows="5" pInputTextarea id="Body" required></textarea>
+
+                        <div class="error-feedback" *ngIf="hasBeenSubmitedEmail('Body')">
+                            <p-message styleClass="mb-2" *ngIf="emailForm.controls.Body.hasError('required')" severity="error" variant="simple" size="small">Por favor, digitar a mensagem do email</p-message>
+                        </div>
+                    </div>
+                </div>
+                
+
+            </form>
+
+
+            <ng-template #footer>
+                <p-button label="Cancelar" icon="pi pi-times" text (click)="hideEmailDialog()" />
+                <p-button [disabled]="isLoading" (click)="submitEmail()" type="submit" label="Salvar" icon="pi pi-check" />
+            </ng-template>
+
         </ng-template>
     </p-dialog>
 
@@ -437,6 +495,7 @@ export class SalesOrderModal {
         return false 
     }
 
+    emailDialog: boolean = false
     isLoading: boolean = false
     submitted: boolean = false
     visible: boolean = false
@@ -468,12 +527,22 @@ export class SalesOrderModal {
         Details: ['', []],
     })
 
+    emailForm = this.formBuilder.group({
+        Subject: ['', [Validators.required]],
+        Body: ['', [Validators.required]],
+        Url: ['', []],
+    })
+
     salesOrderForm = this.formBuilder.group({
         Id: [{value: '', disabled: true}, []],
         Uuid: [{value: '', disabled: true}, []],
 
         SellerName: [{value: '', disabled: true}, []],
         CustomerName: [{value: '', disabled: true}, []],
+
+        CustomerPhone: [{value: '', disabled: true}, []],
+        CustomerEmail: [{value: '', disabled: true}, []],
+
         PfPj: [{value: '', disabled: true}, []],
         Cep: [{value: '', disabled: true}, []],
         Street: [{value: '', disabled: true}, []],
@@ -532,6 +601,54 @@ export class SalesOrderModal {
     onSubmit(){
         this.submitted = true
 
+    }
+
+    submitEmail(){
+        document.getElementById(`btn_submit_email`)?.click()
+
+    }
+
+    onSubmitSendEmail(){
+        this.isLoading = true
+        if (this.emailForm.valid) {
+            
+            this.emailForm.get("Url")?.setValue(this.getQuoteLink() ?? "((Erro ao gerar link))")
+
+            this.salesService.sendQuoteViaEmail(this.id, this.emailForm.value).pipe(finalize(() => this.isLoading = false)).subscribe({
+                next: (res: any) => {
+                    this.messageService.add({ severity: 'success', summary: "Sucesso", detail: 'E-mail enviado com sucesso' })
+                    this.hideEmailDialog()
+                }, 
+                error: (err) => {
+                    this.messageService.add({ severity: 'error', summary: "Erro", detail: 'Ocorreu um erro ao tentar enviar seu o e-mail' })
+                },
+            })
+        }
+    }
+
+    share(type: string){
+        switch(type){
+            case 'wpp':
+                this._openWpp()
+                break;
+            case 'email':
+                this.emailDialog = true
+                break;
+        }
+    }
+
+    _openWpp(){ // alias
+        const customerName = this.salesOrderForm.get("CustomerName")?.value ?? ""
+        const customerPhone = this.salesOrderForm.get("CustomerPhone")?.value ?? ""
+
+        if(customerPhone.trim() == ""){
+            this.messageService.add({ severity: 'error', summary: "Erro", detail: 'O cliente não possui um telefone cadastrado' })
+            return
+        }
+
+        const quoteUrl = this.getQuoteLink()
+        const msg = `Olá ${customerName}, segue o link do seu orçamento/pedido: \n${quoteUrl}`
+        openWppWithMessage(customerPhone, msg)
     }
 
     onSubmitAccessory(){
@@ -606,6 +723,10 @@ export class SalesOrderModal {
 
                 this.salesOrderForm.get("SellerName")?.setValue(res.data['seller_name'])
                 this.salesOrderForm.get("CustomerName")?.setValue(res.data['customer_name'])
+
+                this.salesOrderForm.get("CustomerPhone")?.setValue(res.data['customer_phone'])
+                this.salesOrderForm.get("CustomerEmail")?.setValue(res.data['customer_email'])
+
                 this.salesOrderForm.get("Cep")?.setValue(res.data['Cep'])
                 this.salesOrderForm.get("Street")?.setValue(res.data['Street'])
                 this.salesOrderForm.get("Neighborhood")?.setValue(res.data['Neighborhood'])
@@ -668,6 +789,13 @@ export class SalesOrderModal {
 
     orderProblems(){
 
+    }
+
+    getQuoteLink(){
+        const path = this.router.createUrlTree(['sales', 'order', 'quote', this.uuid])
+        const relativeUrl = this.router.serializeUrl(path) // e.g. /sales/order/quote/123
+        const absoluteUrl = `${location.origin}${relativeUrl}` // ignores base href
+        return absoluteUrl
     }
 
     openQuoteFromSalesOrder(){
@@ -952,6 +1080,10 @@ export class SalesOrderModal {
         return formatBRLMoney(amount.toString())
     }
 
+    hideEmailDialog() {
+        this.emailDialog = false
+    }
+
     isInvalid(controlName: string) {
         const control = this.salesOrderForm.get(controlName)
         return control?.invalid && (control.touched || this.submitted)
@@ -980,6 +1112,13 @@ export class SalesOrderModal {
 
     hasBeenSubmited(controlName: string): boolean {
         const control = this.salesOrderForm.get(controlName)
+        return Boolean(control?.invalid)
+            && (this.submitted || Boolean(control?.touched))
+        //|| Boolean(control?.dirty
+    }
+
+    hasBeenSubmitedEmail(controlName: string): boolean {
+        const control = this.emailForm.get(controlName)
         return Boolean(control?.invalid)
             && (this.submitted || Boolean(control?.touched))
         //|| Boolean(control?.dirty

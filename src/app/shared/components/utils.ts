@@ -37,6 +37,10 @@ export function openWpp(phone: string){
     window.open(`https://api.whatsapp.com/send?phone=+55${phone}&text=Olá`, "_blank")
 }
 
+export function openWppWithMessage(phone: string, message: string){
+    window.open(`https://api.whatsapp.com/send?phone=+55${phone}&text=${encodeURIComponent(message)}`, "_blank")
+}
+
 export function showLoading() {
 
     function removeLoadingGif(forceClose = false) {
