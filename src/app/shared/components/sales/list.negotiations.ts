@@ -96,7 +96,7 @@ interface ExportColumn {
 
     <div class='kb-painel' style='margin-top:1rem;'>
         <div id='stage1' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)">
-            <h5 class='card-text' style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); text-align:center;'>Lead</h5>
+            <h5 class='card-text' style='border-radius:5px;background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); text-align:center;'>Lead</h5>
             <div class='kb-cards'>
                 <p-card *ngFor="let n of stageOne(); trackBy: trackById"
                     [attr.data-stage]="n.stage"
@@ -130,7 +130,7 @@ interface ExportColumn {
         </div>
 
         <div id='stage2' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-            <h5 style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Iniciando a negociação</h5>
+            <h5 style='border-radius:5px;background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Iniciando a negociação</h5>
             <div class='kb-cards'>
 
                 <p-card *ngFor="let n of stageTwo(); trackBy: trackById"
@@ -165,7 +165,7 @@ interface ExportColumn {
         </div>
 
         <div id='stage3' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-            <h5 style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Em negociação</h5>
+            <h5 style='border-radius:5px;background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Em negociação</h5>
             <div class='kb-cards'>
 
                 <p-card *ngFor="let n of stageThree(); trackBy: trackById"
@@ -200,7 +200,7 @@ interface ExportColumn {
         </div>
 
         <div id='stage4' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-            <h5 style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Em fechamento</h5>
+            <h5 style='border-radius:5px;background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Em fechamento</h5>
             <div class='kb-cards'>
 
                 <p-card *ngFor="let n of stageFour(); trackBy: trackById"
@@ -236,7 +236,7 @@ interface ExportColumn {
         </div>
 
         <div id='stage5' class='dropzone' (drop)="drop($event)" (dragover)="dragover($event)" (dragenter)="dragenter($event)" (dragleave)="dragleave($event)" >
-            <h5 style='background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Entrega</h5>
+            <h5 style='border-radius:5px;background: var(--p-toolbar-background); border: 1px solid var(--p-toolbar-border-color); color: var(--p-toolbar-color); text-align:center;'>Entrega</h5>
             <div class='kb-cards'>
 
                 <p-card *ngFor="let n of stageFive(); trackBy: trackById"

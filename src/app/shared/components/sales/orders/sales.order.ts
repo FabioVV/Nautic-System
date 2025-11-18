@@ -63,7 +63,7 @@ import { ListSalesOrderBoatItensComponent } from './list.sales.order_itens';
 
             <div>
                 <h4>Status</h4>
-                <p-tag severity="success" [value]="_statusType" />
+                <p-tag [severity]="getSeverityStatus(_statusType)" [value]="_statusType" />
             </div>
 
             <div>
@@ -1085,6 +1085,22 @@ export class SalesOrderModal {
 
     hideEmailDialog() {
         this.emailDialog = false
+    }
+
+    getSeverityStatus(_status:string){
+        switch(_status){
+            case 'Novo orçamento':
+                return 'info'
+            case 'Novo pedido':
+                return 'info'
+            case 'Orçamento cancelado':
+                return 'danger'
+            case 'Pedido cancelado':
+                return 'danger'
+            case 'Pedido concluído':
+                return 'success'
+        }
+        return 'unknown'
     }
 
     isInvalid(controlName: string) {

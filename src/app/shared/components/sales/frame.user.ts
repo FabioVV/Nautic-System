@@ -509,6 +509,10 @@ export class SalesCustomerModal {
                     })
                 } 
 
+                this.customerForm.get("Cpf")?.setValue(res.data['cpf'])
+                this.customerForm.get("Cnpj")?.setValue(res.data['cnpj'])
+
+
                 this.customerForm.get("Name")?.setValue(res.data['customer_name'])
                 this.customerForm.get("Email")?.setValue(res.data['customer_email'])
                 this.customerForm.get("Phone")?.setValue(res.data['customer_phone'])
